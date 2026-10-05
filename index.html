@@ -221,6 +221,25 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 .reel-side button span{font-size:11px;font-weight:700}
 .reel-music{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;z-index:2}
 .reelv .reel-info{z-index:2}
+/* استوديو الريلز 🎶 */
+.mq-item{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;padding:8px 10px;margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.mq-item img{width:44px;height:44px;border-radius:8px;object-fit:cover;flex:none}
+.mq-item b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mq-item small{font-size:11px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mq-item .mq-go{flex:1;min-width:0;text-align:right}
+.mq-item button{border:none;background:#ffe4ef;color:var(--pink-d);width:34px;height:34px;border-radius:50%;font-size:14px;cursor:pointer;flex:none;margin-right:4px}
+#rn-song-chip{display:none;align-items:center;gap:10px;background:#fff0f6;border:2px solid #ffb3d4;border-radius:12px;padding:8px 10px;margin-bottom:8px}
+#rn-song-chip img{width:44px;height:44px;border-radius:8px;flex:none}
+#rn-song-chip b{font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rn-song-chip small{font-size:11px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rn-song-chip .mq-go{flex:1;min-width:0}
+#rn-song-chip button{border:none;background:none;font-size:16px;cursor:pointer;flex:none}
+.frow{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.frow button{border:2px solid #ffd6e8;background:#fff;border-radius:20px;padding:8px 14px;font-size:13px;cursor:pointer;font-family:inherit;color:var(--txt)}
+.frow button.on{background:var(--pink);color:#fff;border-color:var(--pink)}
+input[type=range]{width:100%;accent-color:var(--pink)}
+.rn-lab{font-size:13px;font-weight:700;color:var(--txt);margin:12px 0 4px;display:block}
+.rn-lab small{color:var(--muted);font-weight:400}
 /* story viewer */
 #story{padding:0!important}
 .story-view{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:60;
@@ -562,10 +581,28 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
     </div>
     <button class="btn block" style="margin-top:12px" onclick="document.getElementById('rn-file').click()">📁 اختاري الملف</button>
     <input type="file" id="rn-file" accept="video/*,image/*" style="display:none" onchange="rnPreview(this)">
+    <div id="rn-edit" style="display:none">
+      <div id="rn-filters" style="display:none">
+        <span class="rn-lab">✨ الفلتر</span>
+        <div class="frow" id="rn-frow"></div>
+      </div>
+      <div id="rn-trim" style="display:none">
+        <span class="rn-lab">✂️ قص الفيديو <small id="rn-trim-lab"></small></span>
+        <input type="range" id="rn-ts" min="0" max="100" value="0" oninput="updTrimLab()">
+        <input type="range" id="rn-te" min="0" max="100" value="100" oninput="updTrimLab()" style="margin-top:6px">
+      </div>
+    </div>
     <div class="field" style="margin-top:12px"><label>✍️ العنوان</label><input id="rn-title" maxlength="80" placeholder="مثلا: روتين مكياجي الصباحي 💄"></div>
-    <div class="field"><label>🎵 موسيقى من يوتيوب <small style="color:var(--muted);font-weight:400">(اختياري)</small></label><input id="rn-yt" dir="ltr" style="text-align:right" placeholder="الصقي رابط الأغنية من YouTube Music"></div>
+    <div class="field"><label>🎵 الموسيقى <small style="color:var(--muted);font-weight:400">(اختياري)</small></label>
+      <div id="rn-song-chip"><img id="rn-chip-art" src=""><div class="mq-go"><b id="rn-chip-t"></b><small id="rn-chip-a"></small></div><button onclick="mqClear()">✖</button></div>
+      <input id="rn-mq" placeholder="🔍 اكتبي اسم الأغنية..." oninput="rnSearchMusic(this.value)">
+      <div id="rn-mres" style="margin-top:6px"></div>
+      <div id="rn-mseg" style="display:none">
+        <span class="rn-lab">🎵 مقطع الأغنية <small>(15 ثانية — <span id="rn-ms-lab">0s</span>)</small></span>
+        <input type="range" id="rn-ms" min="0" max="15" value="0" oninput="mqSeg(this.value)">
+      </div>
+    </div>
     <button class="btn block" id="rn-pub" onclick="publishReel()">نشر الريلز 🚀</button>
-    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px">💡 افتحي YouTube Music، شاركي الأغنية، والصقي الرابط هنا</p>
   </div>
 </div>
 
@@ -847,6 +884,7 @@ function go(id){
   if(id==='souq'){loadProducts(false);}
   if(id==='video'){loadReels(false);}
   if(id!=='video'){try{if(typeof pauseAllReels==='function')pauseAllReels();}catch(e){}}
+  if(id!=='reel-new'){try{if(_mqAudioEl){_mqAudioEl.pause();_mqPlaying=null;}}catch(e){}}
   window.scrollTo(0,0);
 }
 function openSheet(){document.getElementById('sheetbg').style.display='block'}
@@ -1318,6 +1356,10 @@ async function unbanUser(uid){
 }
 /* ===== الريلز الحقيقي 🎬 (فيديو/صور + موسيقى يوتيوب) ===== */
 var _reelsLoaded=false,_reelFile=null,_reelType='video',_reelObs=null;
+var _reelFilter='none',_trimS=0,_trimE=0,_vidDur=0;
+var _reelMusic=null,_mqTimer=null,_mqAudioEl=null,_mqPlaying=null;
+var FILTERCSS={none:'none',noir:'grayscale(1) contrast(1.1)',warm:'sepia(.45) saturate(1.4)',cool:'hue-rotate(-15deg) saturate(1.2) brightness(1.05)',bright:'brightness(1.25) saturate(1.1)',drama:'contrast(1.35) saturate(.7)'};
+var FILTERLBL={none:'عادي ✨',noir:'كلاسيك ⬛',warm:'دافئ 🌅',cool:'بارد 🧊',bright:'مشرق ☀️',drama:'درامي 🎭'};
 var _likedReels={};
 try{_likedReels=JSON.parse(localStorage.getItem('kb_liked_reels')||'{}');}catch(e){}
 function ytId(url){
@@ -1335,12 +1377,137 @@ function rnPreview(inp){
   if(f.size>80*1024*1024){toast('الملف كبير بزاف (أقصى 80MB) 📦');return;}
   _reelFile=f;
   _reelType=f.type.indexOf('image')===0?'photo':'video';
+  _reelFilter='none';_trimS=0;_trimE=0;_vidDur=0;
   var box=document.getElementById('rn-prev');
   var url=URL.createObjectURL(f);
   box.innerHTML=_reelType==='photo'
     ?'<img class="wfull" src="'+url+'">'
     :'<video src="'+url+'" playsinline muted loop style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">';
-  if(_reelType==='video'){var v=box.querySelector('video');if(v)v.play().catch(function(){});}
+  document.getElementById('rn-edit').style.display='block';
+  if(_reelType==='photo'){
+    document.getElementById('rn-filters').style.display='block';
+    document.getElementById('rn-trim').style.display='none';
+    buildFilters();
+  }else{
+    document.getElementById('rn-filters').style.display='none';
+    document.getElementById('rn-trim').style.display='none';
+    var v=box.querySelector('video');
+    if(v){v.play().catch(function(){});
+      v.onloadedmetadata=function(){if(v.duration&&isFinite(v.duration))rnTrimInit(v.duration);};}
+  }
+}
+function buildFilters(){
+  var row=document.getElementById('rn-frow');
+  row.innerHTML='';
+  Object.keys(FILTERLBL).forEach(function(k){
+    var b=document.createElement('button');
+    b.textContent=FILTERLBL[k];
+    if(k==='none')b.className='on';
+    b.onclick=function(){rnSetFilter(k,b);};
+    row.appendChild(b);
+  });
+}
+function rnSetFilter(f,btn){
+  _reelFilter=f;
+  var m=document.querySelector('#rn-prev img,#rn-prev video');
+  if(m)m.style.filter=FILTERCSS[f]||'none';
+  var btns=document.querySelectorAll('#rn-frow button');
+  for(var i=0;i<btns.length;i++)btns[i].classList.remove('on');
+  if(btn)btn.classList.add('on');
+}
+function rnTrimInit(dur){
+  _vidDur=dur;_trimS=0;_trimE=dur;
+  var s=document.getElementById('rn-ts'),e=document.getElementById('rn-te');
+  var mx=Math.max(1,Math.floor(dur));
+  s.max=mx;e.max=mx;s.value=0;e.value=mx;
+  document.getElementById('rn-trim').style.display='block';
+  updTrimLab();
+}
+function updTrimLab(){
+  _trimS=parseFloat(document.getElementById('rn-ts').value)||0;
+  _trimE=parseFloat(document.getElementById('rn-te').value)||_vidDur;
+  if(_trimE<=_trimS)_trimE=_trimS+1;
+  document.getElementById('rn-trim-lab').textContent=fmtT(_trimS)+' - '+fmtT(_trimE);
+}
+function fmtT(s){s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
+/* ===== باحث الأغاني 🎶 (كيما انستغرام) ===== */
+function rnSearchMusic(q){
+  var box=document.getElementById('rn-mres');
+  if(!q||q.trim().length<2){box.innerHTML='';return;}
+  clearTimeout(_mqTimer);
+  _mqTimer=setTimeout(function(){mqDoSearch(q.trim(),box);},450);
+}
+async function mqDoSearch(q,box){
+  box.innerHTML='<p style="text-align:center;color:var(--muted);font-size:13px;padding:10px">نبحث... 🔍</p>';
+  var res=await mqFetch(q);
+  if(!res.length){box.innerHTML='<p style="text-align:center;color:var(--muted);font-size:13px;padding:10px">ما لقينا والو 😕 جربي كلمة أخرى</p>';return;}
+  box.innerHTML='';
+  res.forEach(function(t){
+    var d=document.createElement('div');
+    d.className='mq-item';
+    var im=document.createElement('img');im.src=t.art;im.alt='';
+    var go=document.createElement('div');go.className='mq-go';
+    var b=document.createElement('b');b.textContent=t.title;
+    var sm=document.createElement('small');sm.textContent=t.artist;
+    go.appendChild(b);go.appendChild(sm);
+    var bp=document.createElement('button');bp.className='mq-play';bp.textContent='▶';bp.title='استمعي';
+    var ba=document.createElement('button');ba.textContent='＋';ba.title='اختاري';
+    bp.onclick=function(){mqPreview(t,bp);};
+    ba.onclick=function(){mqSelect(t);};
+    d.appendChild(im);d.appendChild(go);d.appendChild(bp);d.appendChild(ba);
+    box.appendChild(d);
+  });
+}
+async function mqFetch(q){
+  var urls=[
+    'https://itunes.apple.com/search?term='+encodeURIComponent(q)+'&media=music&entity=song&limit=12&country=DZ',
+    'https://itunes.apple.com/search?term='+encodeURIComponent(q)+'&media=music&entity=song&limit=12&country=US'
+  ];
+  for(var i=0;i<urls.length;i++){
+    try{
+      var r=await fetch(urls[i]);
+      var j=await r.json();
+      if(j.results&&j.results.length){
+        return j.results.filter(function(x){return x.previewUrl;}).map(function(x){
+          return {preview:x.previewUrl,title:x.trackName||'؟',artist:x.artistName||'؟',
+            art:(x.artworkUrl100||'').replace('100x100bb','200x200bb')};
+        });
+      }
+    }catch(e){}
+  }
+  return [];
+}
+function mqPreview(t,btn){
+  if(!_mqAudioEl){_mqAudioEl=new Audio();_mqAudioEl.preload='none';}
+  var btns=document.querySelectorAll('#rn-mres .mq-play');
+  for(var i=0;i<btns.length;i++)btns[i].textContent='▶';
+  if(_mqPlaying===t.preview&&!_mqAudioEl.paused){_mqAudioEl.pause();_mqPlaying=null;return;}
+  _mqAudioEl.src=t.preview;
+  _mqAudioEl.play().catch(function(){});
+  _mqPlaying=t.preview;btn.textContent='⏸';
+}
+function mqSelect(t){
+  _reelMusic={preview:t.preview,title:t.title,artist:t.artist,start:0};
+  if(_mqAudioEl){try{_mqAudioEl.pause();}catch(e){}_mqPlaying=null;}
+  document.getElementById('rn-chip-art').src=t.art;
+  document.getElementById('rn-chip-t').textContent=t.title;
+  document.getElementById('rn-chip-a').textContent=t.artist;
+  document.getElementById('rn-song-chip').style.display='flex';
+  document.getElementById('rn-mres').innerHTML='';
+  document.getElementById('rn-mq').value='';
+  document.getElementById('rn-mseg').style.display='block';
+  document.getElementById('rn-ms').value=0;
+  document.getElementById('rn-ms-lab').textContent='0s';
+}
+function mqClear(){
+  _reelMusic=null;
+  document.getElementById('rn-song-chip').style.display='none';
+  document.getElementById('rn-mseg').style.display='none';
+}
+function mqSeg(v){
+  if(!_reelMusic)return;
+  _reelMusic.start=parseInt(v,10)||0;
+  document.getElementById('rn-ms-lab').textContent=_reelMusic.start+'s';
 }
 async function publishReel(){
   if(!_reelFile){toast('اختاري فيديو أو صورة أولا 📹');return;}
@@ -1354,11 +1521,21 @@ async function publishReel(){
     if(up.error)throw up.error;
     var ins=await SB.from('kb_reels').insert({author_id:u.id,video_url:path,
       title:document.getElementById('rn-title').value.trim(),
-      media_type:_reelType,music_youtube_id:ytId(document.getElementById('rn-yt').value)});
+      media_type:_reelType,
+      music_preview_url:_reelMusic?_reelMusic.preview:null,
+      music_title:_reelMusic?_reelMusic.title:null,
+      music_artist:_reelMusic?_reelMusic.artist:null,
+      music_start:_reelMusic?_reelMusic.start:0,
+      photo_filter:_reelFilter,trim_start:_trimS,trim_end:_reelType==='video'?_trimE:0});
     if(ins.error)throw ins.error;
     toast('تنشر الريلز 🎉');
     _reelFile=null;document.getElementById('rn-file').value='';
-    document.getElementById('rn-title').value='';document.getElementById('rn-yt').value='';
+    document.getElementById('rn-title').value='';
+    _reelMusic=null;_reelFilter='none';_trimS=0;_trimE=0;_vidDur=0;
+    mqClear();
+    document.getElementById('rn-mq').value='';
+    document.getElementById('rn-mres').innerHTML='';
+    document.getElementById('rn-edit').style.display='none';
     document.getElementById('rn-prev').innerHTML='<span style="font-size:15px;opacity:.75">📹 اختاري فيديو أو صورة</span>';
     _reelsLoaded=false;go('video');
   }catch(e){toast('تعذر النشر: '+e.message);}
@@ -1366,14 +1543,22 @@ async function publishReel(){
 }
 function reelCard(x,name){
   var d=document.createElement('div');
-  d.className='reelv';d.dataset.id=x.id;d.dataset.yt=x.music_youtube_id||'';
+  d.className='reelv';d.dataset.id=x.id;
+  d.dataset.yt=x.music_youtube_id||'';
+  d.dataset.mp=x.music_preview_url||'';
+  d.dataset.ms=x.music_start||0;
+  d.dataset.ts=x.trim_start||0;
+  d.dataset.te=x.trim_end||0;
+  var fc=FILTERCSS[x.photo_filter]||'none';
   var media=x.media_type==='photo'
-    ?'<img class="wfull" src="'+reelUrl(x.video_url)+'" loading="lazy" alt="">'
-    :'<video src="'+reelUrl(x.video_url)+'" playsinline loop preload="metadata"></video>';
+    ?'<img class="wfull" src="'+reelUrl(x.video_url)+'" loading="lazy" alt="" style="filter:'+fc+'">'
+    :'<video src="'+reelUrl(x.video_url)+'" playsinline loop preload="metadata" style="filter:'+fc+'"></video>';
   var liked=_likedReels[x.id];
+  var mt=x.music_title?('🎵 '+x.music_title):(x.music_youtube_id?'🎵 موسيقى':'');
+  if(mt.length>24)mt=mt.slice(0,24)+'…';
   d.innerHTML=media+
     '<div class="reel-play">▶</div>'+
-    (x.music_youtube_id?'<div class="reel-music">🎵 موسيقى</div>':'')+
+    (mt?'<div class="reel-music">'+escapeHtml(mt)+'</div>':'')+
     '<div class="reel-side">'+
     '<button onclick="likeReel(\''+x.id+'\',this)">'+(liked?'❤️':'🤍')+'<span>'+(x.likes_count||0)+'</span></button>'+
     '<button onclick="openReelComments(\''+x.id+'\')">💬<span>'+(x.comments_count||0)+'</span></button>'+
@@ -1390,13 +1575,37 @@ function toggleReel(d){
   var v=d.querySelector('video');
   var btn=d.querySelector('.reel-play');
   if(v){
-    if(v.paused){pauseAllReels(d);v.play().catch(function(){});btn.style.display='none';ytPlay(d.dataset.yt);}
-    else{v.pause();btn.style.display='flex';ytStop();}
+    if(v.paused){
+      pauseAllReels(d);
+      var ts=parseFloat(d.dataset.ts)||0,te=parseFloat(d.dataset.te)||0;
+      if(ts>0){try{v.currentTime=ts;}catch(e){}}
+      v.ontimeupdate=function(){if(te>ts&&te>0&&v.currentTime>=te){v.currentTime=ts;}};
+      v.play().catch(function(){});
+      btn.style.display='none';
+      if(d.dataset.mp)reelAudioPlay(d.dataset.mp,parseFloat(d.dataset.ms)||0);
+      else ytPlay(d.dataset.yt);
+    }
+    else{v.pause();btn.style.display='flex';reelAudioStop();ytStop();}
   }else{
-    if(d.dataset.playing==='1'){d.dataset.playing='';ytStop();}
-    else{pauseAllReels(d);d.dataset.playing='1';ytPlay(d.dataset.yt);if(d.dataset.yt)toast('🎵 تشغل الموسيقى');}
+    if(d.dataset.playing==='1'){d.dataset.playing='';reelAudioStop();ytStop();}
+    else{pauseAllReels(d);d.dataset.playing='1';
+      if(d.dataset.mp){reelAudioPlay(d.dataset.mp,parseFloat(d.dataset.ms)||0);toast('🎵 تشغل الموسيقى');}
+      else if(d.dataset.yt){ytPlay(d.dataset.yt);toast('🎵 تشغل الموسيقى');}}
   }
 }
+var _reelAudio=null;
+function reelAudioPlay(url,start){
+  reelAudioStop();
+  if(!url)return;
+  _reelAudio=new Audio(url);
+  try{_reelAudio.currentTime=start||0;}catch(e){}
+  _reelAudio.play().catch(function(){});
+  var s0=start||0;
+  _reelAudio.ontimeupdate=function(){
+    if(_reelAudio&&_reelAudio.currentTime>s0+15){_reelAudio.currentTime=s0;}
+  };
+}
+function reelAudioStop(){if(_reelAudio){try{_reelAudio.pause();}catch(e){}_reelAudio=null;}}
 function pauseAllReels(except){
   document.querySelectorAll('#reels-feed .reelv').forEach(function(d){
     if(d===except)return;
@@ -1404,6 +1613,7 @@ function pauseAllReels(except){
     if(v&&!v.paused){v.pause();var b=d.querySelector('.reel-play');if(b)b.style.display='flex';}
     d.dataset.playing='';
   });
+  reelAudioStop();
   ytStop();
 }
 function ytPlay(ytid){
@@ -1444,7 +1654,7 @@ async function loadReels(force){
   if(!SB||(_reelsLoaded&&!force))return;
   var feed=document.getElementById('reels-feed');
   try{
-    var r=await SB.from('kb_reels').select('id,author_id,video_url,title,media_type,music_youtube_id,likes_count,comments_count').order('created_at',{ascending:false}).limit(30);
+    var r=await SB.from('kb_reels').select('id,author_id,video_url,title,media_type,music_youtube_id,music_preview_url,music_title,music_start,likes_count,comments_count,photo_filter,trim_start,trim_end').order('created_at',{ascending:false}).limit(30);
     if(r.error)throw r.error;
     var rows=r.data||[];
     if(!rows.length){
