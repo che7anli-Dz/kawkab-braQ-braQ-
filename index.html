@@ -661,7 +661,7 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
     <div class="field"><label>📝 الوصف</label><textarea id="p-desc" rows="3" placeholder="احكي على منتجك: الخامة، المقاسات، الألوان..."></textarea></div>
     <div class="field"><label>💰 السعر (دج)</label><input id="p-price" type="number" placeholder="مثلا: 4900"></div>
     <div class="field"><label>🗂️ القسم</label><select id="p-cat"><option>ملابس</option><option>مكياج</option><option>إكسسوارات</option><option>صناعة يدوية</option><option>أخرى</option></select></div>
-    <div class="field"><label>📍 الولاية</label><select id="p-wilaya"><option>الجزائر</option><option>وهران</option><option>قسنطينة</option><option>سطيف</option><option>البليدة</option><option>عنابة</option></select></div>
+    <div class="field"><label>📍 الولاية</label><input id="p-wilaya" placeholder="مثلا: وهران"></div>
     <div class="field"><label>✨ حالة المنتج</label>
       <div class="chips" style="padding:0"><div class="chip pcond on" onclick="this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">جديد</div>
       <div class="chip pcond" onclick="this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">مستعمل</div></div></div>
@@ -678,7 +678,7 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
     <div class="field"><label>👩 الاسم الكامل</label><input id="su-name" placeholder="مثلا: أمينة بن علي"></div>
     <div class="field"><label>💌 الإيميل <small style="color:var(--muted);font-weight:400">(لازم يكون باسم بنت)</small></label><input id="su-email" type="email" placeholder="amina.dz@gmail.com" dir="ltr" style="text-align:right"></div>
     <div class="field"><label>📱 رقم الهاتف</label><input id="su-phone" type="tel" placeholder="05 / 06 / 07 ..." dir="ltr" style="text-align:right"></div>
-    <div class="field"><label>📍 الولاية</label><select id="su-wilaya"><option>الجزائر</option><option>وهران</option><option>قسنطينة</option><option>سطيف</option><option>البليدة</option><option>عنابة</option><option>تلمسان</option><option>بجاية</option></select></div>
+    <div class="field"><label>📍 الولاية</label><input id="su-wilaya" placeholder="مثلا: الجزائر"></div>
     <div class="field"><label>🔑 كلمة السر</label><input id="su-pass" type="password" placeholder="••••••••"></div>
     <button class="btn block" onclick="startQuiz()">كملي التسجيل ← اختبار البنات 🔐</button>
     <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px">🔒 الكوكب للبنات فقط — كاين اختبار تحقق بعد التسجيل</p>
@@ -687,12 +687,22 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 
 <!-- تسجيل الدخول -->
 <div class="screen" id="login">
-  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('splash')">→</div><h2 style="font-size:18px">🔑 تسجيل الدخول</h2></div>
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('splash')">→</div><h2 style="font-size:18px" onclick="secretTap()">🔑 تسجيل الدخول</h2></div>
   <div class="sell-form">
     <div class="field"><label>💌 الإيميل</label><input id="li-email" type="email" placeholder="amina.dz@gmail.com" dir="ltr" style="text-align:right"></div>
     <div class="field"><label>🔑 كلمة السر</label><input id="li-pass" type="password" placeholder="••••••••"></div>
     <button class="btn block" onclick="doLogin()">ادخلي 🪐</button>
     <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:12px">ما عندكش حساب؟ <u style="cursor:pointer;font-weight:800;color:var(--pink-d)" onclick="go('signup')">أنشئي واحد 💖</u></p>
+  </div>
+</div>
+
+<!-- تأكيد الإيميل -->
+<div class="screen" id="verify-email">
+  <div class="center-screen">
+    <div class="big">📧</div>
+    <h2>تحققي من إيميلك</h2>
+    <p>بعثنالك رابط تأكيد — حلي إيميلك واضغطي عليه،<br>من بعد سجلي الدخول وادخلي 💖</p>
+    <button class="btn block" onclick="go('login')">سجلي الدخول 🔑</button>
   </div>
 </div>
 
@@ -900,14 +910,19 @@ async function startQuiz(){
   var local=e.split('@')[0].toLowerCase();
   for(var i=0;i<MALENAMES.length;i++){if(local.indexOf(MALENAMES[i])>-1){toast('هاذ الإيميل ما يبانش تاع بنت 💌');return;}}
   if(!pw||pw.length<6){toast('كلمة السر لازم 6 حروف على الأقل 🔑');return;}
+  try{localStorage.setItem('kb_pending',JSON.stringify({n:n,e:e,p:p,w:w}));}catch(_){}
   if(SB){
     try{
       var s=await SB.auth.signUp({email:e,password:pw});
       if(s.error)throw s.error;
+      var sess=s.data&&s.data.session;
       var u=s.data&&s.data.user;
-      if(u){
+      if(sess&&u){
         try{await SB.from('kb_profiles').insert({id:u.id,full_name:n,email:e,phone:p,wilaya:w,verification_status:'pending'});}
         catch(_){}
+        try{localStorage.removeItem('kb_pending');}catch(_){}
+      }else{
+        go('verify-email');return;
       }
     }catch(err){toast('التسجيل تعثر: '+err.message+' — نكمل تجريبيا');}
   }
@@ -1011,6 +1026,7 @@ async function checkVerified(){
   }catch(e){return false;}
 }
 async function gateAndEnter(){
+  await ensureProfile();
   var v=await checkVerified();
   if(v===true){
     _verified=true;
@@ -1032,21 +1048,37 @@ async function doLogin(){
   try{
     var r=await SB.auth.signInWithPassword({email:e,password:p});
     if(r.error)throw r.error;
-    if(_wantClaim){
-      _wantClaim=false;
-      try{
-        var c=await SB.rpc('kb_claim_owner');
-        if(c.error)throw c.error;
-        _verified=true;await loadUserProfile();
+    await ensureProfile();
+    /* تفعيل المالك تلقائيا عند أول دخول — قبل بوابة التحقق */
+    try{
+      var c=await SB.rpc('kb_claim_owner');
+      if(!c.error){
+        _verified=true;_wantClaim=false;await loadUserProfile();
         toast('👑 راك مالك الكوكب دروك!');go('home');return;
-      }catch(ce){}
-    }
+      }
+    }catch(_){}
+    _wantClaim=false;
     if(await gateAndEnter())toast('مرحبا بيك في الكوكب 💖');
   }catch(err){toast('الدخول ما كملش: '+err.message);}
 }
 async function doLogout(){
   try{if(SB)await SB.auth.signOut();}catch(e){}
   _profile=null;_verified=false;go('splash');
+}
+/* إنشاء البروفايل إذا ما كاش (حالة تأكيد الإيميل) */
+async function ensureProfile(){
+  if(!SB)return;
+  try{
+    var u=await sbUser();if(!u)return;
+    var r=await SB.from('kb_profiles').select('id').eq('id',u.id).single();
+    if(r.data)return;
+    var pd=null;
+    try{pd=JSON.parse(localStorage.getItem('kb_pending')||'null');}catch(_){}
+    if(pd&&pd.n){
+      await SB.from('kb_profiles').insert({id:u.id,full_name:pd.n,email:pd.e||u.email,phone:pd.p,wilaya:pd.w,verification_status:'pending'});
+      try{localStorage.removeItem('kb_pending');}catch(_){}
+    }
+  }catch(e){}
 }
 async function loadUserProfile(){
   if(!SB)return;
