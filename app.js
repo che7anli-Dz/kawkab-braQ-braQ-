@@ -1670,8 +1670,8 @@ async function loadFriendsTab(){
       var p=pm[id]||{};
       return frCard(p,'<button class="btn" onclick="openChat(\''+escapeHtml(p.full_name||'صديقة').replace(/'/g,"\\'")+'\',\''+(p.avatar_emoji||'🌸')+'\',\''+id+'\')">💬 محادثة</button>');
     }).join(''):'<p style="color:var(--muted);font-size:13px">ما عندكش صديقات بعد — أضيفي من لتحت 👇</p>';
-    var s=await SB.from('kb_profiles').select('id,full_name,wilaya,avatar_emoji,bio,is_banned,verification_status').eq('verification_status','approved').neq('id',me).limit(30);
-    var list=(s.data||[]).filter(function(p){return !known[p.id]&&p.is_banned!==true;}).slice(0,8);
+    var s=await SB.from('kb_profiles').select('id,full_name,wilaya,avatar_emoji,bio,is_banned,verification_status,role').eq('verification_status','approved').neq('id',me).limit(30);
+    var list=(s.data||[]).filter(function(p){return !known[p.id]&&p.is_banned!==true&&p.role!=='owner';}).slice(0,8);
     var html=list.length?list.map(function(p){
       return frCard(p,'<button class="btn" onclick="event.stopPropagation();sendFriendReq(\''+p.id+'\',this)">👭 أضيفيها</button>');
     }).join(''):'<p style="color:var(--muted);font-size:13px">ما كاش اقتراحات دروك ✨</p>';
@@ -1966,8 +1966,8 @@ async function runSearch(q){
         }).join('')+'</div>';
     }
     // بنات
-    var pf=await SB.from('kb_profiles').select('id,full_name,wilaya,avatar_emoji,bio').ilike('full_name','%'+q+'%').neq('id',me||'').limit(10);
-    var girls=(pf.data||[]).filter(function(x){return x.id!==me;});
+    var pf=await SB.from('kb_profiles').select('id,full_name,wilaya,avatar_emoji,bio,role').ilike('full_name','%'+q+'%').neq('id',me||'').limit(10);
+    var girls=(pf.data||[]).filter(function(x){return x.id!==me&&x.role!=='owner';});
     if(girls.length){
       html+='<div class="sec-title">👭 بنات ('+girls.length+')</div>'
         +girls.map(function(g){
