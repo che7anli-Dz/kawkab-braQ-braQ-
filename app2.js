@@ -707,7 +707,7 @@ async function openUserProfile(uid){
       var fe=document.getElementById('op-friends');if(fe)fe.textContent=fr.count||0;
       var pr2=await SB.from('kb_products').select('id',{count:'exact',head:true}).eq('seller_id',uid).eq('status','active');
       var pe=document.getElementById('op-products');if(pe)pe.textContent=pr2.count||0;
-      var rl2=await SB.from('kb_reels').select('id',{count:'exact',head:true}).eq('user_id',uid);
+      var rl2=await SB.from('kb_reels').select('id',{count:'exact',head:true}).eq('author_id',uid);
       var re2=document.getElementById('op-reels');if(re2)re2.textContent=rl2.count||0;
     }catch(e){}
     _opUid=uid;_opTab='posts';
@@ -855,6 +855,16 @@ async function loadPfTab(){
         var img=(p.photos&&p.photos[0])?'<img src="'+p.photos[0]+'" style="width:100%;height:110px;object-fit:cover;border-radius:12px">':'<div style="height:110px;border-radius:12px;background:linear-gradient(135deg,#ffe0ec,#e9d5ff);display:grid;place-items:center;font-size:32px">🛍️</div>';
         return '<div onclick="openProduct(\''+p.id+'\')" style="cursor:pointer">'+img+'<div style="font-size:13px;font-weight:700;margin-top:4px">'+escapeHtml(p.name||'')+'</div><div style="font-size:12px;color:var(--pink-d);font-weight:700">'+escapeHtml(String(p.price||''))+' دج</div></div>';
       }).join('')+'</div>';
+    }else if(_pfTab==='reels'){
+      var r5=await SB.from('kb_reels').select('id,video_url,media_type,title,likes_count,comments_count').eq('author_id',me).order('created_at',{ascending:false}).limit(20);
+      var reels=r5.data||[];
+      if(!reels.length){box.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">ما نشرتي حتى ريلز بعد 🎬</p>';return;}
+      box.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'+reels.map(function(x){
+        var th=x.media_type==='photo'
+          ?'<img src="'+reelUrl(x.video_url)+'" loading="lazy" style="width:100%;height:150px;object-fit:cover;border-radius:10px">'
+          :'<video src="'+reelUrl(x.video_url)+'" preload="metadata" style="width:100%;height:150px;object-fit:cover;border-radius:10px"></video>';
+        return '<div style="position:relative;cursor:pointer" onclick="go(\'video\')">'+th+'<span style="position:absolute;bottom:4px;right:4px;font-size:11px;background:rgba(0,0,0,.5);color:#fff;border-radius:8px;padding:1px 6px">❤️ '+(x.likes_count||0)+'</span></div>';
+      }).join('')+'</div>';
     }else{
       var r3=await SB.from('kb_posts').select('media_url,media_type').eq('author_id',me).neq('media_type','none').not('media_url','is',null).order('created_at',{ascending:false}).limit(30);
       var r4=await SB.from('kb_products').select('photos').eq('seller_id',me).eq('status','active').limit(20);
@@ -903,6 +913,16 @@ async function loadOpTab(){
         var img=(p.photos&&p.photos[0])?'<img src="'+p.photos[0]+'" style="width:100%;height:110px;object-fit:cover;border-radius:12px">':'<div style="height:110px;border-radius:12px;background:linear-gradient(135deg,#ffe0ec,#e9d5ff);display:grid;place-items:center;font-size:32px">🛍️</div>';
         return '<div onclick="openProduct(\''+p.id+'\')" style="cursor:pointer">'+img+'<div style="font-size:13px;font-weight:700;margin-top:4px">'+escapeHtml(p.name||'')+'</div><div style="font-size:12px;color:var(--pink-d);font-weight:700">'+escapeHtml(String(p.price||''))+' دج</div></div>';
       }).join('')+'</div>';
+    }else if(_opTab==='reels'){
+      var r5=await SB.from('kb_reels').select('id,video_url,media_type,likes_count').eq('author_id',_opUid).order('created_at',{ascending:false}).limit(20);
+      var reels=r5.data||[];
+      if(!reels.length){box.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">ما نشرت حتى ريلز بعد 🎬</p>';return;}
+      box.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">'+reels.map(function(x){
+        var th=x.media_type==='photo'
+          ?'<img src="'+reelUrl(x.video_url)+'" loading="lazy" style="width:100%;height:150px;object-fit:cover;border-radius:10px">'
+          :'<video src="'+reelUrl(x.video_url)+'" preload="metadata" style="width:100%;height:150px;object-fit:cover;border-radius:10px"></video>';
+        return '<div style="position:relative;cursor:pointer" onclick="go(\'video\')">'+th+'<span style="position:absolute;bottom:4px;right:4px;font-size:11px;background:rgba(0,0,0,.5);color:#fff;border-radius:8px;padding:1px 6px">❤️ '+(x.likes_count||0)+'</span></div>';
+      }).join('')+'</div>';
     }else{
       var r3=await SB.from('kb_posts').select('media_url,media_type').eq('author_id',_opUid).neq('media_type','none').not('media_url','is',null).order('created_at',{ascending:false}).limit(30);
       var r4=await SB.from('kb_products').select('photos').eq('seller_id',_opUid).eq('status','active').limit(20);
@@ -945,7 +965,7 @@ async function loadOwnProfile(){
       var se=document.getElementById('pf-sales');if(se)se.textContent=sl.count||0;
     }catch(e){}
     try{
-      var rl=await SB.from('kb_reels').select('id',{count:'exact',head:true}).eq('user_id',me);
+      var rl=await SB.from('kb_reels').select('id',{count:'exact',head:true}).eq('author_id',me);
       var re=document.getElementById('pf-reels');if(re)re.textContent=rl.count||0;
     }catch(e){}
   }catch(e){}
