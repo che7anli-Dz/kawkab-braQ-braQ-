@@ -295,6 +295,11 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 .reel-side{position:absolute;left:10px;bottom:76px;display:flex;flex-direction:column;gap:12px;align-items:center;z-index:2}
 .reel-side button{background:rgba(0,0,0,.4);border:none;color:#fff;min-width:52px;padding:8px 6px;border-radius:26px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:2px;flex-direction:column}
 .reel-side button span{font-size:11px;font-weight:700}
+.reel-prog{position:absolute;bottom:0;right:0;left:0;height:3px;background:rgba(255,255,255,.3);z-index:3}
+.reel-prog i{display:block;height:100%;width:0;background:#ff4d94}
+.reel-heart{position:absolute;top:50%;right:50%;transform:translate(50%,-50%) scale(0);font-size:90px;z-index:4;pointer-events:none;opacity:0}
+.reel-heart.boom{animation:heartboom .7s ease forwards}
+@keyframes heartboom{0%{transform:translate(50%,-50%) scale(0);opacity:0}30%{transform:translate(50%,-50%) scale(1.3);opacity:1}60%{transform:translate(50%,-50%) scale(1);opacity:1}100%{transform:translate(50%,-70%) scale(1);opacity:0}}
 .reel-music{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;z-index:2}
 .reelv .reel-info{z-index:2}
 /* استوديو الريلز 🎶 */
@@ -396,8 +401,8 @@ input[type=range]{width:100%;accent-color:var(--pink)}
   <div class="brand" onclick="go('home')"><img src="icon-512.png" alt="" style="width:34px;height:34px;border-radius:10px;vertical-align:middle;margin-left:6px">كوكب برق برق</div>
   <div class="uicons">
     <span onclick="go('search')">🔍</span>
-    <span onclick="go('messenger')">💬<b class="bdg">3</b></span>
-    <span onclick="go('notifications')">🔔<b class="bdg">5</b></span>
+    <span onclick="go('messenger')">💬<b class="bdg" id="msg-badge" style="display:none"></b></span>
+    <span onclick="go('notifications')">🔔<b class="bdg" id="nt-badge" style="display:none"></b></span>
   </div>
 </div>
 
@@ -529,7 +534,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 
 <!-- السوق -->
 <div class="screen" id="souq">
-  <div class="topbar"><span class="planet">🛍️</span><h1>السوق</h1><p>البيع باطل ديما 💖</p></div>
+  <div class="topbar"><span class="planet">🛍️</span><h1>السوق</h1><p>البيع باطل ديما 💖</p><button class="btn ghost" style="position:absolute;left:14px;top:14px;font-size:12px;padding:6px 12px" onclick="go('orders')">🛒 طلباتي</button></div>
   <div class="search">🔍 &nbsp; قلبي في السوق...</div>
   <div class="store-choices">
     <div class="schoice" onclick="document.getElementById('souq-grid').scrollIntoView({behavior:'smooth'})"><div class="e">🛒</div><b>تشري؟</b><small>قلبي واشتري</small></div>
@@ -567,25 +572,48 @@ input[type=range]{width:100%;accent-color:var(--pink)}
     </div>
     <div class="desc">قفطان جديد، قماش ممتاز وتطريز يدوي. المقاسات من S حتى XL. التوصيل متوفر لكل الولايات والدفع عند الاستلام 💖</div>
     <div class="cta-row">
-      <button class="btn ghost">💬 راسليها</button>
-      <button class="btn">اطلبي دابا 🛒</button>
+      <button class="btn ghost" onclick="toast('هاذا عرض تجريبي 🌸 — المنتجات الحقيقية في السوق 🛍️')">💬 راسليها</button>
+      <button class="btn" onclick="go('souq')">اطلبي دابا 🛒</button>
     </div>
   </div>
 </div>
 
+<!-- الطلبات -->
+<div class="screen" id="orders">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('souq')">→</div><h2 style="font-size:18px">🛒 طلباتي</h2></div>
+  <div class="sec"><div id="orders-list"></div></div>
+</div>
+
 <!-- الخدمات -->
 <div class="screen" id="services">
-  <div class="topbar"><span class="planet">💅</span><h1>الخدمات</h1><p>من بنت... لبنت 💖</p></div>
+  <div class="topbar"><span class="planet">💅</span><h1>الخدمات</h1><p>من بنت... لبنت 💖</p><button class="btn ghost" style="position:absolute;left:14px;top:14px;font-size:12px;padding:6px 12px" onclick="go('mybookings')">📅 حجوزاتي</button></div>
   <div class="search">🔍 &nbsp; قلبي على خدمة في ولايتك...</div>
   <div class="sec">
     <div class="svc"><div class="ico">💇‍♀️</div><div style="flex:1"><h4>كوافيرة — صالون لمسة</h4><p>ياسمين • الجزائر ⭐ 4.9</p>
-      <div class="row"><span class="price">ابتداء من 1,500 دج</span><button class="btn">احجزي 📅</button></div></div></div>
+      <div class="row"><span class="price">ابتداء من 1,500 دج</span><button class="btn" onclick="openBooking('كوافيرة — صالون لمسة','ياسمين')">احجزي 📅</button></div></div></div>
     <div class="svc"><div class="ico">🧵</div><div style="flex:1"><h4>خياطة عصرية وتقليدية</h4><p>فاطمة • البليدة ⭐ 5.0</p>
-      <div class="row"><span class="price">حسب الموديل</span><button class="btn">احجزي 📅</button></div></div></div>
+      <div class="row"><span class="price">حسب الموديل</span><button class="btn" onclick="openBooking('خياطة عصرية وتقليدية','فاطمة')">احجزي 📅</button></div></div></div>
     <div class="svc"><div class="ico">💄</div><div style="flex:1"><h4>ميكاب أرتيست للأفراح</h4><p>نورهان • وهران ⭐ 4.7</p>
-      <div class="row"><span class="price">ابتداء من 5,000 دج</span><button class="btn">احجزي 📅</button></div></div></div>
+      <div class="row"><span class="price">ابتداء من 5,000 دج</span><button class="btn" onclick="openBooking('ميكاب أرتيست للأفراح','نورهان')">احجزي 📅</button></div></div></div>
     <div class="svc"><div class="ico">📚</div><div style="flex:1"><h4>دروس دعم رياضيات</h4><p>هبة • عنابة ⭐ 4.8</p>
-      <div class="row"><span class="price">800 دج / حصة</span><button class="btn">احجزي 📅</button></div></div></div>
+      <div class="row"><span class="price">800 دج / حصة</span><button class="btn" onclick="openBooking('دروس دعم رياضيات','هبة')">احجزي 📅</button></div></div></div>
+  </div>
+</div>
+
+<!-- حجوزاتي -->
+<div class="screen" id="mybookings">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('services')">→</div><h2 style="font-size:18px">📅 حجوزاتي</h2></div>
+  <div class="sec"><div id="my-bookings"></div></div>
+</div>
+
+<!-- مودال الحجز -->
+<div id="bk-modal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeBooking()">
+  <div style="background:#fff;border-radius:20px;padding:22px;width:100%;max-width:380px">
+    <h3 id="bk-title" style="margin-bottom:14px">📅 حجز</h3>
+    <div class="field"><label>التاريخ 🗓️</label><input type="date" id="bk-date" style="width:100%;border:2px solid #ffe0ec;border-radius:12px;padding:11px;font-family:inherit"></div>
+    <div class="field"><label>رقم الهاتف 📱</label><input type="tel" id="bk-phone" placeholder="05 / 06 / 07..." style="width:100%;border:2px solid #ffe0ec;border-radius:12px;padding:11px;font-family:inherit"></div>
+    <div class="field"><label>ملاحظة 📝 (اختياري)</label><textarea id="bk-note" rows="2" placeholder="تفاصيل إضافية..." style="width:100%;border:2px solid #ffe0ec;border-radius:12px;padding:11px;font-family:inherit"></textarea></div>
+    <div style="display:flex;gap:8px;margin-top:6px"><button class="btn" style="flex:1" onclick="submitBooking()">تأكيد الحجز ✅</button><button class="btn ghost" onclick="closeBooking()">إلغاء</button></div>
   </div>
 </div>
 
@@ -594,7 +622,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
   <div class="topbar"><span class="planet">💬</span><h1>المجتمع</h1><p>هدرة البنات... بلا رقابة 😌</p></div>
   <div class="sec">
     <div class="challenge"><h3>🏆 تحدي الأسبوع: أحسن ميكاب نهاري</h3><p>342 بنت مشاركة • التصويت يخلص في يومين</p>
-      <button class="btn">صوتي وشاهدي المشاركات</button></div>
+      <button class="btn" onclick="openChallenge()">صوتي وشاهدي المشاركات</button></div>
     <button class="btn block" onclick="go('post-new')" style="margin-bottom:12px">📝 نشري منشور</button>
     <div id="feed-list"></div>
   </div>
@@ -617,14 +645,14 @@ input[type=range]{width:100%;accent-color:var(--pink)}
     <h2><span id="pf-name">لينا بن علي</span> <span class="rank" id="pf-rank">⭐ نجمة</span></h2>
     <p class="fb-bio" id="pf-bio">🛍️ نبيع كلش حلو للبنات<br>📍 الجزائر • انضمت في أكتوبر 2026<br>💖 الكوكب داري الثاني</p>
     <div class="fb-stats">
-      <div><b>248</b><small>صديقة</small></div>
-      <div><b>12</b><small>منتج</small></div>
+      <div><b id="pf-friends">—</b><small>صديقة</small></div>
+      <div><b id="pf-products">—</b><small>منتج</small></div>
       <div><b>48</b><small>بيعة</small></div>
       <div><b>4.9</b><small>تقييمي ⭐</small></div>
     </div>
     <div class="fb-actions">
-      <button class="btn" style="flex:1">✏️ تعديل البروفايل</button>
-      <button class="btn ghost">↗️ مشاركة</button>
+      <button class="btn" style="flex:1" onclick="openEditProfile()">✏️ تعديل البروفايل</button>
+      <button class="btn ghost" onclick="shareApp()">↗️ مشاركة</button>
     </div>
   </div>
   <div class="tabs">
@@ -640,10 +668,10 @@ input[type=range]{width:100%;accent-color:var(--pink)}
   </div>
   <div class="menu">
     <a>📅 <span>حجوزاتي</span></a>
-    <a>💰 <span>رصيدي: 2,400 دج</span></a>
-    <a>🚀 <span>روّجي منتجك</span></a>
+    <a onclick="openWallet()">💰 <span>رصيدي</span></a>
+    <a onclick="openBoost()">🚀 <span>روّجي منتجك</span></a>
     <a>👭 <span>جيبي صاحبتك</span></a>
-    <a>⚙️ <span>الإعدادات</span></a>
+    <a onclick="openSettings()">⚙️ <span>الإعدادات</span></a>
   </div>
 </div>
 
@@ -662,8 +690,8 @@ input[type=range]{width:100%;accent-color:var(--pink)}
       <div><b>4.8</b><small>تقييم ⭐</small></div>
     </div>
     <div class="fb-actions">
-      <button class="btn" style="flex:1" id="op-add" onclick="this.textContent='✅ تم الإرسال'">👭 أضيفيها صديقة</button>
-      <button class="btn ghost">💬 راسليها</button>
+      <button class="btn" style="flex:1" id="op-add">👭 أضيفيها صديقة</button>
+      <button class="btn ghost" id="op-chat">💬 راسليها</button>
     </div>
   </div>
   <div class="tabs">
@@ -751,12 +779,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 <div class="screen" id="messenger">
   <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('home')">→</div><h2 style="font-size:18px">💬 الرسائل</h2></div>
   <div class="sec">
-    <div class="chat-it" onclick="openChat('إيمان','🌸')"><div class="avatar">🌸</div>
-      <div style="flex:1"><h4 style="font-size:14px">إيمان</h4><p style="font-size:12.5px;color:var(--muted)">أهلا! القفطان مازال متوفر؟</p></div><span class="dot"></span></div>
-    <div class="chat-it" onclick="openChat('خديجة','💄')"><div class="avatar">💄</div>
-      <div style="flex:1"><h4 style="font-size:14px">خديجة</h4><p style="font-size:12.5px;color:var(--muted)">التوصيل غدوة إن شاء الله 🚚</p></div><span class="dot"></span></div>
-    <div class="chat-it" onclick="openChat('سيرين','🌺')"><div class="avatar">🌺</div>
-      <div style="flex:1"><h4 style="font-size:14px">سيرين</h4><p style="font-size:12.5px;color:var(--muted)">هههه ضحكتيني 😂</p></div></div>
+    <div id="conv-list"></div>
   </div>
 </div>
 
@@ -766,9 +789,6 @@ input[type=range]{width:100%;accent-color:var(--pink)}
     <div class="avatar" id="chat-ava" style="width:42px;height:42px;font-size:22px">🌸</div>
     <h2 style="font-size:16px" id="chat-name">إيمان</h2><small style="opacity:.85">🟢 نشطة دابا</small></div>
   <div class="msgs" id="msgs">
-    <div class="msg in">أهلا! القفطان مازال متوفر؟ 🥰</div>
-    <div class="msg out">أهلا بيك! إيه مازال، أي مقاس تحبي؟</div>
-    <div class="msg in">M تعيشي، والتوصيل للجزائر شحال؟</div>
   </div>
   <div style="display:flex;gap:8px;padding:12px 16px">
     <input id="chat-in" placeholder="اكتبي رسالة..." style="flex:1;border:2px solid #ffe0ec;border-radius:20px;padding:11px 14px;font-size:14px;outline:none;font-family:inherit">
@@ -780,12 +800,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 <div class="screen" id="notifications">
   <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('home')">→</div><h2 style="font-size:18px">🔔 الإشعارات</h2></div>
   <div class="sec">
-    <div class="notif"><div class="nic">👭</div><div><b>دخلي صحبتك لكوكبنا!!</b> 🪐<br><small>جيبي صاحباتك واربحي نقاط وشارات ⭐</small></div></div>
-    <div class="notif"><div class="nic">❤️</div><div><b>سيرين</b> عجبتها صورتك <br><small>منذ 5 دقائق</small></div></div>
-    <div class="notif"><div class="nic">👭</div><div><b>دنيا</b> بعثتلك طلب صداقة <br><small>منذ 20 دقيقة</small></div></div>
-    <div class="notif"><div class="nic">🛍️</div><div>طلب جديد على <b>القفطان</b> تاعك <br><small>منذ ساعة</small></div></div>
-    <div class="notif"><div class="nic">🏆</div><div>بدا <b>تحدي الأسبوع</b>: أحسن ميكاب نهاري <br><small>منذ 3 ساعات</small></div></div>
-    <div class="notif"><div class="nic">💬</div><div><b>إيمان</b> بعثتلك رسالة <br><small>منذ 5 ساعات</small></div></div>
+    <div id="notif-list"></div>
   </div>
 </div>
 
@@ -793,12 +808,15 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 <div class="screen" id="search">
   <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('home')">→</div><h2 style="font-size:18px">🔍 البحث</h2></div>
   <div class="sec">
-    <input placeholder="قلبي على منتج، خدمة، بنت..." style="width:100%;border:2px solid #ffe0ec;border-radius:16px;padding:13px 16px;font-size:14px;outline:none;font-family:inherit">
-    <div class="sec-title" style="margin-top:16px">🔥 رائج دابا</div>
-    <div class="chips">
-      <div class="chip" onclick="go('souq')">قفطان</div><div class="chip" onclick="go('souq')">مكياج أصلي</div>
-      <div class="chip" onclick="go('services')">كوافيرة الجزائر</div><div class="chip" onclick="go('souq')">ساك يدوي</div>
+    <input id="search-input" placeholder="قلبي على منتج، بنت..." oninput="doSearch(this.value)" style="width:100%;border:2px solid #ffe0ec;border-radius:16px;padding:13px 16px;font-size:14px;outline:none;font-family:inherit">
+    <div id="search-trend">
+      <div class="sec-title" style="margin-top:16px">🔥 رائج دابا</div>
+      <div class="chips">
+        <div class="chip" onclick="searchChip('قفطان')">قفطان</div><div class="chip" onclick="searchChip('مكياج')">مكياج</div>
+        <div class="chip" onclick="searchChip('ساك')">ساك</div><div class="chip" onclick="searchChip('كريم')">كريم</div>
+      </div>
     </div>
+    <div id="search-results" style="margin-top:12px"></div>
   </div>
 </div>
 
@@ -807,17 +825,31 @@ input[type=range]{width:100%;accent-color:var(--pink)}
   <div class="topbar"><span class="planet">☰</span><h1>القائمة</h1><p>كلش في بلاصة وحدة</p></div>
   <div class="sec">
     <div class="svc" style="cursor:pointer" onclick="go('profile')"><div class="avatar">🌸</div>
-      <div style="flex:1"><h4>لينا بن علي</h4><p>شوفي بروفايلك ⭐ نجمة</p></div><span style="font-size:22px;color:var(--muted)">‹</span></div>
+      <div style="flex:1"><h4 id="mn-name">بروفايلي</h4><p>شوفي بروفايلك ⭐</p></div><span style="font-size:22px;color:var(--muted)">‹</span></div>
   </div>
   <div class="menu">
     <a onclick="go('services')">💅 <span>الخدمات</span></a>
     <a onclick="go('friendship')">👭 <span>صداقة</span></a>
-    <a>💰 <span>رصيدي: 2,400 دج</span></a>
-    <a>🚀 <span>روّجي منتجك</span></a>
-    <a>📷 <span>صوري</span></a>
-    <a>⚙️ <span>الإعدادات</span></a>
+    <a onclick="openWallet()">💰 <span>رصيدي</span></a>
+    <a onclick="openBoost()">🚀 <span>روّجي منتجك</span></a>
+    <a onclick="go('story-new')">📷 <span>صوري يومية</span></a>
+    <a onclick="openSettings()">⚙️ <span>الإعدادات</span></a>
     <a id="admin-link" onclick="openAdmin()" style="display:none;border:2px solid var(--pink);background:#fff0f6">👑 <span>لوحة المالك</span></a>
     <a onclick="doLogout()">🚪 <span>تسجيل الخروج</span></a>
+  </div>
+</div>
+
+<!-- الإعدادات -->
+<div class="screen" id="settings">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('menu')">→</div><h2 style="font-size:18px">⚙️ الإعدادات</h2></div>
+  <div class="sec">
+    <div class="menu">
+      <a onclick="openEditProfile()">✏️ <span>تعديل البروفايل</span></a>
+      <a onclick="go('notifications')">🔔 <span>الإشعارات</span></a>
+      <a onclick="shareApp()">↗️ <span>شاركي التطبيق</span></a>
+      <a onclick="doLogout()">🚪 <span>تسجيل الخروج</span></a>
+    </div>
+    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 v19<br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
   </div>
 </div>
 
@@ -827,11 +859,58 @@ input[type=range]{width:100%;accent-color:var(--pink)}
   <div class="sec" style="display:flex;gap:8px">
     <button class="btn" id="adm-t1" style="flex:1;padding:10px" onclick="admTab('pending')">⏳ طلبات التحقق <span id="adm-count"></span></button>
     <button class="btn" id="adm-t2" style="flex:1;padding:10px;background:transparent;border:2px solid var(--pink);color:var(--pink-d);box-shadow:none" onclick="admTab('members')">👭 الأعضاء</button>
+    <button class="btn" id="adm-t3" style="flex:1;padding:10px;background:transparent;border:2px solid var(--pink);color:var(--pink-d);box-shadow:none" onclick="admTab('bookings')">📅 الحجوزات</button>
   </div>
   <div id="adm-pending" class="sec"></div>
+  <div id="adm-bookings" class="sec" style="display:none"></div>
   <div id="adm-members" class="sec" style="display:none">
     <div class="field"><input id="adm-q" placeholder="🔍 قلبي بالاسم..." oninput="loadMembers()"></div>
     <div id="adm-list"></div>
+  </div>
+</div>
+
+<!-- تعديل البروفايل -->
+<div id="ep-modal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeEditProfile()">
+  <div style="background:#fff;border-radius:20px;padding:22px;width:100%;max-width:380px">
+    <h3 style="margin-bottom:14px">✏️ تعديل البروفايل</h3>
+    <div class="field"><label>الاسم 🌸</label><input id="ep-name" style="width:100%;border:2px solid #ffe0ec;border-radius:12px;padding:11px;font-family:inherit"></div>
+    <div class="field"><label>الولاية 📍</label><input id="ep-wilaya" style="width:100%;border:2px solid #ffe0ec;border-radius:12px;padding:11px;font-family:inherit"></div>
+    <div class="field"><label>نبذة 💬</label><textarea id="ep-bio" rows="2" style="width:100%;border:2px solid #ffe0ec;border-radius:12px;padding:11px;font-family:inherit"></textarea></div>
+    <div class="field"><label>إيموجي البروفايل 😊</label><input id="ep-emoji" maxlength="4" style="width:100%;border:2px solid #ffe0ec;border-radius:12px;padding:11px;font-family:inherit"></div>
+    <div style="display:flex;gap:8px;margin-top:6px"><button class="btn" style="flex:1" onclick="saveProfile()">حفظ ✅</button><button class="btn ghost" onclick="closeEditProfile()">إلغاء</button></div>
+  </div>
+</div>
+
+<!-- تحدي الأسبوع -->
+<div id="ch-modal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeChallenge()">
+  <div style="background:#fff;border-radius:20px;padding:22px;width:100%;max-width:380px;max-height:80vh;overflow-y:auto">
+    <h3 style="margin-bottom:6px">🏆 تحدي الأسبوع</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:14px">أحسن ميكاب نهاري — صوتي لمفضلتك 💄</p>
+    <div id="ch-opts"></div>
+    <button class="btn ghost block" style="margin-top:8px" onclick="closeChallenge()">إغلاق</button>
+  </div>
+</div>
+
+<!-- الرصيد -->
+<div id="w-modal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeWallet()">
+  <div style="background:#fff;border-radius:20px;padding:26px;width:100%;max-width:340px;text-align:center">
+    <div style="font-size:48px">💰</div>
+    <h3>رصيدك: 0 دج</h3>
+    <p style="color:var(--muted);font-size:13px;margin:10px 0 16px">دخلي صاحباتك للكوكب واربحي نقاط وشارات ⭐<br>كل صاحبة تدخل = 100 نقطة 🎉</p>
+    <button class="btn block" onclick="closeWallet();shareApp()">دعي صاحباتك 💖</button>
+    <button class="btn ghost block" style="margin-top:8px" onclick="closeWallet()">إغلاق</button>
+  </div>
+</div>
+
+<!-- الترويج -->
+<div id="b-modal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeBoost()">
+  <div style="background:#fff;border-radius:20px;padding:22px;width:100%;max-width:380px">
+    <h3 style="margin-bottom:6px">🚀 روّجي منتجك</h3>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:14px">منتجك يبان في الواجهة لكل بنات الكوكب</p>
+    <div class="svc"><div class="ico">🥉</div><div style="flex:1"><h4>تثبيت 3 أيام</h4><p>500 دج</p></div><button class="btn" style="font-size:12px" onclick="requestBoost('تثبيت 3 أيام — 500 دج')">اختاري</button></div>
+    <div class="svc"><div class="ico">🥈</div><div style="flex:1"><h4>تثبيت 7 أيام ⭐ الأكثر طلبا</h4><p>900 دج</p></div><button class="btn" style="font-size:12px" onclick="requestBoost('تثبيت 7 أيام — 900 دج')">اختاري</button></div>
+    <div class="svc"><div class="ico">🥇</div><div style="flex:1"><h4>تثبيت 30 يوم</h4><p>2,500 دج</p></div><button class="btn" style="font-size:12px" onclick="requestBoost('تثبيت 30 يوم — 2,500 دج')">اختاري</button></div>
+    <button class="btn ghost block" style="margin-top:8px" onclick="closeBoost()">إغلاق</button>
   </div>
 </div>
 
@@ -1030,13 +1109,13 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 <!-- شريط التنقل -->
 <nav class="navbar" id="navbar" style="display:none">
   <div class="nav-it on" data-s="home" onclick="go('home')"><span class="ico">🏠</span>الرئيسية</div>
-  <div class="nav-it" data-s="friends" onclick="go('friends')"><span class="ico">👥</span>الأصدقاء</div>
+  <div class="nav-it" data-s="friends" onclick="go('friends')"><span class="ico" style="position:relative">👥<b class="bdg" id="fr-badge" style="display:none;position:absolute;top:-6px;left:-8px"></b></span>الأصدقاء</div>
   <div class="nav-it" data-s="video" onclick="go('video')"><span class="ico">🎬</span>ريلز</div>
   <div class="nav-it" data-s="souq" onclick="go('souq')"><span class="ico">🛍️</span>المتجر</div>
   <div class="nav-it" data-s="menu" onclick="go('menu')"><span class="ico">☰</span>القائمة</div>
 </nav>
 
 </div>
-<script src="app.js?v=19"></script>
+<script src="app.js?v=20"></script>
 </body>
 </html>
