@@ -674,25 +674,20 @@ input[type=range]{width:100%;accent-color:var(--pink)}
     <div class="fb-stats">
       <div><b id="pf-friends">—</b><small>صديقة</small></div>
       <div><b id="pf-products">—</b><small>منتج</small></div>
-      <div><b>48</b><small>بيعة</small></div>
-      <div><b>4.9</b><small>تقييمي ⭐</small></div>
+      <div><b id="pf-sales">—</b><small>بيعة</small></div>
+      <div><b id="pf-reels">—</b><small>ريلز 🎬</small></div>
     </div>
     <div class="fb-actions">
       <button class="btn" style="flex:1" onclick="openEditProfile()">✏️ تعديل البروفايل</button>
       <button class="btn ghost" onclick="shareApp()">↗️ مشاركة</button>
     </div>
   </div>
-  <div class="tabs">
-    <div class="tab on" onclick="document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">منشوراتي</div>
-    <div class="tab" onclick="document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">منتجاتي</div>
-    <div class="tab" onclick="document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">صوري</div>
+  <div class="tabs" id="pf-tabs">
+    <div class="tab on" onclick="pfTab('posts',this)">منشوراتي</div>
+    <div class="tab" onclick="pfTab('products',this)">منتجاتي</div>
+    <div class="tab" onclick="pfTab('photos',this)">صوري</div>
   </div>
-  <div class="sec">
-    <div class="post"><div class="head"><div class="avatar">🌸</div>
-      <div><h4>لينا بن علي <span class="rank">⭐ نجمة</span></h4><small>أمس • الجزائر</small></div></div>
-      <div class="txt">وصلوني قفاطن جداد 🎉 شوفوهم في منتجاتي، والكمية محدودة يا بنات!</div>
-      <div class="actions"><span>❤️ 96</span><span>💬 21</span><span>↗️</span></div></div>
-  </div>
+  <div class="sec"><div id="pf-tab-content"><p style="color:var(--muted);font-size:13px;text-align:center">⏳ نحمل...</p></div></div>
   <div class="menu">
     <a onclick="go('mybookings')">📅 <span>حجوزاتي</span></a>
     <a onclick="openWallet()">💰 <span>رصيدي</span></a>
@@ -712,26 +707,21 @@ input[type=range]{width:100%;accent-color:var(--pink)}
     <h2><span id="op-name">إيمان</span> <span class="rank" id="op-rank">⭐ نجمة</span></h2>
     <p class="fb-bio" id="op-bio"></p>
     <div class="fb-stats">
-      <div><b>186</b><small>صديقة</small></div>
-      <div><b>8</b><small>منتج</small></div>
-      <div><b>4.8</b><small>تقييم ⭐</small></div>
+      <div><b id="op-friends">—</b><small>صديقة</small></div>
+      <div><b id="op-products">—</b><small>منتج</small></div>
+      <div><b id="op-reels">—</b><small>ريلز 🎬</small></div>
     </div>
     <div class="fb-actions">
       <button class="btn" style="flex:1" id="op-add">👭 أضيفيها صديقة</button>
       <button class="btn ghost" id="op-chat">💬 راسليها</button>
     </div>
   </div>
-  <div class="tabs">
-    <div class="tab on" onclick="this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">منشوراتها</div>
-    <div class="tab" onclick="this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">منتجاتها</div>
-    <div class="tab" onclick="this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">صورها</div>
+  <div class="tabs" id="op-tabs">
+    <div class="tab on" onclick="opTab('posts',this)">منشوراتها</div>
+    <div class="tab" onclick="opTab('products',this)">منتجاتها</div>
+    <div class="tab" onclick="opTab('photos',this)">صورها</div>
   </div>
-  <div class="sec">
-    <div class="post"><div class="head"><div class="avatar"><span id="op-emoji2">🌸</span></div>
-      <div><h4><span id="op-name2">إيمان</span></h4><small>منذ 3 ساعات</small></div></div>
-      <div class="txt">بنات شكون تحب نتبادلو وصفات؟ عندي وصفة كيكة الشوكولاتة تهبل 🍰</div>
-      <div class="actions"><span>❤️ 45</span><span>💬 12</span><span>↗️</span></div></div>
-  </div>
+  <div class="sec"><div id="op-tab-content"><p style="color:var(--muted);font-size:13px;text-align:center">⏳ نحمل...</p></div></div>
 </div>
 
 <!-- الأصدقاء -->
@@ -821,7 +811,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 <div class="screen" id="chat">
   <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="goBack()">→</div>
     <div class="avatar" id="chat-ava" style="width:42px;height:42px;font-size:22px">🌸</div>
-    <h2 style="font-size:16px" id="chat-name">إيمان</h2><small style="opacity:.85">🟢 نشطة دابا</small></div>
+    <h2 style="font-size:16px" id="chat-name">إيمان</h2></div>
   <div class="msgs" id="msgs">
   </div>
   <div style="display:flex;gap:8px;padding:12px 16px">
@@ -883,7 +873,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
       <a onclick="shareApp()">↗️ <span>شاركي التطبيق</span></a>
       <a onclick="doLogout()">🚪 <span>تسجيل الخروج</span></a>
     </div>
-    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v37</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
+    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v38</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
   </div>
 </div>
 
@@ -1150,6 +1140,6 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 </nav>
 
 </div>
-<script src="app.js?v=37"></script>
+<script src="app.js?v=38"></script>
 </body>
 </html>
