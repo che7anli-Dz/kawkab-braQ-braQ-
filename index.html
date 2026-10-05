@@ -1074,10 +1074,11 @@ async function ensureProfile(){
     if(r.data)return;
     var pd=null;
     try{pd=JSON.parse(localStorage.getItem('kb_pending')||'null');}catch(_){}
-    if(pd&&pd.n){
-      await SB.from('kb_profiles').insert({id:u.id,full_name:pd.n,email:pd.e||u.email,phone:pd.p,wilaya:pd.w,verification_status:'pending'});
-      try{localStorage.removeItem('kb_pending');}catch(_){}
-    }
+    var row={id:u.id,verification_status:'pending'};
+    if(pd&&pd.n){row.full_name=pd.n;row.email=pd.e||u.email;row.phone=pd.p;row.wilaya=pd.w;}
+    else{var em=u.email||'عضوة';row.full_name=em.split('@')[0];row.email=u.email;}
+    await SB.from('kb_profiles').insert(row);
+    try{localStorage.removeItem('kb_pending');}catch(_){}
   }catch(e){}
 }
 async function loadUserProfile(){
