@@ -1043,11 +1043,11 @@ async function loadReels(force){
     }else{
       var ids=[];rows.forEach(function(x){if(ids.indexOf(x.author_id)<0)ids.push(x.author_id);});
       var names={};
-      try{var pr=await SB.from('kb_profiles').select('id,full_name,avatar_emoji').in('id',ids);
-        if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]={n:x.full_name,a:x.avatar_emoji};});}catch(e){}
+      try{var pr=await SB.from('kb_profiles').select('id,full_name,avatar_emoji,avatar_url').in('id',ids);
+        if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]={n:x.full_name,a:x.avatar_emoji,u:x.avatar_url};});}catch(e){}
       feed.innerHTML='';
       var _me=null;try{_me=await frMe();}catch(e){}
-      rows.forEach(function(x){var nm=names[x.author_id]||{n:'بنت الكوكب',a:'🌸'};feed.appendChild(reelCard(x,nm.n,_me&&_me===x.author_id,nm.a));});
+      rows.forEach(function(x){var nm=names[x.author_id]||{n:'بنت الكوكب',a:'🌸'};feed.appendChild(reelCard(x,nm.n,_me&&_me===x.author_id,avaHtml(nm)));});
     }
     _reelsLoaded=true;
     observeReels();
@@ -1920,6 +1920,16 @@ async function openUserProfile(uid){
     var p=r.data;
     document.getElementById('op-name').textContent=p.full_name||'بنت الكوكب';
     document.getElementById('op-name2').textContent=p.full_name||'بنت الكوكب';
+    var oav=document.querySelector('#oprofile .fb-avatar');
+    if(oav){
+      if(p.avatar_url){oav.innerHTML='<img src="'+avatarPublicUrl(p.avatar_url)+'" alt="">';}
+      else{oav.innerHTML='<span id="op-emoji">'+escapeHtml(p.avatar_emoji||'🌸')+'</span>';}
+    }
+    var ocv=document.querySelector('#oprofile .cover');
+    if(ocv){
+      if(p.cover_url){ocv.style.backgroundImage='url('+avatarPublicUrl(p.cover_url)+')';}
+      else{ocv.style.backgroundImage='';}
+    }
     var btn=document.getElementById('op-add');
     btn.textContent='👭 أضيفيها صديقة';btn.style.background='';btn.disabled=false;
     btn.onclick=function(){sendFriendReq(uid,btn);};
@@ -2034,11 +2044,20 @@ async function saveProfile(){
 async function loadOwnProfile(){
   try{
     var me=await frMe();if(!me||!SB)return;
-    var r=await SB.from('kb_profiles').select('full_name,wilaya,bio,avatar_emoji').eq('id',me).single();
+    var r=await SB.from('kb_profiles').select('full_name,wilaya,bio,avatar_emoji,avatar_url,cover_url').eq('id',me).single();
     if(r.data){var p=r.data;
       document.getElementById('pf-name').textContent=p.full_name||'';
       var mn=document.getElementById('mn-name');if(mn)mn.textContent=p.full_name||'بروفايلي';
-      var av=document.querySelector('#profile .fb-avatar');if(av)av.childNodes[0].textContent=p.avatar_emoji||'🌸';
+      var av=document.getElementById('pf-avatar');
+      if(av){
+        if(p.avatar_url){av.innerHTML='<img src="'+avatarPublicUrl(p.avatar_url)+'" alt=""><span class="av-cam">📷</span>';}
+        else{av.innerHTML=escapeHtml(p.avatar_emoji||'🌸')+'<span class="av-cam">📷</span>';}
+      }
+      var cv=document.getElementById('pf-cover');
+      if(cv){
+        if(p.cover_url){cv.style.backgroundImage='url('+avatarPublicUrl(p.cover_url)+')';}
+        else{cv.style.backgroundImage='';}
+      }
       document.getElementById('pf-bio').innerHTML='📍 '+escapeHtml(p.wilaya||'')+'<br>'+escapeHtml(p.bio||'');
     }
     var c=await SB.from('kb_friendships').select('id',{count:'exact',head:true}).eq('status','accepted').or('from_id.eq.'+me+',to_id.eq.'+me);
@@ -2046,6 +2065,38 @@ async function loadOwnProfile(){
     var pr=await SB.from('kb_products').select('id',{count:'exact',head:true}).eq('seller_id',me).eq('status','active');
     var pc=document.getElementById('pf-products');if(pc)pc.textContent=pr.count||0;
   }catch(e){}
+}
+/* ===== صور البروفايل الحقيقية 📷 (كيما فيسبوك) ===== */
+function avatarPublicUrl(path){
+  if(!path)return '';
+  if(path.indexOf('http')===0)return path;
+  try{return SB.storage.from('kb-avatars').getPublicUrl(path).data.publicUrl;}catch(e){return '';}
+}
+function avaHtml(p){
+  var u=p&&(p.avatar_url||p.avatarUrl);
+  if(u)return '<img src="'+avatarPublicUrl(u)+'" alt="">';
+  return escapeHtml((p&&(p.avatar_emoji||p.avatarEmoji))||'🌸');
+}
+function changeAvatar(){document.getElementById('pf-file-ava').click();}
+function changeCover(){document.getElementById('pf-file-cover').click();}
+async function uploadProfilePhoto(inp,type){
+  var f=inp.files&&inp.files[0];inp.value='';if(!f)return;
+  if(f.type.indexOf('image')!==0){toast('اختاري صورة برك 🖼️');return;}
+  if(f.size>10*1024*1024){toast('الصورة كبيرة بزاف (أقصى 10MB) 📦');return;}
+  if(!SB){toast('ما كاش اتصال 📡');return;}
+  toast('نرفعو الصورة... ⏳');
+  try{
+    var u=await sbUser();if(!u)throw new Error('سجلي الدخول أولا');
+    var ext=((f.name||'').split('.').pop()||'jpg').toLowerCase().slice(0,4);
+    if(ext!=='jpg'&&ext!=='jpeg'&&ext!=='png'&&ext!=='webp')ext='jpg';
+    var path=u.id+'/'+type+'.'+ext;
+    await uploadWithProgress('kb-avatars',path,f,f.type||'image/jpeg',function(){});
+    var upd={};upd[type==='avatar'?'avatar_url':'cover_url']=path;
+    var r=await SB.from('kb_profiles').update(upd).eq('id',u.id);
+    if(r.error)throw r.error;
+    toast(type==='avatar'?'تبدلات تصويرة البروفايل 📷✨':'تبدل الغلاف 🎨✨');
+    loadOwnProfile(true);
+  }catch(e){toast('تعذر الرفع: '+(e.message||'📡'));}
 }
 // مشاركة ↗️
 function shareApp(){
