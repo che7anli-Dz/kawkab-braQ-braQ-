@@ -1,5 +1,5 @@
-/* كوكب برق برق — Service Worker بسيط */
-var CACHE = 'kawkab-bb-v6';
+/* كوكب برق برق — Service Worker */
+var CACHE = 'kawkab-bb-v7';
 var ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function (e) {
@@ -20,8 +20,28 @@ self.addEventListener('activate', function (e) {
   );
 });
 
+function isPage(url) {
+  return url.pathname === '/' || url.pathname.endsWith('/index.html') ||
+    url.pathname === '/kawkab-braQ-braQ-/' || url.pathname.endsWith('/kawkab-braQ-braQ-/');
+}
+
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
+  var url = new URL(e.request.url);
+  /* الصفحة: الشبكة أولا باش التحديثات توصل مباشرة */
+  if (isPage(url)) {
+    e.respondWith(
+      fetch(e.request).then(function (res) {
+        var copy = res.clone();
+        caches.open(CACHE).then(function (c) { c.put(e.request, copy); }).catch(function () {});
+        return res;
+      }).catch(function () {
+        return caches.match(e.request).then(function (hit) { return hit || caches.match('./index.html'); });
+      })
+    );
+    return;
+  }
+  /* الملفات: الكاش أولا */
   e.respondWith(
     caches.match(e.request).then(function (hit) {
       return hit || fetch(e.request).then(function (res) {
