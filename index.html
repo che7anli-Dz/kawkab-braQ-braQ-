@@ -724,7 +724,7 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
     <div class="big">🎉</div>
     <h2>مبروك! نتي بنت الكوكب 💖</h2>
     <p>نتيجتك: <b id="pass-score">7 / 7</b><br>مرحبا بيك في كوكب برق برق 🪐</p>
-    <button class="btn block" onclick="go('home')">ادخلي الكوكب ✨</button>
+    <button class="btn block" onclick="markSeen();go('home')">ادخلي الكوكب ✨</button>
   </div>
 </div>
 
@@ -1013,6 +1013,9 @@ function openProfile(name,wilaya,tags,emoji,rank,ret){
 /* ===== الدخول / الخروج / البروفايل ===== */
 /* ===== بوابة الدخول: غير المتحققين ما يدخلوش للتطبيق ===== */
 var _verified=false;
+var _seen=false;
+try{_seen=localStorage.getItem('kb_seen')==='1';}catch(e){}
+function markSeen(){_seen=true;try{localStorage.setItem('kb_seen','1');}catch(e){}}
 async function checkVerified(){
   if(!SB)return true;
   try{
@@ -1030,13 +1033,14 @@ async function gateAndEnter(){
   var v=await checkVerified();
   if(v===true){
     _verified=true;
+    markSeen();
     await loadUserProfile();
     go('home');
     return true;
   }
   try{if(SB)await SB.auth.signOut();}catch(e){}
   _verified=false;
-  go('splash');
+  go(_seen?'login':'splash');
   toast(v==='banned'?'هاذ الحساب محظور 🚫':'كملي التحقق أولا باش تدخلي 🔐');
   return false;
 }
@@ -1044,7 +1048,7 @@ async function doLogin(){
   var e=document.getElementById('li-email').value.trim();
   var p=document.getElementById('li-pass').value;
   if(!e||!p){toast('عمري الإيميل وكلمة السر 🔑');return;}
-  if(!SB){toast('ما كاش اتصال — دخول تجريبي');go('home');return;}
+  if(!SB){toast('ما كاش اتصال — دخول تجريبي');markSeen();go('home');return;}
   try{
     var r=await SB.auth.signInWithPassword({email:e,password:p});
     if(r.error)throw r.error;
@@ -1053,7 +1057,7 @@ async function doLogin(){
     try{
       var c=await SB.rpc('kb_claim_owner');
       if(!c.error){
-        _verified=true;_wantClaim=false;await loadUserProfile();
+        _verified=true;_wantClaim=false;markSeen();await loadUserProfile();
         toast('👑 راك مالك الكوكب دروك!');go('home');return;
       }
     }catch(_){}
@@ -1133,6 +1137,7 @@ async function claimOwner(){
     _verified=true;
     await loadUserProfile();
     toast('👑 راك مالك الكوكب دروك!');
+    markSeen();
     go('home');
   }catch(e){
     var m=String((e&&e.message)||'');
@@ -1275,13 +1280,18 @@ async function loadProducts(force){
 /* ===== تهيئة: جلسة محفوظة + PWA ===== */
 document.addEventListener('DOMContentLoaded',function(){
   if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){}}
+  if(_seen){
+    var sp=document.getElementById('splash');
+    if(sp)sp.classList.remove('active');
+  }
   setTimeout(async function(){
-    if(!SB)return;
+    if(!SB){go(_seen?'login':'splash');return;}
     try{
       var s=await SB.auth.getSession();
       if(s.data&&s.data.session){await gateAndEnter();}
-    }catch(e){}
-  },500);
+      else{go(_seen?'login':'splash');}
+    }catch(e){go(_seen?'login':'splash');}
+  },_seen?100:500);
 });
 </script>
 </body>
