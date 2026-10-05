@@ -602,7 +602,22 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
     <a>🚀 <span>روّجي منتجك</span></a>
     <a>📷 <span>صوري</span></a>
     <a>⚙️ <span>الإعدادات</span></a>
+    <a id="admin-link" onclick="openAdmin()" style="display:none;border:2px solid var(--pink);background:#fff0f6">👑 <span>لوحة المالك</span></a>
     <a onclick="doLogout()">🚪 <span>تسجيل الخروج</span></a>
+  </div>
+</div>
+
+<!-- لوحة المالك 👑 -->
+<div class="screen" id="admin">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('menu')">→</div><h2 style="font-size:18px">👑 لوحة المالك</h2></div>
+  <div class="sec" style="display:flex;gap:8px">
+    <button class="btn" id="adm-t1" style="flex:1;padding:10px" onclick="admTab('pending')">⏳ طلبات التحقق <span id="adm-count"></span></button>
+    <button class="btn" id="adm-t2" style="flex:1;padding:10px;background:transparent;border:2px solid var(--pink);color:var(--pink-d);box-shadow:none" onclick="admTab('members')">👭 الأعضاء</button>
+  </div>
+  <div id="adm-pending" class="sec"></div>
+  <div id="adm-members" class="sec" style="display:none">
+    <div class="field"><input id="adm-q" placeholder="🔍 قلبي بالاسم..." oninput="loadMembers()"></div>
+    <div id="adm-list"></div>
   </div>
 </div>
 
@@ -763,6 +778,8 @@ async function sbUser(){
 }
 function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function go(id){
+  var main=['home','friends','video','souq','menu'];
+  if(SB&&main.indexOf(id)>-1&&!_verified){go('splash');return;}
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   var main=['home','friends','video','souq','menu'];
@@ -925,6 +942,7 @@ async function finishQuiz(){
         if(u)await SB.from('kb_profiles').update({quiz_score:qScore,verification_status:'quiz_passed'}).eq('id',u.id);
       }catch(e){}
     }
+    _verified=true;
     go('quiz-pass');
   }
   else{document.getElementById('fail-score').textContent=qScore+' / '+ACTIVE_QUIZ.length;go('voice');}
@@ -978,6 +996,34 @@ function openProfile(name,wilaya,tags,emoji,rank,ret){
   go('oprofile');
 }
 /* ===== الدخول / الخروج / البروفايل ===== */
+/* ===== بوابة الدخول: غير المتحققين ما يدخلوش للتطبيق ===== */
+var _verified=false;
+async function checkVerified(){
+  if(!SB)return true;
+  try{
+    var u=await sbUser();if(!u)return false;
+    var r=await SB.from('kb_profiles').select('verification_status,role,is_banned').eq('id',u.id).single();
+    if(r.error||!r.data)return false;
+    if(r.data.is_banned)return 'banned';
+    if(r.data.role==='owner')return true;
+    var st=r.data.verification_status;
+    return (st==='quiz_passed'||st==='approved');
+  }catch(e){return false;}
+}
+async function gateAndEnter(){
+  var v=await checkVerified();
+  if(v===true){
+    _verified=true;
+    await loadUserProfile();
+    go('home');
+    return true;
+  }
+  try{if(SB)await SB.auth.signOut();}catch(e){}
+  _verified=false;
+  go('splash');
+  toast(v==='banned'?'هاذ الحساب محظور 🚫':'كملي التحقق أولا باش تدخلي 🔐');
+  return false;
+}
 async function doLogin(){
   var e=document.getElementById('li-email').value.trim();
   var p=document.getElementById('li-pass').value;
@@ -986,24 +1032,25 @@ async function doLogin(){
   try{
     var r=await SB.auth.signInWithPassword({email:e,password:p});
     if(r.error)throw r.error;
-    await loadUserProfile();
-    go('home');toast('مرحبا بيك في الكوكب 💖');
+    if(await gateAndEnter())toast('مرحبا بيك في الكوكب 💖');
   }catch(err){toast('الدخول ما كملش: '+err.message);}
 }
 async function doLogout(){
   try{if(SB)await SB.auth.signOut();}catch(e){}
-  _profile=null;go('splash');
+  _profile=null;_verified=false;go('splash');
 }
 async function loadUserProfile(){
   if(!SB)return;
   try{
     var u=await sbUser();if(!u)return;
-    var r=await SB.from('kb_profiles').select('full_name,wilaya,rank,bio,avatar_emoji').eq('id',u.id).single();
+    var r=await SB.from('kb_profiles').select('full_name,wilaya,rank,bio,avatar_emoji,role').eq('id',u.id).single();
     if(r.error||!r.data)return;
     _profile=r.data;
     document.getElementById('pf-name').textContent=r.data.full_name||'ملكة الكوكب';
     document.getElementById('pf-rank').textContent='⭐ '+(r.data.rank||'مواطنة');
     document.getElementById('pf-bio').innerHTML='📍 '+escapeHtml(r.data.wilaya||'الجزائر')+'<br>'+escapeHtml(r.data.bio||'💖 عضوة في كوكب برق برق');
+    var al=document.getElementById('admin-link');
+    if(al)al.style.display=(r.data.role==='owner')?'flex':'none';
   }catch(e){}
 }
 /* ===== الفوكال: رفع + تسجيل للمراجعة ===== */
@@ -1024,6 +1071,113 @@ async function sendVocal(){
     }catch(e){toast('تعذر إرسال الفوكال — تحققي من الاتصال');}
   }
   go('pending');
+}
+/* ===== لوحة المالك 👑 ===== */
+function admTab(t){
+  document.getElementById('adm-pending').style.display=t==='pending'?'block':'none';
+  document.getElementById('adm-members').style.display=t==='members'?'block':'none';
+  document.getElementById('adm-t1').style.cssText='flex:1;padding:10px'+(t==='pending'?'':'\;background:transparent;border:2px solid var(--pink);color:var(--pink-d);box-shadow:none');
+  document.getElementById('adm-t2').style.cssText='flex:1;padding:10px'+(t==='members'?'':'\;background:transparent;border:2px solid var(--pink);color:var(--pink-d);box-shadow:none');
+  if(t==='pending')loadPending();else loadMembers();
+}
+async function openAdmin(){
+  if(!SB){toast('ما كاش اتصال');return;}
+  if(!_profile||_profile.role!=='owner'){toast('هاذ البلاصة للمالك برك 👑');return;}
+  _verified=true;
+  go('admin');admTab('pending');
+}
+async function loadPending(){
+  var box=document.getElementById('adm-pending');
+  box.innerHTML='<p style="text-align:center;color:var(--muted)">نحمل الطلبات... ⏳</p>';
+  try{
+    var r=await SB.from('kb_voice_notes').select('id,user_id,audio_url,created_at').eq('status','pending').order('created_at',{ascending:true}).limit(50);
+    if(r.error)throw r.error;
+    var notes=r.data||[];
+    document.getElementById('adm-count').textContent=notes.length?('('+notes.length+')'):'';
+    if(!notes.length){box.innerHTML='<p style="text-align:center;color:var(--muted)">ما كاش طلبات معلقة 🎉</p>';return;}
+    var ids=[];notes.forEach(function(n){if(ids.indexOf(n.user_id)<0)ids.push(n.user_id);});
+    var names={};
+    try{
+      var pr=await SB.from('kb_profiles').select('id,full_name,wilaya,quiz_score').in('id',ids);
+      if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x;});
+    }catch(e){}
+    box.innerHTML='';
+    notes.forEach(function(n){
+      var p=names[n.user_id]||{};
+      var d=document.createElement('div');d.className='svc';d.id='vn-'+n.id;
+      d.innerHTML='<div class="avatar" style="width:48px;height:48px;font-size:24px">🎤</div>'+
+        '<div style="flex:1"><h4>'+escapeHtml(p.full_name||'بنت جديدة')+'</h4>'+
+        '<p>'+escapeHtml(p.wilaya||'')+' • نتيجة الكويز: '+(p.quiz_score==null?'—':p.quiz_score+' / 7')+'</p>'+
+        '<div id="vp-'+n.id+'"></div></div>'+
+        '<div style="display:flex;flex-direction:column;gap:6px">'+
+        '<button class="btn" style="padding:8px 12px;font-size:13px" onclick="playVoice(\''+n.audio_url+'\',\'vp-'+n.id+'\')">▶️ اسمعي</button>'+
+        '<button class="btn" style="padding:8px 12px;font-size:13px;background:#22c55e" onclick="approveUser(\''+n.user_id+'\',\''+n.id+'\')">✅ قبول</button>'+
+        '<button class="btn" style="padding:8px 12px;font-size:13px;background:#ef4444" onclick="rejectUser(\''+n.user_id+'\',\''+n.id+'\')">❌ رفض</button></div>';
+      box.appendChild(d);
+    });
+  }catch(e){box.innerHTML='<p style="text-align:center;color:var(--muted)">تعذر التحميل: '+escapeHtml(e.message)+'</p>';}
+}
+async function playVoice(path,slot){
+  var el=document.getElementById(slot);
+  el.innerHTML='⏳...';
+  try{
+    var s=await SB.storage.from('kb-voice').createSignedUrl(path,600);
+    if(s.error)throw s.error;
+    el.innerHTML='<audio controls style="width:100%;margin-top:6px" src="'+s.data.signedUrl+'"></audio>';
+  }catch(e){el.innerHTML='تعذر التشغيل 🎤';}
+}
+async function approveUser(uid,nid){
+  try{
+    await SB.from('kb_profiles').update({verification_status:'approved',is_verified:true}).eq('id',uid);
+    await SB.from('kb_voice_notes').update({status:'approved'}).eq('id',nid);
+    var d=document.getElementById('vn-'+nid);if(d)d.remove();
+    toast('تقبلت ✅ مرحبا بيها في الكوكب');
+  }catch(e){toast('تعذر القبول: '+e.message);}
+}
+async function rejectUser(uid,nid){
+  if(!confirm('ترفضي هاذ العضوة؟ ما راحش تقدر تدخل.'))return;
+  try{
+    await SB.from('kb_profiles').update({verification_status:'rejected'}).eq('id',uid);
+    await SB.from('kb_voice_notes').update({status:'rejected'}).eq('id',nid);
+    var d=document.getElementById('vn-'+nid);if(d)d.remove();
+    toast('ترفضت ❌');
+  }catch(e){toast('تعذر الرفض: '+e.message);}
+}
+async function loadMembers(){
+  var q=(document.getElementById('adm-q').value||'').trim();
+  var box=document.getElementById('adm-list');
+  try{
+    var qry=SB.from('kb_profiles').select('id,full_name,wilaya,role,verification_status,is_banned,created_at').order('created_at',{ascending:false}).limit(50);
+    if(q)qry=qry.ilike('full_name','%'+q+'%');
+    var r=await qry;
+    if(r.error)throw r.error;
+    var rows=(r.data||[]).filter(function(x){return x.role!=='owner';});
+    if(!rows.length){box.innerHTML='<p style="text-align:center;color:var(--muted)">ما كاش نتائج</p>';return;}
+    box.innerHTML='';
+    rows.forEach(function(x){
+      var d=document.createElement('div');d.className='svc';
+      var st=x.is_banned?'🚫 محظورة':({pending:'⏳ مسجلة',quiz_passed:'✅ كويز',voice_pending:'🎤 فوكال',approved:'✅ مقبولة',rejected:'❌ مرفوضة'}[x.verification_status]||x.verification_status);
+      d.innerHTML='<div class="avatar" style="width:48px;height:48px;font-size:24px">🌸</div>'+
+        '<div style="flex:1"><h4>'+escapeHtml(x.full_name||'—')+'</h4><p>'+escapeHtml(x.wilaya||'')+' • '+st+'</p></div>'+
+        (x.is_banned
+          ?'<button class="btn" style="padding:8px 12px;font-size:13px;background:#22c55e" onclick="unbanUser(\''+x.id+'\')">فك الحظر</button>'
+          :'<button class="btn" style="padding:8px 12px;font-size:13px;background:#ef4444" onclick="banUser(\''+x.id+'\',\''+escapeHtml(x.full_name||'')+'\')">🚫 حظر</button>');
+      box.appendChild(d);
+    });
+  }catch(e){box.innerHTML='<p style="text-align:center;color:var(--muted)">تعذر التحميل</p>';}
+}
+async function banUser(uid,name){
+  if(!confirm('تحظري '+name+'؟ ما راحش تقدر تدخل للتطبيق.'))return;
+  try{
+    await SB.from('kb_profiles').update({is_banned:true}).eq('id',uid);
+    toast('تحظرت 🚫');loadMembers();
+  }catch(e){toast('تعذر الحظر: '+e.message);}
+}
+async function unbanUser(uid){
+  try{
+    await SB.from('kb_profiles').update({is_banned:false}).eq('id',uid);
+    toast('تفك الحظر ✅');loadMembers();
+  }catch(e){toast('تعذر فك الحظر: '+e.message);}
 }
 /* ===== السوق: تحميل المنتجات الحقيقية ===== */
 var _productsLoaded=false;
@@ -1055,7 +1209,7 @@ document.addEventListener('DOMContentLoaded',function(){
     if(!SB)return;
     try{
       var s=await SB.auth.getSession();
-      if(s.data&&s.data.session){await loadUserProfile();go('home');}
+      if(s.data&&s.data.session){await gateAndEnter();}
     }catch(e){}
   },500);
 });
