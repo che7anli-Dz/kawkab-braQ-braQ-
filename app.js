@@ -863,7 +863,7 @@ async function publishReel(){
   }catch(e){toast('تعذر النشر: '+e.message);}
   btn.disabled=false;btn.textContent='نشر الريلز 🚀';
 }
-function reelCard(x,name,isMine){
+function reelCard(x,name,isMine,ava){
   var d=document.createElement('div');
   d.className='reelv';d.dataset.id=x.id;
   d.dataset.path=x.video_url||'';
@@ -881,17 +881,19 @@ function reelCard(x,name,isMine){
   if(mt.length>24)mt=mt.slice(0,24)+'…';
   d.innerHTML=media+
     '<div class="reel-play">▶</div>'+
-    '<div class="reel-prog"><i></i></div>'+
     '<div class="reel-heart">❤️</div>'+
-    (mt?'<div class="reel-music">'+escapeHtml(mt)+'</div>':'')+
     '<div class="reel-side">'+
+    '<div class="reel-ava">'+(ava||'🌸')+'</div>'+
     '<button onclick="likeReel(\''+x.id+'\',this)">'+(liked?'❤️':'🤍')+'<span>'+(x.likes_count||0)+'</span></button>'+
     '<button onclick="openReelComments(\''+x.id+'\')">💬<span>'+(x.comments_count||0)+'</span></button>'+
-    '<button onclick="reportReel(\''+x.id+'\')" style="font-size:16px">🚩</button>'+
-    (isMine?'<button onclick="editReelTitle(\''+x.id+'\',this)" style="font-size:16px">✏️</button>':'')+
-    (isMine?'<button onclick="delReel(\''+x.id+'\',this)" style="font-size:16px">🗑️</button>':'')+
+    '<button onclick="shareReel(\''+x.id+'\')">↗️</button>'+
+    '<button onclick="reportReel(\''+x.id+'\')">🚩</button>'+
+    (isMine?'<button onclick="editReelTitle(\''+x.id+'\',this)">✏️</button>':'')+
+    (isMine?'<button onclick="delReel(\''+x.id+'\',this)">🗑️</button>':'')+
     '</div>'+
-    '<div class="reel-info"><b>'+escapeHtml(x.title||'')+'</b><small>@'+escapeHtml(name)+'</small></div>';
+    '<div class="reel-info"><b>@'+escapeHtml(name)+'</b><span>'+escapeHtml(x.title||'')+'</span>'+
+    (mt?'<small class="reel-mus">🎵 '+escapeHtml(mt)+'</small>':'')+'</div>'+
+    '<div class="reel-prog"><i></i></div>';
   d.addEventListener('click',function(e){
     if(e.target.closest('.reel-side'))return;
     var now=Date.now();
@@ -934,6 +936,12 @@ async function editReelTitle(id,btn){
     toast('تعدل العنوان ✏️');
   }catch(e){toast('تعذر التعديل: '+e.message);}
 }
+function shareReel(id){
+  var url=location.origin+location.pathname+'#reel-'+id;
+  if(navigator.share){navigator.share({title:'ريلز 🪐',text:'شوفي هاذ الريلز 💖',url:url}).catch(function(){});}
+  else if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).then(function(){toast('تنسخ الرابط 🔗');},function(){prompt('انسخي الرابط:',url);});}
+  else{prompt('انسخي الرابط:',url);}
+}
 function toggleReel(d){
   var v=d.querySelector('video');
   var btn=d.querySelector('.reel-play');
@@ -947,8 +955,9 @@ function toggleReel(d){
         try{var pr=d.querySelector('.reel-prog i');
           if(pr&&v.duration)pr.style.width=(100*v.currentTime/v.duration)+'%';}catch(e){}
       };
-      v.play().catch(function(){});
-      btn.style.display='none';
+      var pp=v.play();
+      if(pp&&pp.then){pp.then(function(){btn.style.display='none';}).catch(function(){btn.style.display='flex';});}
+      else{btn.style.display='none';}
       if(d.dataset.mp)reelAudioPlay(d.dataset.mp,parseFloat(d.dataset.ms)||0);
       else ytPlay(d.dataset.yt);
     }
@@ -1008,13 +1017,16 @@ function observeReels(){
   if(!('IntersectionObserver' in window))return;
   _reelObs=new IntersectionObserver(function(es){
     es.forEach(function(en){
-      if(!en.isIntersecting){
-        var d=en.target,v=d.querySelector('video');
+      var d=en.target,v=d.querySelector('video');
+      if(en.isIntersecting&&en.intersectionRatio>=0.55){
+        if(v&&v.paused)toggleReel(d);
+        else if(!v&&d.dataset.playing!=='1')toggleReel(d);
+      }else if(!en.isIntersecting){
         if(v&&!v.paused){v.pause();var b=d.querySelector('.reel-play');if(b)b.style.display='flex';}
-        if(d.dataset.playing==='1'){d.dataset.playing='';ytStop();}
+        if(d.dataset.playing==='1'){d.dataset.playing='';reelAudioStop();ytStop();}
       }
     });
-  },{threshold:0.25});
+  },{threshold:[0,0.55,1]});
   document.querySelectorAll('#reels-feed .reelv').forEach(function(d){_reelObs.observe(d);});
 }
 async function loadReels(force){
@@ -1031,11 +1043,11 @@ async function loadReels(force){
     }else{
       var ids=[];rows.forEach(function(x){if(ids.indexOf(x.author_id)<0)ids.push(x.author_id);});
       var names={};
-      try{var pr=await SB.from('kb_profiles').select('id,full_name').in('id',ids);
-        if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x.full_name;});}catch(e){}
+      try{var pr=await SB.from('kb_profiles').select('id,full_name,avatar_emoji').in('id',ids);
+        if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]={n:x.full_name,a:x.avatar_emoji};});}catch(e){}
       feed.innerHTML='';
       var _me=null;try{_me=await frMe();}catch(e){}
-      rows.forEach(function(x){feed.appendChild(reelCard(x,names[x.author_id]||'بنت الكوكب',_me&&_me===x.author_id));});
+      rows.forEach(function(x){var nm=names[x.author_id]||{n:'بنت الكوكب',a:'🌸'};feed.appendChild(reelCard(x,nm.n,_me&&_me===x.author_id,nm.a));});
     }
     _reelsLoaded=true;
     observeReels();
