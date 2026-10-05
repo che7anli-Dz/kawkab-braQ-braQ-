@@ -241,6 +241,9 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 .fab button{pointer-events:auto;position:absolute;left:16px;bottom:0;width:58px;height:58px;border-radius:50%;border:none;
   background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;font-size:28px;cursor:pointer;
   box-shadow:0 6px 18px rgba(255,77,148,.45)}
+#backbtn{display:none;position:fixed;top:12px;right:max(12px,calc(50% - 203px));width:46px;height:46px;border-radius:50%;border:none;
+  background:rgba(255,255,255,.94);box-shadow:0 4px 16px rgba(0,0,0,.2);font-size:24px;font-weight:bold;color:#d63384;
+  z-index:999;cursor:pointer;align-items:center;justify-content:center;line-height:1}
 .verify{background:#f0fdf4;border:2px solid #bbf7d0;color:#15803d;border-radius:14px;padding:10px 14px;font-size:13px;margin:12px 16px 0;display:flex;gap:8px;align-items:center}
 /* facebook chrome */
 .utilbar{display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
@@ -405,6 +408,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
     <span onclick="go('notifications')">🔔<b class="bdg" id="nt-badge" style="display:none"></b></span>
   </div>
 </div>
+<button id="backbtn" onclick="goBack()" aria-label="رجوع">→</button>
 
 <!-- شاشة البداية -->
 <div class="screen active" id="splash">
@@ -785,7 +789,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 
 <!-- المحادثة -->
 <div class="screen" id="chat">
-  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('messenger')">→</div>
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="goBack()">→</div>
     <div class="avatar" id="chat-ava" style="width:42px;height:42px;font-size:22px">🌸</div>
     <h2 style="font-size:16px" id="chat-name">إيمان</h2><small style="opacity:.85">🟢 نشطة دابا</small></div>
   <div class="msgs" id="msgs">
@@ -1116,6 +1120,6 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 </nav>
 
 </div>
-<script src="app.js?v=21"></script>
+<script src="app.js?v=22"></script>
 </body>
 </html>
