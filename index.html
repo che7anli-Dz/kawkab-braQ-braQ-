@@ -569,6 +569,16 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
   </div>
 </div>
 
+<!-- تعليقات الريلز -->
+<div class="screen" id="reel-comments">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('video')">→</div><h2 style="font-size:18px">💬 التعليقات</h2></div>
+  <div class="sec" id="rc-list" style="padding-bottom:96px"></div>
+  <div style="position:fixed;bottom:0;right:0;left:0;max-width:480px;margin:0 auto;background:#fff;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;box-shadow:0 -2px 12px rgba(0,0,0,.08);z-index:5">
+    <input id="rc-input" maxlength="500" placeholder="اكتبي تعليقك... 💖" style="flex:1;border:2px solid #ffd6e8;border-radius:24px;padding:10px 14px;font-size:14px;outline:none;font-family:inherit">
+    <button class="btn" style="padding:10px 18px" onclick="sendReelComment()">📩</button>
+  </div>
+</div>
+
 <!-- الرسائل -->
 <div class="screen" id="messenger">
   <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('home')">→</div><h2 style="font-size:18px">💬 الرسائل</h2></div>
@@ -1364,7 +1374,11 @@ function reelCard(x,name){
   d.innerHTML=media+
     '<div class="reel-play">▶</div>'+
     (x.music_youtube_id?'<div class="reel-music">🎵 موسيقى</div>':'')+
-    '<div class="reel-side"><button onclick="likeReel(\''+x.id+'\',this)">'+(liked?'❤️':'🤍')+'<span>'+(x.likes_count||0)+'</span></button></div>'+
+    '<div class="reel-side">'+
+    '<button onclick="likeReel(\''+x.id+'\',this)">'+(liked?'❤️':'🤍')+'<span>'+(x.likes_count||0)+'</span></button>'+
+    '<button onclick="openReelComments(\''+x.id+'\')">💬<span>'+(x.comments_count||0)+'</span></button>'+
+    '<button onclick="reportReel(\''+x.id+'\')" style="font-size:16px">🚩</button>'+
+    '</div>'+
     '<div class="reel-info"><b>'+escapeHtml(x.title||'')+'</b><small>@'+escapeHtml(name)+'</small></div>';
   d.addEventListener('click',function(e){
     if(e.target.closest('.reel-side'))return;
@@ -1430,7 +1444,7 @@ async function loadReels(force){
   if(!SB||(_reelsLoaded&&!force))return;
   var feed=document.getElementById('reels-feed');
   try{
-    var r=await SB.from('kb_reels').select('id,author_id,video_url,title,media_type,music_youtube_id,likes_count').order('created_at',{ascending:false}).limit(30);
+    var r=await SB.from('kb_reels').select('id,author_id,video_url,title,media_type,music_youtube_id,likes_count,comments_count').order('created_at',{ascending:false}).limit(30);
     if(r.error)throw r.error;
     var rows=r.data||[];
     if(!rows.length){
@@ -1450,6 +1464,62 @@ async function loadReels(force){
   }catch(e){
     if(!_reelsLoaded)feed.innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">تعذر التحميل — تحققي من الاتصال</p>';
   }
+}
+/* ===== تعليقات وبلاغات الريلز 💬🚩 ===== */
+var _rcReel=null;
+function openReelComments(id){
+  _rcReel=id;
+  document.getElementById('rc-list').innerHTML='<p style="text-align:center;color:var(--muted);padding:20px">نحمل التعليقات... ⏳</p>';
+  document.getElementById('rc-input').value='';
+  go('reel-comments');
+  loadReelComments();
+}
+async function loadReelComments(){
+  var list=document.getElementById('rc-list');
+  if(!SB||!_rcReel)return;
+  try{
+    var r=await SB.from('kb_reel_comments').select('id,content,created_at,author_id').eq('reel_id',_rcReel).order('created_at',{ascending:true}).limit(100);
+    if(r.error)throw r.error;
+    var rows=r.data||[];
+    if(!rows.length){list.innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">ما كاش تعليقات بعد<br>كوني أول وحدة تعلق 💖</p>';return;}
+    var ids=[];rows.forEach(function(x){if(ids.indexOf(x.author_id)<0)ids.push(x.author_id);});
+    var names={};
+    try{var pr=await SB.from('kb_profiles').select('id,full_name').in('id',ids);
+      if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x.full_name;});}catch(e){}
+    list.innerHTML='';
+    rows.forEach(function(x){
+      var d=document.createElement('div');
+      d.style.cssText='background:var(--card);border-radius:14px;padding:10px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.05)';
+      d.innerHTML='<b style="font-size:13px;color:var(--pink-d)">'+escapeHtml(names[x.author_id]||'بنت الكوكب')+'</b><p style="font-size:14px;margin-top:2px">'+escapeHtml(x.content)+'</p>';
+      list.appendChild(d);
+    });
+  }catch(e){list.innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">تعذر التحميل</p>';}
+}
+async function sendReelComment(){
+  var inp=document.getElementById('rc-input');
+  var txt=inp.value.trim();
+  if(!txt){toast('اكتبي شي حاجة أولا ✍️');return;}
+  if(!SB||!_rcReel)return;
+  inp.value='';
+  try{
+    var r=await SB.rpc('kb_add_reel_comment',{p_reel:_rcReel,p_content:txt});
+    if(r.error)throw r.error;
+    loadReelComments();
+    var card=document.querySelector('#reels-feed .reelv[data-id="'+_rcReel+'"] .reel-side');
+    if(card&&card.children[1]){var sp=card.children[1].querySelector('span');if(sp)sp.textContent=(parseInt(sp.textContent||'0',10)||0)+1;}
+    toast('تنشر تعليقك 💖');
+  }catch(e){toast('تعذر النشر: '+e.message);}
+}
+async function reportReel(id){
+  var reason=prompt('علاش تبلغي على هاذ الريلز؟ 🚩');
+  if(!reason||!reason.trim())return;
+  if(!SB)return;
+  try{
+    var u=await sbUser();if(!u){toast('سجلي الدخول أولا');return;}
+    var r=await SB.from('kb_reports').insert({reporter_id:u.id,target_id:id,target_type:'reel',reason:reason.trim().slice(0,500)});
+    if(r.error)throw r.error;
+    toast('وصل البلاغ، شكرا 🚩');
+  }catch(e){toast('تعذر الإبلاغ: '+e.message);}
 }
 /* ===== السوق: تحميل المنتجات الحقيقية ===== */
 var _productsLoaded=false;
