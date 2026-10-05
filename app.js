@@ -13,8 +13,6 @@ async function sbUser(){
 }
 function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function go(id){
-  try{window.scrollTo(0,0);}catch(e){}
-  setTimeout(function(){try{window.scrollTo(0,0);}catch(e){}},120);
   var main=['home','friends','video','souq','menu'];
   if(SB&&main.indexOf(id)>-1&&!_verified){go('splash');return;}
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
@@ -34,6 +32,13 @@ function go(id){
   if(id!=='story-new'){try{if(_stAudioEl){_stAudioEl.pause();_stPlaying=null;}}catch(e){}}
   if(id!=='reel-new'){try{if(_mqAudioEl){_mqAudioEl.pause();_mqPlaying=null;}}catch(e){}}
   window.scrollTo(0,0);
+  /* تركيز تلقائي: الكيبورد يخرج وحده في الدخول/التسجيل */
+  if(id==='login'||id==='signup'){
+    setTimeout(function(){
+      var i=document.getElementById(id==='login'?'li-email':'su-name');
+      if(i){try{i.focus({preventScroll:true});}catch(e){i.focus();}}
+    },450);
+  }
 }
 function openSheet(){document.getElementById('sheetbg').style.display='block'}
 function closeSheet(){document.getElementById('sheetbg').style.display='none'}
