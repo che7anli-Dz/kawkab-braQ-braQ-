@@ -29,6 +29,12 @@ function go(id){
   if(id==='sahha'){loadFeed(false);}
   if(id==='friends'){loadFriendsTab();}
   if(id==='friendship'){loadFriendsTab();}
+  if(id==='messenger'){loadMessenger();}
+  if(id==='notifications'){loadNotifs();}
+  if(id==='mybookings'){loadMyBookings();}
+  if(id==='orders'){loadOrders();}
+  if(id==='profile'){loadOwnProfile();updateBadges();}
+  if(id!=='chat'){chatStop();}
   if(id!=='video'){try{if(typeof pauseAllReels==='function')pauseAllReels();}catch(e){}}
   if(id!=='story'){try{if(typeof stopStoryMedia==='function')stopStoryMedia();}catch(e){}}
   if(id!=='story-new'){try{if(_stAudioEl){_stAudioEl.pause();_stPlaying=null;}}catch(e){}}
@@ -235,6 +241,10 @@ function openProfile(name,wilaya,tags,emoji,rank,ret){
   document.getElementById('op-bio').innerHTML='📍 '+wilaya+'<br>'+tags;
   document.getElementById('op-back').setAttribute('onclick',"go('"+ret+"')");
   document.getElementById('op-add').textContent='👭 أضيفيها صديقة';
+  document.getElementById('op-add').style.background='';document.getElementById('op-add').disabled=false;
+  document.getElementById('op-add').onclick=function(){findAndAdd(name,document.getElementById('op-add'));};
+  var oc=document.getElementById('op-chat');
+  if(oc)oc.onclick=function(){toast('🔒 أضيفيها صديقة أولا باش تتهادرو 👭');};
   go('oprofile');
 }
 /* ===== الدخول / الخروج / البروفايل ===== */
@@ -392,9 +402,11 @@ async function claimOwner(){
 function admTab(t){
   document.getElementById('adm-pending').style.display=t==='pending'?'block':'none';
   document.getElementById('adm-members').style.display=t==='members'?'block':'none';
+  document.getElementById('adm-bookings').style.display=t==='bookings'?'block':'none';
   document.getElementById('adm-t1').style.cssText='flex:1;padding:10px'+(t==='pending'?'':'\;background:transparent;border:2px solid var(--pink);color:var(--pink-d);box-shadow:none');
   document.getElementById('adm-t2').style.cssText='flex:1;padding:10px'+(t==='members'?'':'\;background:transparent;border:2px solid var(--pink);color:var(--pink-d);box-shadow:none');
-  if(t==='pending')loadPending();else loadMembers();
+  document.getElementById('adm-t3').style.cssText='flex:1;padding:10px'+(t==='bookings'?'':'\;background:transparent;border:2px solid var(--pink);color:var(--pink-d);box-shadow:none');
+  if(t==='pending')loadPending();else if(t==='bookings')loadOwnerBookings();else loadMembers();
 }
 async function openAdmin(){
   if(!SB){toast('ما كاش اتصال');return;}
@@ -699,6 +711,8 @@ function reelCard(x,name){
   if(mt.length>24)mt=mt.slice(0,24)+'…';
   d.innerHTML=media+
     '<div class="reel-play">▶</div>'+
+    '<div class="reel-prog"><i></i></div>'+
+    '<div class="reel-heart">❤️</div>'+
     (mt?'<div class="reel-music">'+escapeHtml(mt)+'</div>':'')+
     '<div class="reel-side">'+
     '<button onclick="likeReel(\''+x.id+'\',this)">'+(liked?'❤️':'🤍')+'<span>'+(x.likes_count||0)+'</span></button>'+
@@ -708,6 +722,17 @@ function reelCard(x,name){
     '<div class="reel-info"><b>'+escapeHtml(x.title||'')+'</b><small>@'+escapeHtml(name)+'</small></div>';
   d.addEventListener('click',function(e){
     if(e.target.closest('.reel-side'))return;
+    var now=Date.now();
+    if(now-(d._lt||0)<320){
+      d._lt=0;
+      var ht=d.querySelector('.reel-heart');
+      ht.classList.remove('boom');void ht.offsetWidth;ht.classList.add('boom');
+      if(!_likedReels[d.dataset.id])likeReel(d.dataset.id,d.querySelector('.reel-side button'));
+      var v=d.querySelector('video');
+      if(v&&v.paused)toggleReel(d);
+      return;
+    }
+    d._lt=now;
     toggleReel(d);
   });
   return d;
@@ -720,7 +745,11 @@ function toggleReel(d){
       pauseAllReels(d);
       var ts=parseFloat(d.dataset.ts)||0,te=parseFloat(d.dataset.te)||0;
       if(ts>0){try{v.currentTime=ts;}catch(e){}}
-      v.ontimeupdate=function(){if(te>ts&&te>0&&v.currentTime>=te){v.currentTime=ts;}};
+      v.ontimeupdate=function(){
+        if(te>ts&&te>0&&v.currentTime>=te){v.currentTime=ts;}
+        try{var pr=d.querySelector('.reel-prog i');
+          if(pr&&v.duration)pr.style.width=(100*v.currentTime/v.duration)+'%';}catch(e){}
+      };
       v.play().catch(function(){});
       btn.style.display='none';
       if(d.dataset.mp)reelAudioPlay(d.dataset.mp,parseFloat(d.dataset.ms)||0);
@@ -1242,6 +1271,14 @@ async function sendComment(){
     if(r.error)throw r.error;
     loadComments();
     bumpCommentCount();
+    try{
+      var meC=await frMe();
+      var owQ=_cmMode==='post'
+        ?await SB.from('kb_posts').select('author_id').eq('id',_cmId).single()
+        :await SB.from('kb_reels').select('author_id').eq('id',_cmId).single();
+      var ow=owQ.data&&owQ.data.author_id;
+      if(ow&&ow!==meC)await SB.rpc('kb_notify',{p_user:meC,p_to:ow,p_type:'comment',p_title:'تعليق جديد 💬',p_body:txt.slice(0,60)});
+    }catch(e){}
     toast('تنشر تعليقك 💖');
   }catch(e){toast('تعذر النشر: '+e.message);}
 }
@@ -1281,7 +1318,8 @@ async function loadProducts(force){
     var g=document.getElementById('souq-grid');g.innerHTML='';
     r.data.forEach(function(p){
       var img=(p.photos&&p.photos.length)?'<img src="'+p.photos[0]+'" style="width:100%;height:100%;object-fit:cover">':'🛍️';
-      var d=document.createElement('div');d.className='prod';
+      var d=document.createElement('div');d.className='prod';d.style.cursor='pointer';
+      d.onclick=(function(id){return function(){openProduct(id);};})(p.id);
       d.innerHTML='<div class="img" style="background:linear-gradient(135deg,#ffe0ec,#e9d5ff);overflow:hidden">'+img+'<span class="badge">'+escapeHtml(p.condition||'جديد')+'</span></div><div class="info"><h4>'+escapeHtml(p.name)+'</h4><div class="price">'+(p.price?escapeHtml(p.price)+' دج':'السعر عند التواصل')+'</div><div class="seller">'+escapeHtml(names[p.seller_id]||'بنت الكوكب')+(p.wilaya?' • '+escapeHtml(p.wilaya):'')+'</div></div>';
       g.appendChild(d);
     });
@@ -1326,6 +1364,8 @@ async function sendFriendReq(toId,btn){
     if(btn){btn.disabled=true;btn.textContent='⏳';}
     var r=await SB.from('kb_friendships').insert({from_id:me,to_id:toId});
     if(r.error)throw r.error;
+    try{var pn=await SB.from('kb_profiles').select('full_name').eq('id',me).single();
+      await SB.rpc('kb_notify',{p_user:me,p_to:toId,p_type:'friend_req',p_title:'طلب صداقة جديد 👭',p_body:((pn.data&&pn.data.full_name)||'بنت من الكوكب')+' بعثتلك طلب صداقة 💖'});}catch(e){}
     if(btn){btn.textContent='✅ تم الإرسال';btn.style.background='#9a8a97';}
     toast('تبعث الطلب 💖');
   }catch(e){
@@ -1339,6 +1379,9 @@ async function acceptFriend(fid,btn){
     if(btn){btn.disabled=true;btn.textContent='⏳';}
     var r=await SB.from('kb_friendships').update({status:'accepted'}).eq('id',fid);
     if(r.error)throw r.error;
+    try{var fr=await SB.from('kb_friendships').select('from_id').eq('id',fid).single();
+      var me2=await frMe();var pn2=await SB.from('kb_profiles').select('full_name').eq('id',me2).single();
+      if(fr.data)await SB.rpc('kb_notify',{p_user:me2,p_to:fr.data.from_id,p_type:'friend_accept',p_title:'قبلت صداقتك 👭💖',p_body:((pn2.data&&pn2.data.full_name)||'بنت من الكوكب')+' قبلت طلب الصداقة — تقدرو تتهادرو دروك 💬'});}catch(e){}
     toast('وليتو صديقات 👭💖');await loadFriendsTab();
   }catch(e){toast('تعذر القبول 📡');if(btn){btn.disabled=false;btn.textContent='قبول ✅';}}
 }
@@ -1393,6 +1436,454 @@ function openChat(name,emoji,uid){
     }
     document.getElementById('chat-name').textContent=name;
     document.getElementById('chat-ava').textContent=emoji;
+    _chatUid=uid||null;
+    document.getElementById('msgs').innerHTML='';
     go('chat');
+    if(_chatUid){loadChat();chatStop();_chatPoll=setInterval(function(){if(document.getElementById('chat').classList.contains('active'))loadChat();},4000);}
   })();
 }
+
+/* ================= الرسائل الحقيقية 💬 ================= */
+var _chatUid=null,_chatPoll=null;
+function chatStop(){if(_chatPoll){clearInterval(_chatPoll);_chatPoll=null;}}
+async function loadChat(){
+  var box=document.getElementById('msgs');if(!box||!_chatUid)return;
+  try{
+    var me=await frMe();
+    var r=await SB.from('kb_messages').select('*')
+      .or('and(from_id.eq.'+me+',to_id.eq.'+_chatUid+'),and(from_id.eq.'+_chatUid+',to_id.eq.'+me+')')
+      .order('created_at',{ascending:true}).limit(100);
+    var rows=r.data||[];
+    box.innerHTML=rows.length?rows.map(function(m){
+      return '<div class="msg '+(m.from_id===me?'out':'in')+'">'+escapeHtml(m.content)+'</div>';
+    }).join(''):'<p style="text-align:center;color:var(--muted);font-size:13px;padding:20px">ابداي المحادثة 💬💖</p>';
+    box.scrollTop=box.scrollHeight;
+    // علم الواصلة كمقروءة
+    var unread=rows.filter(function(m){return m.to_id===me&&!m.is_read;}).map(function(m){return m.id;});
+    if(unread.length)SB.from('kb_messages').update({is_read:true}).in('id',unread);
+  }catch(e){}
+}
+async function sendMsg(){
+  var i=document.getElementById('chat-in');
+  var t=i.value.trim();if(!t)return;
+  if(!_chatUid){ // وضع تجريبي قديم
+    var d=document.createElement('div');d.className='msg out';d.textContent=t;
+    document.getElementById('msgs').appendChild(d);i.value='';
+    window.scrollTo(0,document.body.scrollHeight);return;
+  }
+  try{
+    i.value='';
+    var me=await frMe();
+    var r=await SB.from('kb_messages').insert({from_id:me,to_id:_chatUid,content:t});
+    if(r.error)throw r.error;
+    try{await SB.rpc('kb_notify',{p_user:me,p_to:_chatUid,p_type:'message',p_title:'رسالة جديدة 💬',p_body:t.slice(0,60)});}catch(e){}
+    await loadChat();
+  }catch(e){toast('ما تبعثتش 📡');i.value=t;}
+}
+/* قائمة المحادثات */
+async function loadMessenger(){
+  var el=document.getElementById('conv-list');if(!el)return;
+  var me=await frMe();if(!me||!SB){el.innerHTML='';return;}
+  el.innerHTML='<p style="color:var(--muted);font-size:13px">⏳ نحمل...</p>';
+  try{
+    var rel=await SB.from('kb_friendships').select('*').eq('status','accepted')
+      .or('from_id.eq.'+me+',to_id.eq.'+me);
+    var fids=(rel.data||[]).map(function(x){return x.from_id===me?x.to_id:x.from_id;});
+    if(!fids.length){el.innerHTML='<p style="color:var(--muted);font-size:13px">ما عندكش صديقات بعد 👭<br>روحي لقسم الأصدقاء وأضيفي بنات!</p>';return;}
+    var pm=await frProfiles(fids);
+    var mg=await SB.from('kb_messages').select('*').or('from_id.eq.'+me+',to_id.eq.'+me)
+      .order('created_at',{ascending:false}).limit(200);
+    var last={},unread={};
+    (mg.data||[]).forEach(function(m){
+      var o=m.from_id===me?m.to_id:m.from_id;
+      if(!last[o])last[o]=m;
+      if(m.to_id===me&&!m.is_read)unread[o]=true;
+    });
+    el.innerHTML=fids.map(function(id){
+      var p=pm[id]||{},lm=last[id];
+      return '<div class="chat-it" onclick="openChat(\''+escapeHtml(p.full_name||'صديقة').replace(/'/g,"\\'")+'\',\''+(p.avatar_emoji||'🌸')+'\',\''+id+'\')">'
+        +'<div class="avatar">'+(p.avatar_emoji||'🌸')+'</div>'
+        +'<div style="flex:1"><h4 style="font-size:14px">'+escapeHtml(p.full_name||'صديقة')+'</h4>'
+        +'<p style="font-size:12.5px;color:var(--muted)">'+escapeHtml(lm?lm.content:'اضغطي لبدء المحادثة 💬')+'</p></div>'
+        +(unread[id]?'<span class="dot"></span>':'')+'</div>';
+    }).join('');
+  }catch(e){el.innerHTML='<p style="color:var(--muted);font-size:13px">تعذر التحميل 📡</p>';}
+}
+
+/* ================= الإشعارات الحقيقية 🔔 ================= */
+var NT_ICONS={friend_req:'👭',friend_accept:'💖',message:'💬',comment:'💬',like:'❤️',booking:'📅',info:'🪐'};
+function ntTime(t){
+  try{var d=new Date(t),n=new Date(),s=(n-d)/1000;
+  if(s<60)return 'دروك';if(s<3600)return Math.floor(s/60)+' د';
+  if(s<86400)return Math.floor(s/3600)+' س';return Math.floor(s/86400)+' يوم';}catch(e){return '';}
+}
+async function loadNotifs(){
+  var el=document.getElementById('notif-list');if(!el)return;
+  var me=await frMe();if(!me||!SB){el.innerHTML='';return;}
+  el.innerHTML='<p style="color:var(--muted);font-size:13px">⏳ نحمل...</p>';
+  try{
+    var r=await SB.from('kb_notifications').select('*').eq('user_id',me)
+      .order('created_at',{ascending:false}).limit(50);
+    var rows=r.data||[];
+    el.innerHTML=rows.length?rows.map(function(n){
+      var ic=NT_ICONS[n.type]||'🪐';
+      return '<div class="notif" style="'+(n.is_read?'':'background:#fff5f9')+'"><div class="nic">'+ic+'</div>'
+        +'<div><b>'+escapeHtml(n.title)+'</b>'+(n.body?'<br><small>'+escapeHtml(n.body)+'</small>':'')
+        +'<br><small style="color:var(--muted)">'+ntTime(n.created_at)+'</small></div></div>';
+    }).join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">ما كاش إشعارات بعد 🔕</p>';
+    var unread=rows.filter(function(n){return !n.is_read;}).map(function(n){return n.id;});
+    if(unread.length)SB.from('kb_notifications').update({is_read:true}).in('id',unread);
+    updateBadges();
+  }catch(e){el.innerHTML='<p style="color:var(--muted);font-size:13px">تعذر التحميل 📡</p>';}
+}
+async function updateBadges(){
+  try{
+    var me=await frMe();if(!me||!SB)return;
+    var n=await SB.from('kb_notifications').select('id',{count:'exact',head:true}).eq('user_id',me).eq('is_read',false);
+    var nb=document.getElementById('nt-badge');
+    if(nb){var c=n.count||0;nb.textContent=c>9?'9+':c;nb.style.display=c?'':'none';}
+    var m=await SB.from('kb_messages').select('id',{count:'exact',head:true}).eq('to_id',me).eq('is_read',false);
+    var mb=document.getElementById('msg-badge');
+    if(mb){var c2=m.count||0;mb.textContent=c2>9?'9+':c2;mb.style.display=c2?'':'none';}
+    var f=await SB.from('kb_friendships').select('id',{count:'exact',head:true}).eq('to_id',me).eq('status','pending');
+    var fb=document.getElementById('fr-badge');
+    if(fb){var c3=f.count||0;fb.textContent=c3>9?'9+':c3;fb.style.display=c3?'':'none';}
+  }catch(e){}
+}
+
+/* ================= حجز الخدمات 📅 ================= */
+var _bkService='',_bkProvider='';
+function openBooking(svc,prov){
+  _bkService=svc;_bkProvider=prov||'';
+  document.getElementById('bk-title').textContent='📅 '+svc;
+  document.getElementById('bk-date').value='';
+  document.getElementById('bk-phone').value='';
+  document.getElementById('bk-note').value='';
+  document.getElementById('bk-modal').style.display='flex';
+}
+function closeBooking(){document.getElementById('bk-modal').style.display='none';}
+async function submitBooking(){
+  var d=document.getElementById('bk-date').value,
+      ph=document.getElementById('bk-phone').value.trim(),
+      nt=document.getElementById('bk-note').value.trim();
+  if(!d){toast('اختاري التاريخ 📅');return;}
+  if(!ph){toast('اكتبي رقم الهاتف 📱');return;}
+  try{
+    var me=await frMe();if(!me){toast('سجلي الدخول أولا 🔑');return;}
+    var r=await SB.from('kb_bookings').insert({client_id:me,service_name:_bkService,provider_name:_bkProvider,booking_date:d,phone:ph,note:nt});
+    if(r.error)throw r.error;
+    closeBooking();toast('تبعث الحجز ✅ نعيطولك للتأكيد 📞');
+    try{await SB.rpc('kb_notify',{p_user:me,p_to:me,p_type:'booking',p_title:'حجز جديد 📅',p_body:_bkService+' — '+d});}catch(e){}
+  }catch(e){toast('تعذر الحجز 📡');}
+}
+var BK_ST={pending:'⏳ معلق',confirmed:'✅ مؤكد',done:'🏁 مكتمل',cancelled:'❌ ملغي'};
+async function loadMyBookings(){
+  var el=document.getElementById('my-bookings');if(!el)return;
+  var me=await frMe();if(!me||!SB){el.innerHTML='';return;}
+  el.innerHTML='<p style="color:var(--muted);font-size:13px">⏳ نحمل...</p>';
+  try{
+    var r=await SB.from('kb_bookings').select('*').eq('client_id',me).order('booking_date',{ascending:true});
+    var rows=r.data||[];
+    el.innerHTML=rows.length?rows.map(function(b){
+      return '<div class="svc"><div class="ico">📅</div><div style="flex:1"><h4>'+escapeHtml(b.service_name)+'</h4>'
+        +'<p>'+escapeHtml(b.booking_date)+' • '+(BK_ST[b.status]||b.status)+'</p>'
+        +(b.status==='pending'?'<div class="row"><button class="btn ghost" style="font-size:12px;padding:6px 12px" onclick="cancelBooking(\''+b.id+'\')">إلغاء</button></div>':'')
+        +'</div></div>';
+    }).join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:16px">ما عندكش حجوزات بعد 📅</p>';
+  }catch(e){el.innerHTML='<p style="color:var(--muted);font-size:13px">تعذر التحميل 📡</p>';}
+}
+async function cancelBooking(id){
+  try{var r=await SB.from('kb_bookings').update({status:'cancelled'}).eq('id',id);
+    if(r.error)throw r.error;toast('تلغى الحجز');loadMyBookings();
+  }catch(e){toast('تعذر الإلغاء 📡');}
+}
+/* حجوزات المالك 👑 */
+async function loadOwnerBookings(){
+  var el=document.getElementById('adm-bookings');if(!el)return;
+  el.innerHTML='<p style="text-align:center;color:var(--muted)">نحمل الحجوزات... ⏳</p>';
+  try{
+    var r=await SB.from('kb_bookings').select('*').order('created_at',{ascending:false}).limit(50);
+    if(r.error)throw r.error;
+    var rows=r.data||[];
+    var ids=[];rows.forEach(function(b){if(ids.indexOf(b.client_id)<0)ids.push(b.client_id);});
+    var names={};try{var pr=await SB.from('kb_profiles').select('id,full_name,phone').in('id',ids);
+      (pr.data||[]).forEach(function(x){names[x.id]=x;});}catch(e){}
+    el.innerHTML=rows.length?rows.map(function(b){
+      var p=names[b.client_id]||{};
+      return '<div class="svc"><div class="ico">📅</div><div style="flex:1"><h4>'+escapeHtml(b.service_name)+' — '+escapeHtml(p.full_name||'؟')+'</h4>'
+        +'<p>📞 '+escapeHtml(b.phone||p.phone||'—')+' • 🗓️ '+escapeHtml(b.booking_date)+(b.note?'<br>📝 '+escapeHtml(b.note):'')+'</p></div>'
+        +'<div style="display:flex;flex-direction:column;gap:6px">'
+        +(b.status==='pending'?'<button class="btn" style="padding:8px 12px;font-size:13px;background:#22c55e" onclick="bkStatus(\''+b.id+'\',\'confirmed\')">✅ تأكيد</button>':'')
+        +(b.status!=='done'&&b.status!=='cancelled'?'<button class="btn ghost" style="padding:8px 12px;font-size:13px" onclick="bkStatus(\''+b.id+'\',\'cancelled\')">❌</button>':'')
+        +'<small style="text-align:center">'+(BK_ST[b.status]||b.status)+'</small></div></div>';
+    }).join(''):'<p style="text-align:center;color:var(--muted)">ما كاش حجوزات 🎉</p>';
+  }catch(e){el.innerHTML='<p style="text-align:center;color:var(--muted)">تعذر التحميل 📡</p>';}
+}
+async function bkStatus(id,st){
+  try{var r=await SB.from('kb_bookings').update({status:st}).eq('id',id);
+    if(r.error)throw r.error;
+    var b=await SB.from('kb_bookings').select('client_id,service_name').eq('id',id).single();
+    if(b.data)try{await SB.rpc('kb_notify',{p_user:(await frMe()),p_to:b.data.client_id,p_type:'booking',
+      p_title:st==='confirmed'?'تأكد حجزك ✅':'تغير حجزك 📅',
+      p_body:b.data.service_name+' — '+(BK_ST[st]||st)});}catch(e){}
+    loadOwnerBookings();
+  }catch(e){toast('تعذر التحديث 📡');}
+}
+
+/* ================= البحث الحقيقي 🔍 ================= */
+var _sqT=null;
+function doSearch(q){
+  clearTimeout(_sqT);
+  _sqT=setTimeout(function(){runSearch(q.trim());},350);
+}
+async function runSearch(q){
+  var box=document.getElementById('search-results');if(!box)return;
+  var trend=document.getElementById('search-trend');
+  if(!q){box.innerHTML='';if(trend)trend.style.display='block';return;}
+  if(trend)trend.style.display='none';
+  box.innerHTML='<p style="color:var(--muted);font-size:13px">⏳ نقلب...</p>';
+  try{
+    var me=await frMe();
+    var html='';
+    // منتجات
+    var pr=await SB.from('kb_products').select('id,name,price,photos,category').or('name.ilike.%'+q+'%,description.ilike.%'+q+'%').limit(12);
+    var prods=pr.data||[];
+    if(prods.length){
+      html+='<div class="sec-title">🛍️ منتجات ('+prods.length+')</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">'
+        +prods.map(function(p){
+          var img=(p.photos&&p.photos[0])?'<img src="'+p.photos[0]+'" style="width:100%;height:110px;object-fit:cover;border-radius:12px">':'<div style="height:110px;border-radius:12px;background:linear-gradient(135deg,#ffe0ec,#ffd6e8);display:grid;place-items:center;font-size:36px">🛍️</div>';
+          return '<div onclick="openProduct(\''+p.id+'\')" style="cursor:pointer">'+img+'<div style="font-size:13px;font-weight:700;margin-top:4px">'+escapeHtml(p.name||'')+'</div><div style="font-size:12px;color:var(--pink-d);font-weight:700">'+escapeHtml(String(p.price||''))+' دج</div></div>';
+        }).join('')+'</div>';
+    }
+    // بنات
+    var pf=await SB.from('kb_profiles').select('id,full_name,wilaya,avatar_emoji,bio').ilike('full_name','%'+q+'%').neq('id',me||'').limit(10);
+    var girls=(pf.data||[]).filter(function(x){return x.id!==me;});
+    if(girls.length){
+      html+='<div class="sec-title">👭 بنات ('+girls.length+')</div>'
+        +girls.map(function(g){
+          return '<div class="svc"><div class="avatar" style="width:48px;height:48px;font-size:22px">'+(g.avatar_emoji||'🌸')+'</div>'
+            +'<div style="flex:1"><h4>'+escapeHtml(g.full_name||'')+(g.wilaya?' • '+escapeHtml(g.wilaya):'')+'</h4><p>'+escapeHtml(g.bio||'')+'</p>'
+            +'<div class="row"><button class="btn" style="font-size:12px;padding:6px 14px" onclick="sendFriendReq(\''+g.id+'\',this)">👭 أضيفيها</button></div></div></div>';
+        }).join('');
+    }
+    box.innerHTML=html||'<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">ما لقينا والو ب«'+escapeHtml(q)+'» 😕<br>جربي كلمة أخرى</p>';
+  }catch(e){box.innerHTML='<p style="color:var(--muted);font-size:13px">تعذر البحث 📡</p>';}
+}
+function searchChip(q){var i=document.getElementById('search-input');if(i)i.value=q;runSearch(q);}
+
+/* ================= السوق: تفاصيل + طلبات 🛒 ================= */
+var _curProduct=null;
+async function openProduct(pid){
+  try{
+    var r=await SB.from('kb_products').select('*').eq('id',pid).single();
+    if(r.error||!r.data){toast('تعذر فتح المنتج 📡');return;}
+    var p=r.data;_curProduct=p;
+    var sp={};try{var s=await SB.from('kb_profiles').select('id,full_name,wilaya,avatar_emoji').eq('id',p.seller_id).single();
+      if(s.data)sp=s.data;}catch(e){}
+    var img=(p.photos&&p.photos[0])?'<img src="'+p.photos[0]+'" style="width:100%;height:100%;object-fit:cover">':'👗';
+    var di=document.querySelector('#detail .detail-img');
+    di.innerHTML=img+'<div class="back" onclick="go(\'souq\')">→</div>';
+    var db=document.querySelector('#detail .detail-body');
+    db.querySelector('h2').textContent=p.name||'منتج';
+    db.querySelector('.price').textContent=(p.price?p.price+' دج':'السعر عند التواصل');
+    db.querySelector('.desc').textContent=p.description||'';
+    var sc=db.querySelector('.seller-card');
+    sc.innerHTML='<div class="avatar">'+(sp.avatar_emoji||'🌸')+'</div><div><h4 style="font-size:14px">'+escapeHtml(sp.full_name||'بنت الكوكب')+'</h4>'
+      +'<small style="color:var(--muted)">'+escapeHtml(sp.wilaya||'')+'</small></div>';
+    sc.onclick=function(){if(sp.id)openUserProfile(sp.id);};
+    var btns=db.querySelectorAll('.cta-row .btn');
+    btns[0].onclick=function(){chatSeller();};
+    btns[1].onclick=function(){orderNow();};
+    go('detail');
+  }catch(e){toast('تعذر فتح المنتج 📡');}
+}
+async function openUserProfile(uid){
+  try{
+    var r=await SB.from('kb_profiles').select('*').eq('id',uid).single();
+    if(r.error||!r.data)return;
+    var p=r.data;
+    document.getElementById('op-name').textContent=p.full_name||'بنت الكوكب';
+    document.getElementById('op-name2').textContent=p.full_name||'بنت الكوكب';
+    var btn=document.getElementById('op-add');
+    btn.textContent='👭 أضيفيها صديقة';btn.style.background='';btn.disabled=false;
+    btn.onclick=function(){sendFriendReq(uid,btn);};
+    var chatB=document.getElementById('op-chat');
+    if(chatB)chatB.onclick=function(){openChat(p.full_name||'صديقة',p.avatar_emoji||'🌸',uid);};
+    go('oprofile');
+  }catch(e){}
+}
+async function chatSeller(){
+  if(!_curProduct)return;
+  var me=await frMe();
+  if(_curProduct.seller_id===me){toast('هاذا منتجك نتي 😊');return;}
+  try{
+    var sp=await SB.from('kb_profiles').select('full_name,avatar_emoji').eq('id',_curProduct.seller_id).single();
+    var nm=(sp.data&&sp.data.full_name)||'البائعة',em=(sp.data&&sp.data.avatar_emoji)||'🌸';
+    var fr=await SB.rpc('kb_are_friends',{a:me,b:_curProduct.seller_id});
+    if(!fr.data){
+      if(confirm('💬 باش تراسلي البائعة لازم تكونو صديقات أولا.\nنبعثولها طلب صداقة دروك؟')){
+        await SB.from('kb_friendships').insert({from_id:me,to_id:_curProduct.seller_id});
+        toast('تبعث طلب الصداقة 👭');
+      }
+      return;
+    }
+    openChat(nm,em,_curProduct.seller_id);
+  }catch(e){toast('تعذر 📡');}
+}
+async function orderNow(){
+  if(!_curProduct)return;
+  try{
+    var me=await frMe();
+    if(_curProduct.seller_id===me){toast('هاذا منتجك نتي 😊');return;}
+    if(!confirm('🛒 تأكدي الطلب:\n'+_curProduct.name+'\n'+(_curProduct.price||'')+' دج\nالدفع عند الاستلام 🤝'))return;
+    var r=await SB.from('kb_orders').insert({product_id:_curProduct.id,buyer_id:me,seller_id:_curProduct.seller_id});
+    if(r.error)throw r.error;
+    try{
+      var pn=await SB.from('kb_profiles').select('full_name').eq('id',me).single();
+      await SB.rpc('kb_notify',{p_user:me,p_to:_curProduct.seller_id,p_type:'order',p_title:'طلب جديد 🛒',p_body:((pn.data&&pn.data.full_name)||'زبونة')+' طلبت: '+_curProduct.name});
+    }catch(e){}
+    toast('تبعث الطلب ✅ البائعة تتواصل معاك');
+    go('orders');
+  }catch(e){toast('تعذر الطلب 📡');}
+}
+var ORD_ST={pending:'⏳ معلق',accepted:'✅ مقبول',rejected:'❌ مرفوض',done:'🏁 مكتمل',cancelled:'🚫 ملغي'};
+async function loadOrders(){
+  var el=document.getElementById('orders-list');if(!el)return;
+  var me=await frMe();if(!me||!SB){el.innerHTML='';return;}
+  el.innerHTML='<p style="color:var(--muted);font-size:13px">⏳ نحمل...</p>';
+  try{
+    var r=await SB.from('kb_orders').select('*').or('buyer_id.eq.'+me+',seller_id.eq.'+me).order('created_at',{ascending:false}).limit(50);
+    var rows=r.data||[];
+    var pids=[];rows.forEach(function(o){if(pids.indexOf(o.product_id)<0)pids.push(o.product_id);});
+    var pn={};if(pids.length){try{var pr=await SB.from('kb_products').select('id,name,price,photos').in('id',pids);
+      (pr.data||[]).forEach(function(x){pn[x.id]=x;});}catch(e){}}
+    el.innerHTML=rows.length?rows.map(function(o){
+      var p=pn[o.product_id]||{},isSeller=o.seller_id===me;
+      var acts='';
+      if(o.status==='pending'&&isSeller)acts='<div class="row"><button class="btn" style="font-size:12px;padding:6px 14px;background:#22c55e" onclick="ordStatus(\''+o.id+'\',\'accepted\')">✅ قبول</button><button class="btn ghost" style="font-size:12px;padding:6px 14px" onclick="ordStatus(\''+o.id+'\',\'rejected\')">❌ رفض</button></div>';
+      else if(o.status==='pending'&&!isSeller)acts='<div class="row"><button class="btn ghost" style="font-size:12px;padding:6px 14px" onclick="ordStatus(\''+o.id+'\',\'cancelled\')">إلغاء الطلب</button></div>';
+      else if(o.status==='accepted'&&isSeller)acts='<div class="row"><button class="btn" style="font-size:12px;padding:6px 14px" onclick="ordStatus(\''+o.id+'\',\'done\')">🏁 تم التسليم</button></div>';
+      var img=(p.photos&&p.photos[0])?'<img src="'+p.photos[0]+'" style="width:100%;height:100%;object-fit:cover">':'🛍️';
+      return '<div class="svc"><div class="avatar" style="width:52px;height:52px;font-size:24px;overflow:hidden">'+img+'</div>'
+        +'<div style="flex:1"><h4>'+escapeHtml(p.name||'منتج')+' '+(isSeller?'<small style="color:var(--muted)">(بعتيه)</small>':'<small style="color:var(--muted)">(شريتيه)</small>')+'</h4>'
+        +'<p>'+(p.price?p.price+' دج • ':'')+(ORD_ST[o.status]||o.status)+'</p>'+acts+'</div></div>';
+    }).join(''):'<p style="color:var(--muted);font-size:13px;text-align:center;padding:16px">ما كاش طلبات بعد 🛒</p>';
+  }catch(e){el.innerHTML='<p style="color:var(--muted);font-size:13px">تعذر التحميل 📡</p>';}
+}
+async function ordStatus(id,st){
+  try{var r=await SB.from('kb_orders').update({status:st}).eq('id',id);
+    if(r.error)throw r.error;
+    var o=await SB.from('kb_orders').select('buyer_id,seller_id,product_id').eq('id',id).single();
+    if(o.data){var me=await frMe(),other=me===o.data.buyer_id?o.data.seller_id:o.data.buyer_id;
+      var pn=await SB.from('kb_products').select('name').eq('id',o.data.product_id).single();
+      try{await SB.rpc('kb_notify',{p_user:me,p_to:other,p_type:'order',p_title:'تحديث الطلب 🛒',p_body:((pn.data&&pn.data.name)||'منتج')+' — '+(ORD_ST[st]||st)});}catch(e){}}
+    loadOrders();
+  }catch(e){toast('تعذر التحديث 📡');}
+}
+
+/* ================= أزرار كانت ميتة 🧹 ================= */
+// بروفايل تجريبي: نحاول نلقى الحساب الحقيقي
+async function findAndAdd(name,btn){
+  try{
+    var r=await SB.from('kb_profiles').select('id').ilike('full_name','%'+name+'%').limit(1);
+    if(r.data&&r.data.length){sendFriendReq(r.data[0].id,btn);return;}
+  }catch(e){}
+  toast('هاذا حساب تجريبي 🌸');
+}
+// تعديل البروفايل ✏️
+function openEditProfile(){
+  (async function(){
+    var me=await frMe();if(!me||!SB){toast('سجلي الدخول أولا 🔑');return;}
+    var r=await SB.from('kb_profiles').select('full_name,wilaya,bio,avatar_emoji').eq('id',me).single();
+    var p=r.data||{};
+    document.getElementById('ep-name').value=p.full_name||'';
+    document.getElementById('ep-wilaya').value=p.wilaya||'';
+    document.getElementById('ep-bio').value=p.bio||'';
+    document.getElementById('ep-emoji').value=p.avatar_emoji||'🌸';
+    document.getElementById('ep-modal').style.display='flex';
+  })();
+}
+function closeEditProfile(){document.getElementById('ep-modal').style.display='none';}
+async function saveProfile(){
+  try{
+    var me=await frMe();if(!me)return;
+    var upd={full_name:document.getElementById('ep-name').value.trim(),
+      wilaya:document.getElementById('ep-wilaya').value.trim(),
+      bio:document.getElementById('ep-bio').value.trim(),
+      avatar_emoji:document.getElementById('ep-emoji').value.trim()||'🌸'};
+    var r=await SB.from('kb_profiles').update(upd).eq('id',me);
+    if(r.error)throw r.error;
+    closeEditProfile();toast('تحفظ البروفايل ✅');loadOwnProfile();
+  }catch(e){toast('تعذر الحفظ 📡');}
+}
+async function loadOwnProfile(){
+  try{
+    var me=await frMe();if(!me||!SB)return;
+    var r=await SB.from('kb_profiles').select('full_name,wilaya,bio,avatar_emoji').eq('id',me).single();
+    if(r.data){var p=r.data;
+      document.getElementById('pf-name').textContent=p.full_name||'';
+      var mn=document.getElementById('mn-name');if(mn)mn.textContent=p.full_name||'بروفايلي';
+      var av=document.querySelector('#profile .fb-avatar');if(av)av.childNodes[0].textContent=p.avatar_emoji||'🌸';
+      document.getElementById('pf-bio').innerHTML='📍 '+escapeHtml(p.wilaya||'')+'<br>'+escapeHtml(p.bio||'');
+    }
+    var c=await SB.from('kb_friendships').select('id',{count:'exact',head:true}).eq('status','accepted').or('from_id.eq.'+me+',to_id.eq.'+me);
+    var fb=document.getElementById('pf-friends');if(fb)fb.textContent=c.count||0;
+    var pr=await SB.from('kb_products').select('id',{count:'exact',head:true}).eq('seller_id',me).eq('status','active');
+    var pc=document.getElementById('pf-products');if(pc)pc.textContent=pr.count||0;
+  }catch(e){}
+}
+// مشاركة ↗️
+function shareApp(){
+  var url=location.href;
+  if(navigator.share){navigator.share({title:'كوكب برق برق 🪐',text:'كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑',url:url}).catch(function(){});}
+  else{try{navigator.clipboard.writeText(url);toast('تنسخ الرابط ✅ شاركيه مع صاحباتك 💖');}catch(e){toast(url);}}
+}
+// تحدي الأسبوع 🏆 — تصويت حقيقي (محلي)
+var CH_OPTS=['💄 ميكاب نهاري ناعم','🌸 ميكاب وردي','✨ ميكاب سموكي خفيف'];
+function openChallenge(){
+  var v={};try{v=JSON.parse(localStorage.getItem('kb_vote')||'{}');}catch(e){}
+  var mine=localStorage.getItem('kb_myvote');
+  var total=CH_OPTS.reduce(function(s,_,i){return s+(v[i]||0);},0)||1;
+  document.getElementById('ch-opts').innerHTML=CH_OPTS.map(function(o,i){
+    var n=v[i]||0,pct=Math.round(100*n/total);
+    return '<div onclick="voteCh('+i+')" style="cursor:pointer;background:#fff;border:2px solid '+(mine==String(i)?'var(--pink)':'#ffe0ec')+';border-radius:14px;padding:12px;margin-bottom:8px">'
+      +'<div style="font-weight:700;font-size:14px">'+o+(mine==String(i)?' ✅':'')+'</div>'
+      +'<div style="height:8px;background:#ffe0ec;border-radius:4px;margin-top:8px"><i style="display:block;height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--pink),var(--purple));border-radius:4px"></i></div>'
+      +'<small style="color:var(--muted)">'+pct+'% • '+n+' صوت</small></div>';
+  }).join('');
+  document.getElementById('ch-modal').style.display='flex';
+}
+function voteCh(i){
+  var v={};try{v=JSON.parse(localStorage.getItem('kb_vote')||'{}');}catch(e){}
+  var mine=localStorage.getItem('kb_myvote');
+  if(mine!=null&&v[mine]!=null)v[mine]=Math.max(0,v[mine]-1);
+  v[i]=(v[i]||0)+1;
+  try{localStorage.setItem('kb_vote',JSON.stringify(v));localStorage.setItem('kb_myvote',String(i));}catch(e){}
+  openChallenge();toast('تسجل صوتك 🗳️💖');
+}
+function closeChallenge(){document.getElementById('ch-modal').style.display='none';}
+
+/* ================= عناصر القائمة 📋 ================= */
+// رصيدي 💰
+function openWallet(){
+  document.getElementById('w-modal').style.display='flex';
+}
+function closeWallet(){document.getElementById('w-modal').style.display='none';}
+// روّجي منتجك 🚀
+function openBoost(){
+  document.getElementById('b-modal').style.display='flex';
+}
+function closeBoost(){document.getElementById('b-modal').style.display='none';}
+async function requestBoost(pkg){
+  try{
+    var me=await frMe();if(!me){toast('سجلي الدخول أولا 🔑');return;}
+    var ow=await SB.from('kb_profiles').select('id').eq('role','owner').limit(1).single();
+    if(!ow.data){toast('تعذر 📡');return;}
+    var pn=await SB.from('kb_profiles').select('full_name').eq('id',me).single();
+    await SB.rpc('kb_notify',{p_user:me,p_to:ow.data.id,p_type:'boost',
+      p_title:'طلب ترويج 🚀',p_body:((pn.data&&pn.data.full_name)||'عضوة')+' حابة باقة: '+pkg});
+    closeBoost();toast('تبعث الطلب ✅ الإدارة تتواصل معاك');
+  }catch(e){toast('تعذر 📡');}
+}
+// الإعدادات ⚙️
+function openSettings(){go('settings');}
