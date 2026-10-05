@@ -1081,7 +1081,7 @@ function initReelScroll(){
 var _stFile=null,_stType='photo',_stFilter='none',_stMusic=null;
 var _stTimer=null,_stAudioEl=null,_stPlaying=null;
 var _storiesByAuthor={},_storiesLoaded=false;
-var _stvList=[],_stvIdx=0,_stvTimer=null,_stvDur=5000;
+var _stvList=[],_stvIdx=0,_stvTimer=null,_stvDur=5000,_stMyId=null;
 function storyUrl(path){
   if(!path)return '';
   if(path.indexOf('http')===0)return path;
@@ -1238,6 +1238,7 @@ async function loadStories(force){
     });
     var u=await sbUser();
     var myId=u?u.id:null;
+    _stMyId=myId?String(myId):null;
     row.innerHTML='';
     var mine=myId?_storiesByAuthor[myId]||[]:[];
     var add=document.createElement('div');
@@ -1292,6 +1293,8 @@ function renderStory(){
   var fc=FILTERCSS[s.photo_filter]||'none';
   document.getElementById('st-name').textContent=s._aname||'بنت الكوكب';
   document.getElementById('st-time').textContent=timeAgo(s.created_at);
+  var delB=document.getElementById('st-del');
+  if(delB)delB.style.display=(_stMyId&&String(s.author_id)===_stMyId)?'':'none';
   document.getElementById('st-cap').textContent=s.caption||'';
   var mus=document.getElementById('st-music');
   if(s.music_title){mus.style.display='block';mus.textContent='🎵 '+s.music_title;}
@@ -1334,6 +1337,22 @@ function stopStoryMedia(){
   if(box){var v=box.querySelector('video');if(v){try{v.pause();}catch(e){}}box.innerHTML='';}
 }
 function closeStory(){stopStoryMedia();go('home');}
+async function delStory(){
+  var s=_stvList[_stvIdx];
+  if(!s)return;
+  if(!confirm('تمحي هاذ اليومية نهائيا؟ 🗑️'))return;
+  try{
+    var r=await SB.from('kb_stories').delete().eq('id',s.id);
+    if(r.error)throw r.error;
+    var p=s.media_url;
+    if(p&&p.indexOf('http')!==0){try{await SB.storage.from('kb-stories').remove([p]);}catch(e){}}
+    _stvList.splice(_stvIdx,1);
+    _storiesLoaded=false;
+    if(_stvList.length){if(_stvIdx>=_stvList.length)_stvIdx=_stvList.length-1;renderStory();}
+    else{closeStory();}
+    toast('تمحات اليومية 🗑️');
+  }catch(e){toast('تعذر المسح: '+e.message);}
+}
 function timeAgo(ts){
   if(!ts)return '';
   var s=Math.floor((Date.now()-new Date(ts).getTime())/1000);
