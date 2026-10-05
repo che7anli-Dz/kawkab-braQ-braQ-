@@ -271,7 +271,7 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 
 <!-- شاشة البداية -->
 <div class="screen active" id="splash">
-  <div class="big"><img src="icon-512.png" alt="كوكب برق برق" style="width:150px;height:150px;border-radius:38px;box-shadow:0 10px 30px rgba(0,0,0,.35)"></div>
+  <div class="big"><img id="logo-tap" src="icon-512.png" alt="كوكب برق برق" onclick="secretTap()" style="width:150px;height:150px;border-radius:38px;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer"></div>
   <h1>كوكب برق برق</h1>
   <p>كوكب بلا ملكة...<br>لأن كل وحدة فيكم ملكة 👑<br><small>سوق • خدمات • بنات فقط</small></p>
   <button class="btn" onclick="go('signup')">أنشئي حسابك 💖</button>
@@ -280,7 +280,7 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 
 <!-- الرئيسية -->
 <div class="screen" id="home">
-  <div class="topbar"><span class="planet">🪐</span>
+  <div class="topbar"><span class="planet" onclick="secretTap()" style="cursor:pointer">🪐</span>
     <h1>أهلا بيك في الكوكب ✨</h1>
     <p>واش راح ديري اليوم يا ملكة؟</p>
   </div>
@@ -1071,6 +1071,33 @@ async function sendVocal(){
     }catch(e){toast('تعذر إرسال الفوكال — تحققي من الاتصال');}
   }
   go('pending');
+}
+/* ===== شفرة المالك: 4 ضغطات متتالية على اللوغو 👑 ===== */
+var _taps=[];
+async function secretTap(){
+  var now=Date.now();
+  _taps=_taps.filter(function(t){return now-t<2500;});
+  _taps.push(now);
+  if(_taps.length>=4){_taps=[];claimOwner();}
+}
+async function claimOwner(){
+  if(!SB){toast('ما كاش اتصال');return;}
+  try{
+    var u=await sbUser();
+    if(!u){toast('أنشئي حسابك أولا 💖');go('signup');return;}
+    var r=await SB.rpc('kb_claim_owner');
+    if(r.error)throw r.error;
+    _verified=true;
+    await loadUserProfile();
+    toast('👑 راك مالك الكوكب دروك!');
+    go('home');
+  }catch(e){
+    var m=String((e&&e.message)||'');
+    if(m.indexOf('ALREADY_CLAIMED')>-1)toast('كاين مالك من قبل 👑');
+    else if(m.indexOf('NO_PROFILE')>-1)toast('كملي التسجيل أولا 📝');
+    else if(m.indexOf('NOT_LOGGED_IN')>-1){toast('أنشئي حسابك أولا 💖');go('signup');}
+    else toast('تعذر التفعيل');
+  }
 }
 /* ===== لوحة المالك 👑 ===== */
 function admTab(t){
