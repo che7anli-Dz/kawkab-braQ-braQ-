@@ -586,11 +586,21 @@ function rnSetFilter(f,btn){
   for(var i=0;i<btns.length;i++)btns[i].classList.remove('on');
   if(btn)btn.classList.add('on');
 }
+var _trimDur=15;
+function setTrimDur(d,btn){
+  _trimDur=d;
+  var btns=document.querySelectorAll('#rn-dur-row button');
+  for(var i=0;i<btns.length;i++)btns[i].classList.remove('on');
+  if(btn)btn.classList.add('on');
+  updTrimLab();
+}
 function rnTrimInit(dur){
-  _vidDur=dur;_trimS=0;_trimE=dur;
-  var s=document.getElementById('rn-ts'),e=document.getElementById('rn-te');
+  _vidDur=dur;_trimS=0;_trimE=dur;_trimDur=15;
+  var s=document.getElementById('rn-ts');
   var mx=Math.max(1,Math.floor(dur));
-  s.max=mx;e.max=mx;s.value=0;e.value=mx;
+  s.max=mx;s.value=0;
+  var btns=document.querySelectorAll('#rn-dur-row button');
+  for(var i=0;i<btns.length;i++)btns[i].classList.toggle('on',i===0);
   document.getElementById('rn-trim').style.display='block';
   var v=document.querySelector('#rn-prev video');
   if(v){v.ontimeupdate=function(){
@@ -600,8 +610,9 @@ function rnTrimInit(dur){
 }
 function updTrimLab(){
   _trimS=parseFloat(document.getElementById('rn-ts').value)||0;
-  _trimE=parseFloat(document.getElementById('rn-te').value)||_vidDur;
-  if(_trimE<=_trimS)_trimE=_trimS+1;
+  if(_trimDur>0)_trimE=Math.min(_trimS+_trimDur,_vidDur);
+  else _trimE=_vidDur;
+  if(_trimE<=_trimS)_trimE=Math.min(_trimS+1,_vidDur);
   document.getElementById('rn-trim-lab').textContent='▶ '+fmtT(_trimS)+' - '+fmtT(_trimE);
   var v=document.querySelector('#rn-prev video');
   if(v){try{v.currentTime=_trimS;}catch(e){}v.play().catch(function(){});}
@@ -708,7 +719,7 @@ async function publishReel(){
     toast('تنشر الريلز 🎉');
     _reelFile=null;document.getElementById('rn-file').value='';
     document.getElementById('rn-title').value='';
-    _reelMusic=null;_reelFilter='none';_trimS=0;_trimE=0;_vidDur=0;
+    _reelMusic=null;_reelFilter='none';_trimS=0;_trimE=0;_vidDur=0;_trimDur=15;
     mqClear();
     document.getElementById('rn-mq').value='';
     document.getElementById('rn-mres').innerHTML='';
@@ -1872,7 +1883,7 @@ async function saveProfile(){
     var r=await SB.from('kb_profiles').update(upd).eq('id',me);
     if(r.error)throw r.error;
     closeEditProfile();toast('تحفظ البروفايل ✅');loadOwnProfile();
-  }catch(e){toast('تعذر الحفظ 📡');}
+  }catch(e){toast('تعذر الحفظ: '+(e.message||'📡'));}
 }
 async function loadOwnProfile(){
   try{
