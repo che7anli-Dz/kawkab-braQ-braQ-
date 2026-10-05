@@ -1011,8 +1011,18 @@ async function uploadProfilePhoto(inp,type){
     var r=await SB.from('kb_profiles').update(upd).eq('id',u.id);
     if(r.error)throw r.error;
     if(oldPath&&oldPath!==path){try{await SB.storage.from('kb-avatars').remove([oldPath]);}catch(e3){}}
+    // تحديث مباشر بالرابط الجديد — مضمون
+    try{
+      var _pub=avatarPublicUrl(path)+'?t='+Date.now();
+      if(type==='avatar'){
+        var _av1=document.getElementById('pf-avatar');
+        if(_av1)_av1.innerHTML='<img src="'+_pub+'" alt=""><span class="av-cam">📷</span>';
+      }else{
+        var _cv1=document.getElementById('pf-cover');
+        if(_cv1)_cv1.style.backgroundImage='url("'+_pub+'")';
+      }
+    }catch(e4){}
     toast(type==='avatar'?'تبدلات تصويرة البروفايل 📷✨':'تبدل الغلاف 🎨✨');
-    loadOwnProfile(true);
   }catch(e){toast('تعذر الرفع: '+(e.message||'📡'));}
 }
 // مشاركة ↗️
