@@ -879,8 +879,9 @@ function reelCard(x,name,isMine,ava){
   var liked=_likedReels[x.id];
   var mt=x.music_title?('🎵 '+x.music_title):(x.music_youtube_id?'🎵 موسيقى':'');
   if(mt.length>24)mt=mt.slice(0,24)+'…';
+  var isPhoto=x.media_type==='photo';
   d.innerHTML=media+
-    '<div class="reel-play">▶</div>'+
+    (isPhoto?'':'<div class="reel-play">▶</div>')+
     '<div class="reel-heart">❤️</div>'+
     '<div class="reel-side">'+
     '<div class="reel-ava">'+(ava||'🌸')+'</div>'+
