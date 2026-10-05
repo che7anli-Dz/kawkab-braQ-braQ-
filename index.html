@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>كوكب برق برق 🪐</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --pink:#ff4d94; --pink-d:#e0337c; --purple:#8b5cf6; --purple-d:#6d28d9;
+  --bg:#fff5f9; --card:#ffffff; --txt:#3b2b3a; --muted:#9a8a97; --gold:#fbbf24;
+}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var(--txt);
+  display:flex;justify-content:center;min-height:100vh}
+.phone{width:100%;max-width:430px;min-height:100vh;background:var(--bg);position:relative;
+  overflow:hidden;box-shadow:0 0 60px rgba(255,77,148,.25)}
+.stars{position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(2px 2px at 20% 30%,#fff,transparent),
+  radial-gradient(2px 2px at 70% 15%,#ffd6e8,transparent),
+  radial-gradient(1.5px 1.5px at 40% 70%,#fff,transparent),
+  radial-gradient(2px 2px at 85% 55%,#e9d5ff,transparent),
+  radial-gradient(1.5px 1.5px at 10% 85%,#fff,transparent)}
+.screen{display:none;min-height:100vh;padding-bottom:96px;position:relative;z-index:1}
+.screen.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+/* header */
+.topbar{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;
+  padding:18px 16px 26px;border-radius:0 0 28px 28px;position:relative;overflow:hidden}
+.topbar h1{font-size:22px;font-weight:800}
+.topbar p{font-size:13px;opacity:.9;margin-top:4px}
+.topbar .planet{position:absolute;left:14px;top:8px;font-size:44px;opacity:.85;transform:rotate(-12deg)}
+.search{margin:-16px 16px 0;background:#fff;border-radius:16px;padding:12px 14px;position:relative;z-index:2;
+  box-shadow:0 4px 14px rgba(0,0,0,.08);display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}
+/* section */
+.sec{padding:16px 16px 0}
+.sec-title{font-size:17px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+/* planet cards */
+.planets{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.planet-card{border-radius:20px;padding:16px 12px;color:#fff;cursor:pointer;position:relative;overflow:hidden;min-height:118px}
+.planet-card .ico{font-size:34px}
+.planet-card h3{font-size:15px;margin-top:6px;font-weight:800}
+.planet-card p{font-size:11.5px;opacity:.9;margin-top:2px}
+.pc1{background:linear-gradient(135deg,#ff4d94,#ff8a5c)}
+.pc2{background:linear-gradient(135deg,#8b5cf6,#d946ef)}
+.pc3{background:linear-gradient(135deg,#0ea5e9,#8b5cf6)}
+.pc4{background:linear-gradient(135deg,#f43f5e,#fb923c)}
+.pc5{background:linear-gradient(135deg,#14b8a6,#8b5cf6)}
+/* products */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px}
+.chip{white-space:nowrap;background:#fff;border:2px solid #ffe0ec;padding:7px 14px;border-radius:20px;font-size:13px;cursor:pointer}
+.chip.on{background:var(--pink);color:#fff;border-color:var(--pink);font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prod{background:var(--card);border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.06)}
+.prod .img{height:110px;display:flex;align-items:center;justify-content:center;font-size:52px;position:relative}
+.prod .badge{position:absolute;top:8px;right:8px;background:var(--pink);color:#fff;font-size:10px;font-weight:700;
+  padding:3px 8px;border-radius:10px}
+.prod .info{padding:10px 12px}
+.prod .info h4{font-size:13.5px;font-weight:700}
+.prod .price{color:var(--pink-d);font-weight:800;font-size:14px;margin-top:4px}
+.prod .seller{font-size:11px;color:var(--muted);margin-top:2px}
+/* services */
+.svc{background:var(--card);border-radius:18px;padding:14px;display:flex;gap:12px;align-items:center;margin-bottom:12px;
+  box-shadow:0 3px 10px rgba(0,0,0,.06);cursor:pointer}
+.svc .ico{font-size:38px;background:#fdf0f6;width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.svc h4{font-size:14.5px;font-weight:800}
+.svc p{font-size:12px;color:var(--muted);margin-top:2px}
+.svc .row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.svc .price{color:var(--purple-d);font-weight:800;font-size:14px}
+.btn{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;border:none;border-radius:14px;
+  padding:10px 18px;font-size:14px;font-weight:800;cursor:pointer}
+.btn.block{width:100%;padding:14px;font-size:16px;border-radius:16px}
+.btn.ghost{background:#fff;color:var(--pink-d);border:2px solid #ffd0e2}
+/* feed */
+.post{background:var(--card);border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:0 3px 10px rgba(0,0,0,.06)}
+.post .head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--purple));
+  display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:800;flex-shrink:0}
+.post .head h4{font-size:14px}
+.post .head .rank{font-size:11px;color:var(--gold);font-weight:700}
+.post .head small{color:var(--muted);font-size:11px}
+.post .txt{font-size:13.5px;line-height:1.7}
+.post .actions{display:flex;gap:16px;margin-top:10px;font-size:13px;color:var(--muted)}
+.post .actions span{cursor:pointer}
+.challenge{background:linear-gradient(135deg,#6d28d9,#ec4899);border-radius:20px;padding:18px;color:#fff;margin-bottom:14px;position:relative;overflow:hidden}
+.challenge h3{font-size:16px;font-weight:800}
+.challenge p{font-size:12.5px;opacity:.92;margin:6px 0 12px}
+.challenge .btn{background:#fff;color:var(--purple-d)}
+/* profile */
+.passport{margin:16px;background:linear-gradient(135deg,var(--purple-d),var(--pink));border-radius:22px;padding:20px;color:#fff;position:relative;overflow:hidden}
+.passport h2{font-size:19px;font-weight:800}
+.passport .rank{display:inline-block;background:rgba(255,255,255,.22);padding:5px 14px;border-radius:20px;font-size:13px;font-weight:700;margin-top:8px}
+.passport .row{display:flex;gap:18px;margin-top:14px}
+.passport .stat{text-align:center}
+.passport .stat b{font-size:18px;display:block}
+.passport .stat small{font-size:11px;opacity:.85}
+.menu{background:var(--card);margin:0 16px 12px;border-radius:16px;overflow:hidden}
+.menu a{display:flex;align-items:center;gap:12px;padding:14px 16px;font-size:14px;text-decoration:none;color:var(--txt);border-bottom:1px solid #fbe9f1;cursor:pointer}
+.menu a:last-child{border:none}
+.menu a .ico{font-size:20px}
+/* facebook-style profile */
+.cover{height:168px;background:linear-gradient(120deg,#8b5cf6,#ec4899 55%,#ff8a5c);position:relative}
+.cover-cam{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,.92);font-size:12px;font-weight:700;
+  padding:7px 13px;border-radius:16px;cursor:pointer;color:#5c4a5a}
+.fb-avatar{width:112px;height:112px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--purple));
+  border:5px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:54px;
+  position:absolute;bottom:-56px;right:20px}
+.av-cam{position:absolute;bottom:4px;left:4px;background:#fff;border-radius:50%;width:32px;height:32px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:pointer}
+.fb-head{padding:66px 16px 0}
+.fb-head h2{font-size:21px;font-weight:800}
+.fb-head .rank{font-size:13px;color:#b45309;background:#fef3c7;padding:3px 10px;border-radius:12px;font-weight:800}
+.fb-bio{font-size:13.5px;color:#5c4a5a;margin-top:8px;line-height:1.8}
+.fb-stats{display:flex;gap:8px;margin:14px 0}
+.fb-stats div{flex:1;background:#fff;border-radius:14px;padding:10px 4px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.fb-stats b{font-size:17px;display:block}
+.fb-stats small{font-size:11px;color:var(--muted)}
+.fb-actions{display:flex;gap:10px}
+.tabs{display:flex;gap:6px;padding:16px 16px 0;border-bottom:1px solid #fbe9f1}
+.tab{flex:1;text-align:center;padding:11px 4px;font-size:14px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer}
+.tab.on{color:var(--pink-d);border-color:var(--pink)}
+/* splash */
+#splash{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  background:linear-gradient(160deg,#3b1157,#a21caf 60%,#ff4d94);color:#fff;padding:30px;min-height:100vh}
+#splash .big{font-size:90px;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-14px) rotate(8deg)}}
+#splash h1{font-size:34px;font-weight:900;margin-top:14px}
+#splash p{font-size:15px;opacity:.92;margin:10px 0 26px;line-height:1.8}
+#splash .btn{background:#fff;color:#a21caf;font-size:17px;padding:15px 44px;border-radius:30px}
+/* detail */
+.detail-img{height:230px;display:flex;align-items:center;justify-content:center;font-size:110px;
+  background:linear-gradient(135deg,#ffe0ec,#e9d5ff);position:relative}
+.back{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.9);width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;z-index:2}
+.detail-body{padding:18px 16px}
+.detail-body h2{font-size:20px;font-weight:800}
+.detail-body .price{font-size:22px;color:var(--pink-d);font-weight:900;margin:8px 0}
+.detail-body .desc{font-size:14px;color:#5c4a5a;line-height:1.8;background:#fff;padding:14px;border-radius:14px;margin:12px 0}
+.seller-card{background:#fff;border-radius:16px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.seller-card .stars{color:var(--gold);font-size:13px}
+.cta-row{display:flex;gap:10px}
+.cta-row .btn{flex:1}
+/* bottom nav */
+.navbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
+  background:#fff;border-top:1px solid #fbe9f1;display:flex;padding:10px 6px calc(10px + env(safe-area-inset-bottom));z-index:10}
+.nav-it{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--muted);cursor:pointer;padding:4px}
+.nav-it .ico{font-size:22px}
+.nav-it.on{color:var(--pink-d);font-weight:800}
+.fab{position:fixed;bottom:86px;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:10;pointer-events:none}
+.fab button{pointer-events:auto;position:absolute;left:16px;bottom:0;width:58px;height:58px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;font-size:28px;cursor:pointer;
+  box-shadow:0 6px 18px rgba(255,77,148,.45)}
+.verify{background:#f0fdf4;border:2px solid #bbf7d0;color:#15803d;border-radius:14px;padding:10px 14px;font-size:13px;margin:12px 16px 0;display:flex;gap:8px;align-items:center}
+/* facebook chrome */
+.utilbar{display:none;position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
+  height:58px;background:#fff;z-index:20;align-items:center;justify-content:space-between;padding:0 14px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08)}
+.withutil .utilbar{display:flex}
+.withutil .screen.active{padding-top:58px}
+.brand{font-weight:900;font-size:18px;color:var(--pink-d);cursor:pointer;white-space:nowrap}
+.uicons{display:flex;gap:8px}
+.uicons span{width:38px;height:38px;border-radius:50%;background:#fdf0f6;display:flex;align-items:center;
+  justify-content:center;font-size:18px;cursor:pointer;position:relative}
+.bdg{position:absolute;top:-5px;left:-5px;background:#ef4444;color:#fff;font-size:10px;min-width:18px;height:18px;
+  border-radius:9px;display:flex;align-items:center;justify-content:center;font-weight:800;padding:0 4px}
+/* stories */
+.stories{display:flex;gap:10px;overflow-x:auto;padding:14px 16px 4px;scrollbar-width:none}
+.stories::-webkit-scrollbar{display:none}
+.story{flex-shrink:0;width:92px;cursor:pointer}
+.story .im{height:132px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:44px;
+  border:3px solid var(--pink);box-shadow:0 3px 10px rgba(0,0,0,.1)}
+.story .nm{font-size:11px;text-align:center;margin-top:5px;font-weight:700}
+.composer{background:#fff;margin:12px 16px 0;border-radius:16px;padding:12px;box-shadow:0 3px 10px rgba(0,0,0,.06);
+  display:flex;gap:10px;align-items:center;cursor:pointer}
+.composer .ph{flex:1;background:#fbe9f1;border-radius:20px;padding:10px 14px;color:var(--muted);font-size:13px}
+/* messenger */
+.chat-head{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;padding:14px 16px;
+  display:flex;align-items:center;gap:12px}
+.chat-it{background:#fff;border-radius:16px;padding:12px;display:flex;gap:12px;align-items:center;margin-bottom:10px;
+  cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.chat-it .dot{width:10px;height:10px;border-radius:50%;background:var(--pink);flex-shrink:0}
+.msgs{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:78%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.6;animation:fade .2s}
+.msg.in{background:#fff;align-self:flex-start;border-bottom-right-radius:4px;box-shadow:0 2px 6px rgba(0,0,0,.06)}
+.msg.out{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;align-self:flex-end;border-bottom-left-radius:4px}
+/* notifications */
+.notif{background:#fff;border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center;margin-bottom:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);font-size:13.5px}
+.notif small{color:var(--muted)}
+.nic{width:44px;height:44px;border-radius:50%;background:#fdf0f6;display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0}
+/* reels */
+.reel{height:420px;border-radius:20px;position:relative;overflow:hidden;margin-bottom:14px;cursor:pointer;color:#fff}
+.reel .play{position:absolute;top:50%;right:50%;transform:translate(50%,-50%);font-size:56px;opacity:.92;
+  width:88px;height:88px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center}
+.reel-info{position:absolute;bottom:0;width:100%;padding:38px 14px 14px;background:linear-gradient(transparent,rgba(0,0,0,.7))}
+.reel-info b{font-size:15px;display:block}
+.reel-info small{font-size:12px;opacity:.9}
+/* story viewer */
+#story{padding:0!important}
+.story-view{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:60;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff}
+.sprog{position:absolute;top:14px;right:16px;left:16px;height:4px;background:rgba(255,255,255,.35);border-radius:2px}
+.sfill{height:100%;width:0;background:#fff;border-radius:2px;animation:prog 5s linear forwards}
+@keyframes prog{to{width:100%}}
+.shead{position:absolute;top:28px;right:16px;left:16px;display:flex;align-items:center;gap:10px}
+.sbig{font-size:130px;animation:float 3s ease-in-out infinite}
+.scap{font-size:19px;font-weight:800;margin-top:14px}
+/* create sheet */
+.sheet-bg{display:none;position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
+  background:rgba(0,0,0,.45);z-index:50}
+.sheet{position:absolute;bottom:0;width:100%;background:#fff;border-radius:24px 24px 0 0;padding:20px 16px 28px;animation:fade .25s}
+/* store choices + sell form */
+.store-choices{display:flex;gap:10px;padding:12px 16px 0}
+.schoice{flex:1;background:#fff;border-radius:16px;padding:14px 6px;text-align:center;cursor:pointer;
+  box-shadow:0 3px 10px rgba(0,0,0,.06);border:2px solid transparent}
+.schoice:active{border-color:var(--pink);transform:scale(.97)}
+.schoice .e{font-size:32px}
+.schoice b{display:block;font-size:14px;margin-top:6px}
+.schoice small{font-size:11px;color:var(--muted)}
+.sell-form{padding:16px}
+.field{margin-bottom:14px}
+.field>label{display:block;font-size:13.5px;font-weight:800;margin-bottom:7px}
+.field input,.field textarea,.field select{width:100%;border:2px solid #ffe0ec;border-radius:14px;padding:12px 14px;
+  font-size:14px;font-family:inherit;outline:none;background:#fff;color:var(--txt)}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--pink)}
+.photos{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.photo-box{aspect-ratio:1;background:#fff;border:2px dashed #f9a8c9;border-radius:14px;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;overflow:hidden;font-size:26px}
+.photo-box small{display:block;font-size:9px;color:var(--muted);margin-top:2px}
+.photo-box span{text-align:center;color:var(--muted)}
+.toast{display:none;position:fixed;bottom:104px;left:50%;transform:translateX(-50%);width:max-content;max-width:88%;
+  background:#3b2b3a;color:#fff;padding:13px 24px;border-radius:30px;font-size:14px;font-weight:700;z-index:70;
+  box-shadow:0 6px 20px rgba(0,0,0,.3);text-align:center;animation:fade .25s}
+/* quiz + voice */
+.qprog{height:8px;background:#ffe0ec;border-radius:4px;margin:12px 0 6px;overflow:hidden}
+#q-bar{height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--purple));border-radius:4px;transition:width .3s}
+#q-text{font-size:18px;font-weight:800;margin:10px 0 16px;line-height:1.7}
+.qopt{display:block;width:100%;background:#fff;border:2px solid #ffe0ec;border-radius:14px;padding:14px;
+  font-size:15px;font-weight:700;margin-bottom:10px;cursor:pointer;font-family:inherit;color:var(--txt);text-align:right}
+.qopt.ok{background:#dcfce7!important;border-color:#22c55e!important}
+.qopt.no{background:#fee2e2!important;border-color:#ef4444!important}
+#rec-btn.recording{background:#ef4444!important;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+.center-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:40px 24px;min-height:78vh}
+.center-screen .big{font-size:80px}
+.center-screen h2{font-size:22px;font-weight:800;margin:14px 0 8px}
+.center-screen p{font-size:14px;color:#5c4a5a;line-height:1.8;margin-bottom:18px}
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ff4d94">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="phone">
+<div class="stars"></div>
+
+<!-- الشريط العلوي كيما فيسبوك -->
+<div class="utilbar" id="utilbar">
+  <div class="brand" onclick="go('home')"><img src="icon-512.jpg" alt="" style="width:34px;height:34px;border-radius:10px;vertical-align:middle;margin-left:6px">كوكب برق برق</div>
+  <div class="uicons">
+    <span onclick="go('search')">🔍</span>
+    <span onclick="go('messenger')">💬<b class="bdg">3</b></span>
+    <span onclick="go('notifications')">🔔<b class="bdg">5</b></span>
+  </div>
+</div>
+
+<!-- شاشة البداية -->
+<div class="screen active" id="splash">
+  <div class="big"><img src="icon-512.jpg" alt="كوكب برق برق" style="width:150px;height:150px;border-radius:38px;box-shadow:0 10px 30px rgba(0,0,0,.35)"></div>
+  <h1>كوكب برق برق</h1>
+  <p>كوكب بلا ملكة...<br>لأن كل وحدة فيكم ملكة 👑<br><small>سوق • خدمات • بنات فقط</small></p>
+  <button class="btn" onclick="go('signup')">أنشئي حسابك 💖</button>
+  <button class="btn" onclick="go('login')" style="margin-top:12px;background:transparent;border:2px solid #fff;color:#fff;box-shadow:none">تسجيل الدخول 🔑</button>
+</div>
+
+<!-- الرئيسية -->
+<div class="screen" id="home">
+  <div class="topbar"><span class="planet">🪐</span>
+    <h1>أهلا بيك في الكوكب ✨</h1>
+    <p>واش راح ديري اليوم يا ملكة؟</p>
+  </div>
+  <div class="search">🔍 &nbsp; قلبي على منتج، خدمة، بنت...</div>
+  <div class="verify">🔒 مجتمع آمن: الدخول بالتحقق فقط — غير للبنات</div>
+  <!-- القصص -->
+  <div class="stories">
+    <div class="story" onclick="openSheet()"><div class="im" style="background:#fbe9f1;border-style:dashed;font-size:36px">＋</div><div class="nm">قصتك 📷</div></div>
+    <div class="story" onclick="openStory('إيمان','🌸','linear-gradient(160deg,#8b5cf6,#ec4899)','يوم جديد 🌅')"><div class="im" style="background:linear-gradient(160deg,#8b5cf6,#ec4899)">🌸</div><div class="nm">إيمان</div></div>
+    <div class="story" onclick="openStory('نورهان','💄','linear-gradient(160deg,#f43f5e,#fb923c)','لوك اليوم 💄')"><div class="im" style="background:linear-gradient(160deg,#f43f5e,#fb923c)">💄</div><div class="nm">نورهان</div></div>
+    <div class="story" onclick="openStory('سيرين','🌺','linear-gradient(160deg,#0ea5e9,#8b5cf6)','رحلة للشاطئ 🏖️')"><div class="im" style="background:linear-gradient(160deg,#0ea5e9,#8b5cf6)">🌺</div><div class="nm">سيرين</div></div>
+    <div class="story" onclick="openStory('خديجة','🦋','linear-gradient(160deg,#14b8a6,#8b5cf6)','وصفة اليوم 🍰')"><div class="im" style="background:linear-gradient(160deg,#14b8a6,#8b5cf6)">🦋</div><div class="nm">خديجة</div></div>
+  </div>
+  <!-- منشور جديد -->
+  <div class="composer" onclick="openSheet()"><div class="avatar" style="width:42px;height:42px;font-size:22px">🌸</div><div class="ph">📝 واش في خاطرك يا ملكة؟</div></div>
+  <div class="sec">
+    <div class="sec-title">✨ واش تحبي ديري؟</div>
+    <div class="planets">
+      <div class="planet-card pc1" onclick="go('souq')"><div class="ico">🛍️</div><h3>السوق</h3><p>بيع وشراء بين البنات</p></div>
+      <div class="planet-card pc2" onclick="go('services')"><div class="ico">💅</div><h3>خدمات</h3><p>كوافيرة، خياطة وأكثر</p></div>
+      <div class="planet-card pc3" onclick="go('sahha')"><div class="ico">💬</div><h3>المجتمع</h3><p>هدرة، نصائح وتحديات</p></div>
+      <div class="planet-card pc4" onclick="go('sahha')"><div class="ico">📡</div><h3>لايف</h3><p>بثوث البنات مباشرة</p></div>
+      <div class="planet-card pc5" style="grid-column:span 2" onclick="go('friendship')"><div class="ico">👭</div><h3>صداقة</h3><p>تعرفي على بنات كيفك وكوني صداقات جديدة 💖</p></div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-title">🔥 تخفيضات الأسبوع</div>
+    <div class="grid">
+      <div class="prod" onclick="go('detail')"><div class="img" style="background:linear-gradient(135deg,#ffe0ec,#ffd6e8)">👗<span class="badge">-30%</span></div>
+        <div class="info"><h4>قفطان عصري</h4><div class="price">4,900 دج</div><div class="seller" style="cursor:pointer;color:var(--pink-d);font-weight:700" onclick="event.stopPropagation();openProfile('أمينة','الجزائر','👗 موضة • 🧵 خياطة يدوية','👗','👸 أميرة','home')">أمينة • الجزائر ⭐4.8</div></div></div>
+      <div class="prod" onclick="go('detail')"><div class="img" style="background:linear-gradient(135deg,#e9d5ff,#f5d0fe)">💄</div>
+        <div class="info"><h4>باليت مكياج أصلية</h4><div class="price">2,300 دج</div><div class="seller" style="cursor:pointer;color:var(--pink-d);font-weight:700" onclick="event.stopPropagation();openProfile('خديجة','وهران','💄 مكياج • 🧴 عناية بالبشرة','💄','⭐ نجمة','home')">خديجة • وهران ⭐4.9</div></div></div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="challenge"><h3>🏆 تحدي الأسبوع</h3><p>أحسن ميكاب نهاري — صوتي لأحسن لوك والرابحة تربح شارة "نجمة الكوكب" ⭐</p>
+      <button class="btn" onclick="go('sahha')">شاركي دابا</button></div>
+  </div>
+</div>
+
+<!-- السوق -->
+<div class="screen" id="souq">
+  <div class="topbar"><span class="planet">🛍️</span><h1>السوق</h1><p>البيع باطل ديما 💖</p></div>
+  <div class="search">🔍 &nbsp; قلبي في السوق...</div>
+  <div class="store-choices">
+    <div class="schoice" onclick="document.getElementById('souq-grid').scrollIntoView({behavior:'smooth'})"><div class="e">🛒</div><b>تشري؟</b><small>قلبي واشتري</small></div>
+    <div class="schoice" onclick="go('sell')"><div class="e">💰</div><b>تبيعي؟</b><small>اعرضي منتجك باطل</small></div>
+    <div class="schoice" onclick="document.getElementById('souq-grid').scrollIntoView({behavior:'smooth'})"><div class="e">👀</div><b>تسوقي؟</b><small>اكتشفي الجديد</small></div>
+  </div>
+  <div class="sec">
+    <div class="chips">
+      <div class="chip on">الكل</div><div class="chip">ملابس</div><div class="chip">مكياج</div>
+      <div class="chip">إكسسوارات</div><div class="chip">صناعة يدوية</div>
+    </div>
+    <div class="grid" id="souq-grid">
+      <div class="prod" onclick="go('detail')"><div class="img" style="background:linear-gradient(135deg,#ffe0ec,#ffd6e8)">👗<span class="badge">جديد</span></div>
+        <div class="info"><h4>قفطان عصري</h4><div class="price">4,900 دج</div><div class="seller" style="cursor:pointer;color:var(--pink-d);font-weight:700" onclick="event.stopPropagation();openProfile('أمينة','الجزائر','👗 موضة • 🧵 خياطة يدوية','👗','👸 أميرة','souq')">أمينة • الجزائر</div></div></div>
+      <div class="prod" onclick="go('detail')"><div class="img" style="background:linear-gradient(135deg,#e9d5ff,#f5d0fe)">💄</div>
+        <div class="info"><h4>باليت مكياج أصلية</h4><div class="price">2,300 دج</div><div class="seller" style="cursor:pointer;color:var(--pink-d);font-weight:700" onclick="event.stopPropagation();openProfile('خديجة','وهران','💄 مكياج • 🧴 عناية بالبشرة','💄','⭐ نجمة','souq')">خديجة • وهران</div></div></div>
+      <div class="prod" onclick="go('detail')"><div class="img" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">👜</div>
+        <div class="info"><h4>ساك يدوي جلد</h4><div class="price">3,500 دج</div><div class="seller" style="cursor:pointer;color:var(--pink-d);font-weight:700" onclick="event.stopPropagation();openProfile('سارة','قسنطينة','👜 إكسسوارات • 🎨 صناعة يدوية','👜','⭐ نجمة','souq')">سارة • قسنطينة</div></div></div>
+      <div class="prod" onclick="go('detail')"><div class="img" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0)">🧴<span class="badge">-20%</span></div>
+        <div class="info"><h4>كريم طبيعي للبشرة</h4><div class="price">1,200 دج</div><div class="seller" style="cursor:pointer;color:var(--pink-d);font-weight:700" onclick="event.stopPropagation();openProfile('مريم','سطيف','🌱 منتجات طبيعية • 🧴 وصفات','🧴','🌱 مواطنة','souq')">مريم • سطيف</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- تفاصيل منتج -->
+<div class="screen" id="detail">
+  <div class="detail-img">👗<div class="back" onclick="go('souq')">→</div></div>
+  <div class="detail-body">
+    <h2>قفطان عصري مطرز</h2>
+    <div class="price">4,900 دج</div>
+    <div class="seller-card" style="cursor:pointer" onclick="openProfile('أمينة','الجزائر','👗 موضة • 🧵 خياطة يدوية','👗','👸 أميرة','detail')">
+      <div class="avatar">أ</div>
+      <div><h4 style="font-size:14px">أمينة ب.</h4><div class="stars">⭐⭐⭐⭐⭐ 4.8 (132 تقييم)</div>
+      <small style="color:var(--muted)">الجزائر • ترد عادة في ساعة</small></div>
+    </div>
+    <div class="desc">قفطان جديد، قماش ممتاز وتطريز يدوي. المقاسات من S حتى XL. التوصيل متوفر لكل الولايات والدفع عند الاستلام 💖</div>
+    <div class="cta-row">
+      <button class="btn ghost">💬 راسليها</button>
+      <button class="btn">اطلبي دابا 🛒</button>
+    </div>
+  </div>
+</div>
+
+<!-- الخدمات -->
+<div class="screen" id="services">
+  <div class="topbar"><span class="planet">💅</span><h1>الخدمات</h1><p>من بنت... لبنت 💖</p></div>
+  <div class="search">🔍 &nbsp; قلبي على خدمة في ولايتك...</div>
+  <div class="sec">
+    <div class="svc"><div class="ico">💇‍♀️</div><div style="flex:1"><h4>كوافيرة — صالون لمسة</h4><p>ياسمين • الجزائر ⭐ 4.9</p>
+      <div class="row"><span class="price">ابتداء من 1,500 دج</span><button class="btn">احجزي 📅</button></div></div></div>
+    <div class="svc"><div class="ico">🧵</div><div style="flex:1"><h4>خياطة عصرية وتقليدية</h4><p>فاطمة • البليدة ⭐ 5.0</p>
+      <div class="row"><span class="price">حسب الموديل</span><button class="btn">احجزي 📅</button></div></div></div>
+    <div class="svc"><div class="ico">💄</div><div style="flex:1"><h4>ميكاب أرتيست للأفراح</h4><p>نورهان • وهران ⭐ 4.7</p>
+      <div class="row"><span class="price">ابتداء من 5,000 دج</span><button class="btn">احجزي 📅</button></div></div></div>
+    <div class="svc"><div class="ico">📚</div><div style="flex:1"><h4>دروس دعم رياضيات</h4><p>هبة • عنابة ⭐ 4.8</p>
+      <div class="row"><span class="price">800 دج / حصة</span><button class="btn">احجزي 📅</button></div></div></div>
+  </div>
+</div>
+
+<!-- الساحة -->
+<div class="screen" id="sahha">
+  <div class="topbar"><span class="planet">💬</span><h1>المجتمع</h1><p>هدرة البنات... بلا رقابة 😌</p></div>
+  <div class="sec">
+    <div class="challenge"><h3>🏆 تحدي الأسبوع: أحسن ميكاب نهاري</h3><p>342 بنت مشاركة • التصويت يخلص في يومين</p>
+      <button class="btn">صوتي وشاهدي المشاركات</button></div>
+    <div class="post"><div class="head" style="cursor:pointer" onclick="openProfile('ريان','الجزائر','🧴 عناية • 👗 موضة','🌷','⭐ نجمة','sahha')"><div class="avatar">ر</div>
+      <div><h4>ريان <span class="rank">⭐ نجمة</span></h4><small>منذ ساعتين • الجزائر</small></div></div>
+      <div class="txt">بنات جربت كريم الأرز الطبيعي تاع وحدة في السوق، بشرتي ولات حرير 😍 شكون جرباتو؟</div>
+      <div class="actions"><span>❤️ 214</span><span>💬 48 تعليق</span><span>↗️ مشاركة</span></div></div>
+    <div class="post"><div class="head" style="cursor:pointer" onclick="openProfile('سيرين','وهران','💼 بيزنس • 📚 دراسة','🌺','👸 أميرة','sahha')"><div class="avatar">س</div>
+      <div><h4>سيرين <span class="rank">👸 أميرة</span></h4><small>منذ 5 ساعات • وهران</small></div></div>
+      <div class="txt">نصيحة للي يحبو يبداو مشروع: ابداو باللي تعرفو تديروه، والكوكب هو السوق تاعكم 💪</div>
+      <div class="actions"><span>❤️ 389</span><span>💬 96 تعليق</span><span>↗️ مشاركة</span></div></div>
+  </div>
+</div>
+
+<!-- صداقة -->
+<div class="screen" id="friendship">
+  <div class="topbar"><span class="planet">👭</span><h1>صداقة</h1><p>تعرفي على بنات كيفك 💖</p></div>
+  <div class="search">🔍 &nbsp; قلبي بالولاية ولا الاهتمام...</div>
+  <div class="verify">🔒 المحادثة تتفتح غير بعد ما تقبلو بعضاكم — بلا إزعاج</div>
+  <div class="sec">
+    <div class="chips">
+      <div class="chip on">الكل</div><div class="chip">🍳 طبخ</div><div class="chip">🏃‍♀️ رياضة</div>
+      <div class="chip">📚 دراسة</div><div class="chip">👗 موضة</div><div class="chip">✈️ سفر</div>
+    </div>
+    <div class="svc" style="cursor:pointer" onclick="openProfile('إيمان','الجزائر','🍳 طبخ • 📚 دراسة • 🎬 أفلام','🌸','⭐ نجمة','friendship')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🌸</div>
+      <div style="flex:1"><h4>إيمان • الجزائر</h4><p>🍳 طبخ &nbsp;📚 دراسة &nbsp;🎬 أفلام</p>
+      <div class="row"><small style="color:var(--muted)">نشطة دابا 🟢</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
+    <div class="svc" style="cursor:pointer" onclick="openProfile('نسرين','وهران','🏃‍♀️ رياضة • ✈️ سفر • 📸 تصوير','🦋','⭐ نجمة','friendship')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🦋</div>
+      <div style="flex:1"><h4>نسرين • وهران</h4><p>🏃‍♀️ رياضة &nbsp;✈️ سفر &nbsp;📸 تصوير</p>
+      <div class="row"><small style="color:var(--muted)">نشطة منذ ساعة</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
+    <div class="svc" style="cursor:pointer" onclick="openProfile('آية','قسنطينة','👗 موضة • 💄 مكياج • 🎨 رسم','🌙','⭐ نجمة','friendship')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🌙</div>
+      <div style="flex:1"><h4>آية • قسنطينة</h4><p>👗 موضة &nbsp;💄 مكياج &nbsp;🎨 رسم</p>
+      <div class="row"><small style="color:var(--muted)">نشطة دابا 🟢</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
+    <div class="svc" style="cursor:pointer" onclick="openProfile('هاجر','سطيف','📚 دراسة • 🍳 طبخ • 🌱 طبيعة','☀️','🌱 مواطنة','friendship')"><div class="avatar" style="width:56px;height:56px;font-size:26px">☀️</div>
+      <div style="flex:1"><h4>هاجر • سطيف</h4><p>📚 دراسة &nbsp;🍳 طبخ &nbsp;🌱 طبيعة</p>
+      <div class="row"><small style="color:var(--muted)">نشطة منذ يوم</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
+  </div>
+</div>
+
+<!-- حسابي -->
+<div class="screen" id="profile">
+  <div class="cover"><span class="cover-cam">📷 بدلي الغلاف</span><div class="fb-avatar">🌸<span class="av-cam">📷</span></div></div>
+  <div class="fb-head">
+    <h2><span id="pf-name">لينا بن علي</span> <span class="rank" id="pf-rank">⭐ نجمة</span></h2>
+    <p class="fb-bio" id="pf-bio">🛍️ نبيع كلش حلو للبنات<br>📍 الجزائر • انضمت في أكتوبر 2026<br>💖 الكوكب داري الثاني</p>
+    <div class="fb-stats">
+      <div><b>248</b><small>صديقة</small></div>
+      <div><b>12</b><small>منتج</small></div>
+      <div><b>48</b><small>بيعة</small></div>
+      <div><b>4.9</b><small>تقييمي ⭐</small></div>
+    </div>
+    <div class="fb-actions">
+      <button class="btn" style="flex:1">✏️ تعديل البروفايل</button>
+      <button class="btn ghost">↗️ مشاركة</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" onclick="document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">منشوراتي</div>
+    <div class="tab" onclick="document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">منتجاتي</div>
+    <div class="tab" onclick="document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">صوري</div>
+  </div>
+  <div class="sec">
+    <div class="post"><div class="head"><div class="avatar">🌸</div>
+      <div><h4>لينا بن علي <span class="rank">⭐ نجمة</span></h4><small>أمس • الجزائر</small></div></div>
+      <div class="txt">وصلوني قفاطن جداد 🎉 شوفوهم في منتجاتي، والكمية محدودة يا بنات!</div>
+      <div class="actions"><span>❤️ 96</span><span>💬 21 تعليق</span><span>↗️ مشاركة</span></div></div>
+  </div>
+  <div class="menu">
+    <a>📅 <span>حجوزاتي</span></a>
+    <a>💰 <span>رصيدي: 2,400 دج</span></a>
+    <a>🚀 <span>روّجي منتجك</span></a>
+    <a>👭 <span>جيبي صاحبتك</span></a>
+    <a>⚙️ <span>الإعدادات</span></a>
+  </div>
+</div>
+
+<!-- بروفايل بنت أخرى -->
+<div class="screen" id="oprofile">
+  <div class="cover" style="background:linear-gradient(120deg,#0ea5e9,#8b5cf6 60%,#ec4899)">
+    <div class="back" id="op-back" onclick="go('friendship')">→</div>
+    <div class="fb-avatar"><span id="op-emoji">🌸</span></div>
+  </div>
+  <div class="fb-head">
+    <h2><span id="op-name">إيمان</span> <span class="rank" id="op-rank">⭐ نجمة</span></h2>
+    <p class="fb-bio" id="op-bio"></p>
+    <div class="fb-stats">
+      <div><b>186</b><small>صديقة</small></div>
+      <div><b>8</b><small>منتج</small></div>
+      <div><b>4.8</b><small>تقييم ⭐</small></div>
+    </div>
+    <div class="fb-actions">
+      <button class="btn" style="flex:1" id="op-add" onclick="this.textContent='✅ تم الإرسال'">👭 أضيفيها صديقة</button>
+      <button class="btn ghost">💬 راسليها</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <div class="tab on" onclick="this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">منشوراتها</div>
+    <div class="tab" onclick="this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">منتجاتها</div>
+    <div class="tab" onclick="this.parentNode.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">صورها</div>
+  </div>
+  <div class="sec">
+    <div class="post"><div class="head"><div class="avatar"><span id="op-emoji2">🌸</span></div>
+      <div><h4><span id="op-name2">إيمان</span></h4><small>منذ 3 ساعات</small></div></div>
+      <div class="txt">بنات شكون تحب نتبادلو وصفات؟ عندي وصفة كيكة الشوكولاتة تهبل 🍰</div>
+      <div class="actions"><span>❤️ 45</span><span>💬 12 تعليق</span><span>↗️ مشاركة</span></div></div>
+  </div>
+</div>
+
+<!-- الأصدقاء -->
+<div class="screen" id="friends">
+  <div class="topbar"><span class="planet">👥</span><h1>الأصدقاء</h1><p>كبري دائرتك 💖</p></div>
+  <div class="sec">
+    <div class="sec-title">🙋‍♀️ طلبات الصداقة <span style="background:var(--pink);color:#fff;font-size:11px;padding:2px 10px;border-radius:10px">2</span></div>
+    <div class="svc"><div class="avatar" style="width:56px;height:56px;font-size:26px">🍓</div>
+      <div style="flex:1"><h4>دنيا • الجزائر</h4><p>👭 12 صديقة مشتركة</p>
+      <div class="row"><button class="btn" onclick="this.closest('.svc').style.display='none'">قبول ✅</button><button class="btn ghost" onclick="this.closest('.svc').style.display='none'">رفض</button></div></div></div>
+    <div class="svc"><div class="avatar" style="width:56px;height:56px;font-size:26px">🍒</div>
+      <div style="flex:1"><h4>شيماء • البليدة</h4><p>👭 5 صديقات مشتركات</p>
+      <div class="row"><button class="btn" onclick="this.closest('.svc').style.display='none'">قبول ✅</button><button class="btn ghost" onclick="this.closest('.svc').style.display='none'">رفض</button></div></div></div>
+  </div>
+  <div class="sec">
+    <div class="sec-title">✨ بنات جدد للصداقة</div>
+    <div class="svc" style="cursor:pointer" onclick="openProfile('إيمان','الجزائر','🍳 طبخ • 📚 دراسة • 🎬 أفلام','🌸','⭐ نجمة','friends')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🌸</div>
+      <div style="flex:1"><h4>إيمان • الجزائر</h4><p>🍳 طبخ • 📚 دراسة</p>
+      <div class="row"><small style="color:var(--muted)">نشطة دابا 🟢</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
+    <div class="svc" style="cursor:pointer" onclick="openProfile('نسرين','وهران','🏃‍♀️ رياضة • ✈️ سفر • 📸 تصوير','🦋','⭐ نجمة','friends')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🦋</div>
+      <div style="flex:1"><h4>نسرين • وهران</h4><p>🏃‍♀️ رياضة • ✈️ سفر</p>
+      <div class="row"><small style="color:var(--muted)">نشطة منذ ساعة</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
+    <div class="svc" style="cursor:pointer" onclick="openProfile('آية','قسنطينة','👗 موضة • 💄 مكياج • 🎨 رسم','🌙','⭐ نجمة','friends')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🌙</div>
+      <div style="flex:1"><h4>آية • قسنطينة</h4><p>👗 موضة • 💄 مكياج</p>
+      <div class="row"><small style="color:var(--muted)">نشطة دابا 🟢</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
+  </div>
+</div>
+
+<!-- ريلز -->
+<div class="screen" id="video">
+  <div class="topbar"><span class="planet">🎬</span><h1>ريلز</h1><p>فيديوهات البنات 🎥</p></div>
+  <div class="sec">
+    <div class="reel" style="background:linear-gradient(160deg,#8b5cf6,#ec4899)"><div class="play">▶</div>
+      <div class="reel-info"><b>روتين مكياجي الصباحي 💄</b><small>@نورهان • ❤️ 2.3k &nbsp; 💬 184</small></div></div>
+    <div class="reel" style="background:linear-gradient(160deg,#f43f5e,#fb923c)"><div class="play">▶</div>
+      <div class="reel-info"><b>جولة في سوق الكوكب 🛍️</b><small>@سيرين • ❤️ 5.1k &nbsp; 💬 402</small></div></div>
+    <div class="reel" style="background:linear-gradient(160deg,#0ea5e9,#14b8a6)"><div class="play">▶</div>
+      <div class="reel-info"><b>وصفة كيكة الشوكولاتة 🍰</b><small>@خديجة • ❤️ 3.8k &nbsp; 💬 296</small></div></div>
+  </div>
+</div>
+
+<!-- الرسائل -->
+<div class="screen" id="messenger">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('home')">→</div><h2 style="font-size:18px">💬 الرسائل</h2></div>
+  <div class="sec">
+    <div class="chat-it" onclick="openChat('إيمان','🌸')"><div class="avatar">🌸</div>
+      <div style="flex:1"><h4 style="font-size:14px">إيمان</h4><p style="font-size:12.5px;color:var(--muted)">أهلا! القفطان مازال متوفر؟</p></div><span class="dot"></span></div>
+    <div class="chat-it" onclick="openChat('خديجة','💄')"><div class="avatar">💄</div>
+      <div style="flex:1"><h4 style="font-size:14px">خديجة</h4><p style="font-size:12.5px;color:var(--muted)">التوصيل غدوة إن شاء الله 🚚</p></div><span class="dot"></span></div>
+    <div class="chat-it" onclick="openChat('سيرين','🌺')"><div class="avatar">🌺</div>
+      <div style="flex:1"><h4 style="font-size:14px">سيرين</h4><p style="font-size:12.5px;color:var(--muted)">هههه ضحكتيني 😂</p></div></div>
+  </div>
+</div>
+
+<!-- المحادثة -->
+<div class="screen" id="chat">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('messenger')">→</div>
+    <div class="avatar" id="chat-ava" style="width:42px;height:42px;font-size:22px">🌸</div>
+    <h2 style="font-size:16px" id="chat-name">إيمان</h2><small style="opacity:.85">🟢 نشطة دابا</small></div>
+  <div class="msgs" id="msgs">
+    <div class="msg in">أهلا! القفطان مازال متوفر؟ 🥰</div>
+    <div class="msg out">أهلا بيك! إيه مازال، أي مقاس تحبي؟</div>
+    <div class="msg in">M تعيشي، والتوصيل للجزائر شحال؟</div>
+  </div>
+  <div style="display:flex;gap:8px;padding:12px 16px">
+    <input id="chat-in" placeholder="اكتبي رسالة..." style="flex:1;border:2px solid #ffe0ec;border-radius:20px;padding:11px 14px;font-size:14px;outline:none;font-family:inherit">
+    <button class="btn" style="border-radius:50%;width:48px;height:48px;padding:0;flex-shrink:0" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<!-- الإشعارات -->
+<div class="screen" id="notifications">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('home')">→</div><h2 style="font-size:18px">🔔 الإشعارات</h2></div>
+  <div class="sec">
+    <div class="notif"><div class="nic">👭</div><div><b>دخلي صحبتك لكوكبنا!!</b> 🪐<br><small>جيبي صاحباتك واربحي نقاط وشارات ⭐</small></div></div>
+    <div class="notif"><div class="nic">❤️</div><div><b>سيرين</b> عجبتها صورتك <br><small>منذ 5 دقائق</small></div></div>
+    <div class="notif"><div class="nic">👭</div><div><b>دنيا</b> بعثتلك طلب صداقة <br><small>منذ 20 دقيقة</small></div></div>
+    <div class="notif"><div class="nic">🛍️</div><div>طلب جديد على <b>القفطان</b> تاعك <br><small>منذ ساعة</small></div></div>
+    <div class="notif"><div class="nic">🏆</div><div>بدا <b>تحدي الأسبوع</b>: أحسن ميكاب نهاري <br><small>منذ 3 ساعات</small></div></div>
+    <div class="notif"><div class="nic">💬</div><div><b>إيمان</b> بعثتلك رسالة <br><small>منذ 5 ساعات</small></div></div>
+  </div>
+</div>
+
+<!-- البحث -->
+<div class="screen" id="search">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('home')">→</div><h2 style="font-size:18px">🔍 البحث</h2></div>
+  <div class="sec">
+    <input placeholder="قلبي على منتج، خدمة، بنت..." style="width:100%;border:2px solid #ffe0ec;border-radius:16px;padding:13px 16px;font-size:14px;outline:none;font-family:inherit">
+    <div class="sec-title" style="margin-top:16px">🔥 رائج دابا</div>
+    <div class="chips">
+      <div class="chip" onclick="go('souq')">قفطان</div><div class="chip" onclick="go('souq')">مكياج أصلي</div>
+      <div class="chip" onclick="go('services')">كوافيرة الجزائر</div><div class="chip" onclick="go('souq')">ساك يدوي</div>
+    </div>
+  </div>
+</div>
+
+<!-- القائمة -->
+<div class="screen" id="menu">
+  <div class="topbar"><span class="planet">☰</span><h1>القائمة</h1><p>كلش في بلاصة وحدة</p></div>
+  <div class="sec">
+    <div class="svc" style="cursor:pointer" onclick="go('profile')"><div class="avatar">🌸</div>
+      <div style="flex:1"><h4>لينا بن علي</h4><p>شوفي بروفايلك ⭐ نجمة</p></div><span style="font-size:22px;color:var(--muted)">‹</span></div>
+  </div>
+  <div class="menu">
+    <a onclick="go('services')">💅 <span>الخدمات</span></a>
+    <a onclick="go('friendship')">👭 <span>صداقة</span></a>
+    <a>💰 <span>رصيدي: 2,400 دج</span></a>
+    <a>🚀 <span>روّجي منتجك</span></a>
+    <a>📷 <span>صوري</span></a>
+    <a>⚙️ <span>الإعدادات</span></a>
+    <a onclick="doLogout()">🚪 <span>تسجيل الخروج</span></a>
+  </div>
+</div>
+
+<!-- عارض القصة -->
+<div class="screen" id="story">
+  <div class="story-view" id="story-view" style="background:linear-gradient(160deg,#8b5cf6,#ec4899)">
+    <div class="sprog"><div class="sfill" id="sfill"></div></div>
+    <div class="shead"><div class="avatar" id="st-ava" style="width:40px;height:40px;font-size:20px">🌸</div>
+      <b id="st-name">إيمان</b><span style="margin-right:auto;cursor:pointer;font-size:24px" onclick="go('home')">✕</span></div>
+    <div class="sbig" id="st-emoji">🌸</div>
+    <div class="scap" id="st-cap">يوم جديد 🌅</div>
+  </div>
+</div>
+
+<!-- نافذة الإنشاء -->
+<div class="sheet-bg" id="sheetbg" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet">
+    <h3 style="text-align:center;margin-bottom:12px">➕ إنشاء جديد</h3>
+    <div class="menu" style="margin:0">
+      <a onclick="closeSheet();go('home')">📝 <span>منشور جديد</span></a>
+      <a onclick="closeSheet()">📖 <span>قصة / يومية</span></a>
+      <a onclick="closeSheet();go('sell')">🛍️ <span>منتج للبيع</span></a>
+      <a onclick="closeSheet();go('services')">💅 <span>خدمة جديدة</span></a>
+    </div>
+  </div>
+</div>
+
+<!-- بيعي منتجك -->
+<div class="screen" id="sell">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('souq')">→</div><h2 style="font-size:18px">💰 بيعي منتجك</h2></div>
+  <div class="verify">🎉 النشر باطل ديما — بلا عمولة، بلا شروط</div>
+  <div class="sell-form">
+    <div class="field"><label>📷 صور المنتج <small style="color:var(--muted);font-weight:400">(الأولى هي الرئيسية)</small></label>
+      <div class="photos">
+        <label class="photo-box"><input type="file" accept="image/*" hidden onchange="handlePhoto(this,1)"><span id="phv1">📷<small>رئيسية</small></span></label>
+        <label class="photo-box"><input type="file" accept="image/*" hidden onchange="handlePhoto(this,2)"><span id="phv2">＋</span></label>
+        <label class="photo-box"><input type="file" accept="image/*" hidden onchange="handlePhoto(this,3)"><span id="phv3">＋</span></label>
+        <label class="photo-box"><input type="file" accept="image/*" hidden onchange="handlePhoto(this,4)"><span id="phv4">＋</span></label>
+      </div></div>
+    <div class="field"><label>🏷️ اسم المنتج</label><input id="p-name" placeholder="مثلا: قفطان مطرز يدوي"></div>
+    <div class="field"><label>📝 الوصف</label><textarea id="p-desc" rows="3" placeholder="احكي على منتجك: الخامة، المقاسات، الألوان..."></textarea></div>
+    <div class="field"><label>💰 السعر (دج)</label><input id="p-price" type="number" placeholder="مثلا: 4900"></div>
+    <div class="field"><label>🗂️ القسم</label><select id="p-cat"><option>ملابس</option><option>مكياج</option><option>إكسسوارات</option><option>صناعة يدوية</option><option>أخرى</option></select></div>
+    <div class="field"><label>📍 الولاية</label><select id="p-wilaya"><option>الجزائر</option><option>وهران</option><option>قسنطينة</option><option>سطيف</option><option>البليدة</option><option>عنابة</option></select></div>
+    <div class="field"><label>✨ حالة المنتج</label>
+      <div class="chips" style="padding:0"><div class="chip pcond on" onclick="this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">جديد</div>
+      <div class="chip pcond" onclick="this.parentNode.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));this.classList.add('on')">مستعمل</div></div></div>
+    <button class="btn block" onclick="publishProduct()">🚀 انشري المنتج</button>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px">💵 الدفع عند الاستلام • 🚚 التوصيل لكل الولايات</p>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- التسجيل -->
+<div class="screen" id="signup">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('splash')">→</div><h2 style="font-size:18px">💖 حساب جديد</h2></div>
+  <div class="sell-form">
+    <div class="field"><label>👩 الاسم الكامل</label><input id="su-name" placeholder="مثلا: أمينة بن علي"></div>
+    <div class="field"><label>💌 الإيميل <small style="color:var(--muted);font-weight:400">(لازم يكون باسم بنت)</small></label><input id="su-email" type="email" placeholder="amina.dz@gmail.com" dir="ltr" style="text-align:right"></div>
+    <div class="field"><label>📱 رقم الهاتف</label><input id="su-phone" type="tel" placeholder="05 / 06 / 07 ..." dir="ltr" style="text-align:right"></div>
+    <div class="field"><label>📍 الولاية</label><select id="su-wilaya"><option>الجزائر</option><option>وهران</option><option>قسنطينة</option><option>سطيف</option><option>البليدة</option><option>عنابة</option><option>تلمسان</option><option>بجاية</option></select></div>
+    <div class="field"><label>🔑 كلمة السر</label><input id="su-pass" type="password" placeholder="••••••••"></div>
+    <button class="btn block" onclick="startQuiz()">كملي التسجيل ← اختبار البنات 🔐</button>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px">🔒 الكوكب للبنات فقط — كاين اختبار تحقق بعد التسجيل</p>
+  </div>
+</div>
+
+<!-- تسجيل الدخول -->
+<div class="screen" id="login">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('splash')">→</div><h2 style="font-size:18px">🔑 تسجيل الدخول</h2></div>
+  <div class="sell-form">
+    <div class="field"><label>💌 الإيميل</label><input id="li-email" type="email" placeholder="amina.dz@gmail.com" dir="ltr" style="text-align:right"></div>
+    <div class="field"><label>🔑 كلمة السر</label><input id="li-pass" type="password" placeholder="••••••••"></div>
+    <button class="btn block" onclick="doLogin()">ادخلي 🪐</button>
+    <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:12px">ما عندكش حساب؟ <u style="cursor:pointer;font-weight:800;color:var(--pink-d)" onclick="go('signup')">أنشئي واحد 💖</u></p>
+  </div>
+</div>
+
+<!-- اختبار البنات -->
+<div class="screen" id="quiz">
+  <div class="chat-head"><h2 style="font-size:18px">🔐 اختبار البنات</h2></div>
+  <div class="sec">
+    <p style="font-size:13px;color:var(--muted);line-height:1.7">جاوبي على 7 أسئلة ماكياج — لازم <b>4 صحيحة</b> على الأقل باش تدخلي ديركت ✨</p>
+    <div class="qprog"><div id="q-bar"></div></div>
+    <p id="q-num" style="font-size:12px;color:var(--muted);font-weight:700">سؤال 1 من 7</p>
+    <h3 id="q-text"></h3>
+    <div id="q-opts"></div>
+  </div>
+</div>
+
+<!-- نجحت في الاختبار -->
+<div class="screen" id="quiz-pass">
+  <div class="center-screen">
+    <div class="big">🎉</div>
+    <h2>مبروك! نتي بنت الكوكب 💖</h2>
+    <p>نتيجتك: <b id="pass-score">7 / 7</b><br>مرحبا بيك في كوكب برق برق 🪐</p>
+    <button class="btn block" onclick="go('home')">ادخلي الكوكب ✨</button>
+  </div>
+</div>
+
+<!-- الفوكال -->
+<div class="screen" id="voice">
+  <div class="chat-head"><h2 style="font-size:18px">🎤 خطوة أخيرة</h2></div>
+  <div class="sec">
+    <div class="post" style="border:2px solid #fde68a;background:#fffbeb">
+      <div class="txt">نتيجتك: <b id="fail-score">3 / 7</b> — ما تقلقيش! 😊<br><br>سجلي <b>فوكال قصير</b> عرفي فيه بنفسك: اسمك، ولايتك، وعلاش حابة تدخلي الكوكب.<br>صاحب التطبيق راح يسمعو ويقرر بنفسو.</div>
+    </div>
+    <div style="text-align:center;padding:10px 0">
+      <button class="btn block" id="rec-btn" onclick="toggleRec()">🎤 سجلي الفوكال</button>
+      <div id="rec-live" style="display:none;margin-top:12px;font-weight:800;color:#ef4444">🔴 راهو يسجل... <span id="rec-time">0:00</span></div>
+      <div id="rec-done" style="display:none;margin-top:12px">
+        <audio id="rec-play" controls style="width:100%"></audio>
+        <button class="btn ghost block" style="margin-top:8px" onclick="toggleRec()">🔄 سجلي مرة أخرى</button>
+      </div>
+      <div style="margin-top:14px">
+        <label style="font-size:13px;color:var(--muted);cursor:pointer">ولا ارفعي فوكال مسجل 📤
+          <input type="file" accept="audio/*" hidden onchange="uploadVocal(this)"></label>
+      </div>
+    </div>
+    <button class="btn block" onclick="sendVocal()">📤 ابعثي الفوكال</button>
+  </div>
+</div>
+
+<!-- قيد المراجعة -->
+<div class="screen" id="pending">
+  <div class="center-screen">
+    <div class="big">⏳</div>
+    <h2>الفوكال وصل!</h2>
+    <p>صاحب التطبيق راح يسمع الفوكال تاعك ويقرر.<br><b>استني نصف ساعة برك وعاودي حاولي</b> — إذا تقبلتي تدخلي ديركت 💖</p>
+  </div>
+</div>
+
+<!-- زر الإضافة -->
+<div class="fab" id="fab" style="display:none"><button onclick="openSheet()">＋</button></div>
+
+<!-- شريط التنقل -->
+<nav class="navbar" id="navbar" style="display:none">
+  <div class="nav-it on" data-s="home" onclick="go('home')"><span class="ico">🏠</span>الرئيسية</div>
+  <div class="nav-it" data-s="friends" onclick="go('friends')"><span class="ico">👥</span>الأصدقاء</div>
+  <div class="nav-it" data-s="video" onclick="go('video')"><span class="ico">🎬</span>ريلز</div>
+  <div class="nav-it" data-s="souq" onclick="go('souq')"><span class="ico">🛍️</span>المتجر</div>
+  <div class="nav-it" data-s="menu" onclick="go('menu')"><span class="ico">☰</span>القائمة</div>
+</nav>
+
+</div>
+<script>
+/* ===== Supabase — الربط الحقيقي (مع fallback للوضع التجريبي) ===== */
+var SB=null;
+try{
+  if(typeof supabase!=='undefined'){
+    SB=supabase.createClient('https://chosrqzpuczmirrxmnkf.supabase.co','sb_publishable__e-8by0NKHyY-mnRowNtqg_zRr8Fq_q');
+  }
+}catch(e){SB=null;}
+var _profile=null;
+async function sbUser(){
+  if(!SB)return null;
+  try{var r=await SB.auth.getUser();return (r.data&&r.data.user)?r.data.user:null;}catch(e){return null;}
+}
+function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function go(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  var main=['home','friends','video','souq','menu'];
+  var isMain=main.indexOf(id)>-1;
+  document.querySelector('.phone').classList.toggle('withutil',isMain);
+  document.getElementById('navbar').style.display=isMain?'flex':'none';
+  document.getElementById('fab').style.display=isMain?'block':'none';
+  document.querySelectorAll('.nav-it').forEach(n=>n.classList.toggle('on',n.dataset.s===id));
+  if(id==='souq'){loadProducts(false);}
+  window.scrollTo(0,0);
+}
+function openSheet(){document.getElementById('sheetbg').style.display='block'}
+function closeSheet(){document.getElementById('sheetbg').style.display='none'}
+function openStory(name,emoji,bg,cap){
+  document.getElementById('st-name').textContent=name;
+  document.getElementById('st-ava').textContent=emoji;
+  document.getElementById('st-emoji').textContent=emoji;
+  document.getElementById('st-cap').textContent=cap;
+  document.getElementById('story-view').style.background=bg;
+  var f=document.getElementById('sfill'); f.style.animation='none'; void f.offsetWidth; f.style.animation='';
+  go('story');
+}
+function openChat(name,emoji){
+  document.getElementById('chat-name').textContent=name;
+  document.getElementById('chat-ava').textContent=emoji;
+  go('chat');
+}
+function sendMsg(){
+  var i=document.getElementById('chat-in');
+  if(i.value.trim()){
+    var d=document.createElement('div'); d.className='msg out'; d.textContent=i.value;
+    document.getElementById('msgs').appendChild(d); i.value='';
+    window.scrollTo(0,document.body.scrollHeight);
+  }
+}
+var firstPhoto='';
+function handlePhoto(input,idx){
+  var f=input.files&&input.files[0]; if(!f)return;
+  window._pFiles=window._pFiles||{}; window._pFiles[idx]=f;
+  var url=URL.createObjectURL(f);
+  document.getElementById('phv'+idx).innerHTML='<img src="'+url+'" style="width:100%;height:100%;object-fit:cover">';
+  if(idx===1)firstPhoto=url;
+}
+function toast(t){
+  var e=document.getElementById('toast'); e.textContent=t; e.style.display='block';
+  clearTimeout(window._tt); window._tt=setTimeout(function(){e.style.display='none'},2300);
+}
+async function publishProduct(){
+  var name=document.getElementById('p-name').value.trim()||'منتج جديد 🛍️';
+  var desc=document.getElementById('p-desc').value.trim();
+  var price=document.getElementById('p-price').value.trim();
+  var wilaya=document.getElementById('p-wilaya').value;
+  var cat=document.getElementById('p-cat').value;
+  var cond=document.querySelector('.pcond.on').textContent;
+  var files=window._pFiles||{};
+  var photoUrls=[];
+  var me=await sbUser();
+  var realSaved=false;
+  if(SB&&me){
+    try{
+      var idxs=Object.keys(files);
+      for(var k=0;k<idxs.length;k++){
+        var f=files[idxs[k]];
+        var safeName=String(f.name||'photo.jpg').replace(/[^a-zA-Z0-9.]/g,'_');
+        var path=me.id+'/'+Date.now()+'_'+idxs[k]+'_'+safeName;
+        var up=await SB.storage.from('kb-products').upload(path,f,{upsert:true});
+        if(!up.error){
+          var pub=SB.storage.from('kb-products').getPublicUrl(path);
+          if(pub.data&&pub.data.publicUrl)photoUrls.push(pub.data.publicUrl);
+        }
+      }
+      var ins=await SB.from('kb_products').insert({seller_id:me.id,name:name,description:desc,price:price||null,category:cat,wilaya:wilaya,condition:cond,photos:photoUrls,status:'active'});
+      if(ins.error)throw ins.error;
+      _productsLoaded=false; realSaved=true;
+      toast('🎉 تم نشر منتجك بنجاح!');
+    }catch(e){toast('تعذر الحفظ في القاعدة — تحققي من الاتصال');}
+  }
+  if(!realSaved)toast('🎉 تم نشر منتجك بنجاح!');
+  var imgHtml=firstPhoto?'<img src="'+firstPhoto+'" style="width:100%;height:100%;object-fit:cover">':'🛍️';
+  var d=document.createElement('div'); d.className='prod'; d.setAttribute('onclick',"go('detail')");
+  d.innerHTML='<div class="img" style="background:linear-gradient(135deg,#ffe0ec,#e9d5ff);overflow:hidden">'+imgHtml+'<span class="badge">'+cond+'</span></div><div class="info"><h4>'+escapeHtml(name)+'</h4><div class="price">'+(price?escapeHtml(price)+' دج':'السعر عند التواصل')+'</div><div class="seller">'+escapeHtml((_profile&&_profile.full_name)||'لينا')+' • '+escapeHtml(wilaya)+'</div></div>';
+  var g=document.getElementById('souq-grid'); g.insertBefore(d,g.firstChild);
+  document.getElementById('p-name').value=''; document.getElementById('p-desc').value='';
+  document.getElementById('p-price').value=''; firstPhoto=''; window._pFiles={};
+  for(var i=1;i<=4;i++){document.getElementById('phv'+i).innerHTML=i===1?'📷<small>رئيسية</small>':'＋';}
+  go('souq');
+}
+/* signup + quiz + voice */
+var QUIZ=[
+ {q:'الكونسيلر البرتقالي واش يغطي؟',o:['الهالات الغامقة','حب الشباب','النمش'],c:0},
+ {q:'"البايكينغ" واش هو؟',o:['تسخين الفرشاة','خلط كريمات','تثبيت بالبودرة'],c:2},
+ {q:'المكياج المتكتل سببه؟',o:['ماركة غالية','منتج زايد','وجه مغسول'],c:1},
+ {q:'الفوندوتان تجربيه وين؟',o:['خط الفك','على اليد','على الخد'],c:0},
+ {q:'"الفال آوت" واش هو؟',o:['سيلان الماسكارا','تشقق الروج','تساقط الظل'],c:2},
+ {q:'الماسكارا المقاومة للماء علاش تتجنب؟',o:['غالية بزاف','تقطع الرموش','ما تطولش'],c:1},
+ {q:'البرايمر يندار قبل واش؟',o:['الفوندوتان','الماسكارا','أحمر الشفايف'],c:0}
+];
+var MALENAMES=['mohamed','mohammed','ahmed','amine','yacine','yassine','islam','riad','riyad','karim','walid','samir','bilal','hichem','houssem','oussama','abdel','mehdi','rayan','adam','yousef','omar','khaled','sofiane','anis','rafik','nassim'];
+var qIdx=0,qScore=0,qOrder=[];
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+var ACTIVE_QUIZ=QUIZ;
+async function fetchQuiz(){
+  if(!SB)return QUIZ;
+  try{
+    var r=await SB.from('kb_quiz_questions').select('question,options,correct_index').eq('active',true).limit(20);
+    if(r.error||!r.data||!r.data.length)return QUIZ;
+    return r.data.map(function(x){return{q:x.question,o:x.options,c:x.correct_index};});
+  }catch(e){return QUIZ;}
+}
+async function startQuiz(){
+  var n=document.getElementById('su-name').value.trim();
+  var e=document.getElementById('su-email').value.trim();
+  var p=document.getElementById('su-phone').value.trim();
+  var w=document.getElementById('su-wilaya').value;
+  var pw=document.getElementById('su-pass').value;
+  if(!n||!e||!p){toast('عمري الاسم والإيميل والهاتف 📝');return;}
+  if(e.indexOf('@')<1){toast('الإيميل ما راهوش صحيح 💌');return;}
+  var local=e.split('@')[0].toLowerCase();
+  for(var i=0;i<MALENAMES.length;i++){if(local.indexOf(MALENAMES[i])>-1){toast('هاذ الإيميل ما يبانش تاع بنت 💌');return;}}
+  if(!pw||pw.length<6){toast('كلمة السر لازم 6 حروف على الأقل 🔑');return;}
+  if(SB){
+    try{
+      var s=await SB.auth.signUp({email:e,password:pw});
+      if(s.error)throw s.error;
+      var u=s.data&&s.data.user;
+      if(u){
+        try{await SB.from('kb_profiles').insert({id:u.id,full_name:n,email:e,phone:p,wilaya:w,verification_status:'pending'});}
+        catch(_){}
+      }
+    }catch(err){toast('التسجيل تعثر: '+err.message+' — نكمل تجريبيا');}
+  }
+  ACTIVE_QUIZ=await fetchQuiz();
+  qIdx=0;qScore=0;qOrder=shuffle(ACTIVE_QUIZ.map(function(_,i){return i;}));
+  renderQ();go('quiz');
+}
+function renderQ(){
+  var Q=ACTIVE_QUIZ[qOrder[qIdx]];
+  var opts=shuffle(Q.o.map(function(t,i){return{t:t,ok:i===Q.c};}));
+  document.getElementById('q-num').textContent='سؤال '+(qIdx+1)+' من '+ACTIVE_QUIZ.length;
+  document.getElementById('q-bar').style.width=(qIdx/ACTIVE_QUIZ.length*100)+'%';
+  document.getElementById('q-text').textContent=Q.q;
+  var box=document.getElementById('q-opts');box.innerHTML='';
+  opts.forEach(function(op){
+    var b=document.createElement('button');b.className='qopt';b.textContent=op.t;
+    b.onclick=function(){answer(op.ok,b);};box.appendChild(b);
+  });
+}
+function answer(ok,btn){
+  if(ok){qScore++;btn.classList.add('ok');}else{btn.classList.add('no');}
+  var all=document.querySelectorAll('.qopt');for(var i=0;i<all.length;i++)all[i].disabled=true;
+  setTimeout(function(){qIdx++;if(qIdx<ACTIVE_QUIZ.length)renderQ();else finishQuiz();},650);
+}
+async function finishQuiz(){
+  document.getElementById('q-bar').style.width='100%';
+  if(qScore>=4){
+    document.getElementById('pass-score').textContent=qScore+' / '+ACTIVE_QUIZ.length;
+    if(SB){
+      try{
+        var u=await sbUser();
+        if(u)await SB.from('kb_profiles').update({quiz_score:qScore,verification_status:'quiz_passed'}).eq('id',u.id);
+      }catch(e){}
+    }
+    go('quiz-pass');
+  }
+  else{document.getElementById('fail-score').textContent=qScore+' / '+ACTIVE_QUIZ.length;go('voice');}
+}
+var mrRec=null,mrStream=null,mrChunks=[],mrTimer=null,mrSec=0;
+function toggleRec(){
+  var btn=document.getElementById('rec-btn');
+  if(mrRec&&mrRec.state==='recording'){mrRec.stop();return;}
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('المتصفح ما يدعمش التسجيل 🎤');return;}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    mrStream=stream;mrChunks=[];
+    mrRec=new MediaRecorder(stream);
+    mrRec.ondataavailable=function(e){mrChunks.push(e.data);};
+    mrRec.onstop=function(){
+      var blob=new Blob(mrChunks,{type:'audio/webm'});
+      window._vocalBlob=blob;
+      document.getElementById('rec-play').src=URL.createObjectURL(blob);
+      document.getElementById('rec-done').style.display='block';
+      document.getElementById('rec-live').style.display='none';
+      btn.innerHTML='🎤 سجلي الفوكال';btn.classList.remove('recording');
+      if(mrStream)mrStream.getTracks().forEach(function(t){t.stop();});
+      clearInterval(mrTimer);
+    };
+    mrRec.start();mrSec=0;
+    document.getElementById('rec-time').textContent='0:00';
+    document.getElementById('rec-done').style.display='none';
+    document.getElementById('rec-live').style.display='block';
+    btn.innerHTML='⏹️ وقفي التسجيل';btn.classList.add('recording');
+    mrTimer=setInterval(function(){
+      mrSec++;document.getElementById('rec-time').textContent=Math.floor(mrSec/60)+':'+String(mrSec%60).padStart(2,'0');
+      if(mrSec>=90&&mrRec.state==='recording')mrRec.stop();
+    },1000);
+  }).catch(function(){toast('ما قدرناش نوصلو للميكروفون 🎤');});
+}
+function uploadVocal(input){
+  var f=input.files&&input.files[0];if(!f)return;
+  window._vocalBlob=f;
+  document.getElementById('rec-play').src=URL.createObjectURL(f);
+  document.getElementById('rec-done').style.display='block';
+  toast('تم رفع الفوكال ✅');
+}
+function openProfile(name,wilaya,tags,emoji,rank,ret){
+  document.getElementById('op-name').textContent=name;
+  document.getElementById('op-name2').textContent=name;
+  document.getElementById('op-rank').textContent=rank;
+  document.getElementById('op-emoji').textContent=emoji;
+  document.getElementById('op-emoji2').textContent=emoji;
+  document.getElementById('op-bio').innerHTML='📍 '+wilaya+'<br>'+tags;
+  document.getElementById('op-back').setAttribute('onclick',"go('"+ret+"')");
+  document.getElementById('op-add').textContent='👭 أضيفيها صديقة';
+  go('oprofile');
+}
+/* ===== الدخول / الخروج / البروفايل ===== */
+async function doLogin(){
+  var e=document.getElementById('li-email').value.trim();
+  var p=document.getElementById('li-pass').value;
+  if(!e||!p){toast('عمري الإيميل وكلمة السر 🔑');return;}
+  if(!SB){toast('ما كاش اتصال — دخول تجريبي');go('home');return;}
+  try{
+    var r=await SB.auth.signInWithPassword({email:e,password:p});
+    if(r.error)throw r.error;
+    await loadUserProfile();
+    go('home');toast('مرحبا بيك في الكوكب 💖');
+  }catch(err){toast('الدخول ما كملش: '+err.message);}
+}
+async function doLogout(){
+  try{if(SB)await SB.auth.signOut();}catch(e){}
+  _profile=null;go('splash');
+}
+async function loadUserProfile(){
+  if(!SB)return;
+  try{
+    var u=await sbUser();if(!u)return;
+    var r=await SB.from('kb_profiles').select('full_name,wilaya,rank,bio,avatar_emoji').eq('id',u.id).single();
+    if(r.error||!r.data)return;
+    _profile=r.data;
+    document.getElementById('pf-name').textContent=r.data.full_name||'ملكة الكوكب';
+    document.getElementById('pf-rank').textContent='⭐ '+(r.data.rank||'مواطنة');
+    document.getElementById('pf-bio').innerHTML='📍 '+escapeHtml(r.data.wilaya||'الجزائر')+'<br>'+escapeHtml(r.data.bio||'💖 عضوة في كوكب برق برق');
+  }catch(e){}
+}
+/* ===== الفوكال: رفع + تسجيل للمراجعة ===== */
+async function sendVocal(){
+  var blob=window._vocalBlob||null;
+  if(!blob){toast('سجلي الفوكال أولا 🎤');return;}
+  if(SB){
+    try{
+      var u=await sbUser();
+      if(u){
+        var path=u.id+'/'+Date.now()+'.webm';
+        var up=await SB.storage.from('kb-voice').upload(path,blob,{contentType:'audio/webm',upsert:true});
+        if(up.error)throw up.error;
+        await SB.from('kb_voice_notes').insert({user_id:u.id,audio_url:path,status:'pending'});
+        await SB.from('kb_profiles').update({verification_status:'voice_pending'}).eq('id',u.id);
+        toast('وصل الفوكال ✅');
+      }
+    }catch(e){toast('تعذر إرسال الفوكال — تحققي من الاتصال');}
+  }
+  go('pending');
+}
+/* ===== السوق: تحميل المنتجات الحقيقية ===== */
+var _productsLoaded=false;
+async function loadProducts(force){
+  if(!SB||(_productsLoaded&&!force))return;
+  try{
+    var r=await SB.from('kb_products').select('id,name,price,wilaya,condition,photos,seller_id').eq('status','active').order('created_at',{ascending:false}).limit(30);
+    if(r.error||!r.data||!r.data.length)return;
+    var ids=[];r.data.forEach(function(p){if(ids.indexOf(p.seller_id)<0)ids.push(p.seller_id);});
+    var names={};
+    try{
+      var pr=await SB.from('kb_profiles').select('id,full_name').in('id',ids);
+      if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x.full_name;});
+    }catch(e){}
+    var g=document.getElementById('souq-grid');g.innerHTML='';
+    r.data.forEach(function(p){
+      var img=(p.photos&&p.photos.length)?'<img src="'+p.photos[0]+'" style="width:100%;height:100%;object-fit:cover">':'🛍️';
+      var d=document.createElement('div');d.className='prod';
+      d.innerHTML='<div class="img" style="background:linear-gradient(135deg,#ffe0ec,#e9d5ff);overflow:hidden">'+img+'<span class="badge">'+escapeHtml(p.condition||'جديد')+'</span></div><div class="info"><h4>'+escapeHtml(p.name)+'</h4><div class="price">'+(p.price?escapeHtml(p.price)+' دج':'السعر عند التواصل')+'</div><div class="seller">'+escapeHtml(names[p.seller_id]||'بنت الكوكب')+(p.wilaya?' • '+escapeHtml(p.wilaya):'')+'</div></div>';
+      g.appendChild(d);
+    });
+    _productsLoaded=true;
+  }catch(e){}
+}
+/* ===== تهيئة: جلسة محفوظة + PWA ===== */
+document.addEventListener('DOMContentLoaded',function(){
+  if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){}}
+  setTimeout(async function(){
+    if(!SB)return;
+    try{
+      var s=await SB.auth.getSession();
+      if(s.data&&s.data.session){await loadUserProfile();go('home');}
+    }catch(e){}
+  },500);
+});
+</script>
+</body>
+</html>
