@@ -877,8 +877,7 @@ function reelCard(x,name,isMine,ava){
     ?'<img class="wfull" src="'+reelUrl(x.video_url)+'" loading="lazy" alt="" style="filter:'+fc+'">'
     :'<video data-src="'+reelUrl(x.video_url)+'" playsinline loop preload="none" style="filter:'+fc+';background:#1a1a2e"></video>';
   var liked=_likedReels[x.id];
-  var mt=x.music_title?('🎵 '+x.music_title):(x.music_youtube_id?'🎵 موسيقى':'');
-  if(mt.length>24)mt=mt.slice(0,24)+'…';
+  var mt=x.music_title||(x.music_youtube_id?'موسيقى':'');
   var isPhoto=x.media_type==='photo';
   d.innerHTML=media+
     (isPhoto?'':'<div class="reel-play">▶</div>')+
@@ -893,7 +892,8 @@ function reelCard(x,name,isMine,ava){
     (isMine?'<button onclick="delReel(\''+x.id+'\',this)">🗑️</button>':'')+
     '</div>'+
     '<div class="reel-info"><b>@'+escapeHtml(name)+'</b><span>'+escapeHtml(x.title||'')+'</span>'+
-    (mt?'<small class="reel-mus">🎵 '+escapeHtml(mt)+'</small>':'')+'</div>'+
+    (mt?'<small class="reel-mus">🎵 <i>'+escapeHtml(mt)+' — '+escapeHtml(mt)+'</i></small>':'')+'</div>'+
+    (mt?'<div class="reel-disc'+(isPhoto?' paused':'')+'"></div>':'')+
     '<div class="reel-prog"><i></i></div>';
   d.addEventListener('click',function(e){
     if(e.target.closest('.reel-side'))return;
@@ -959,10 +959,12 @@ function toggleReel(d){
       var pp=v.play();
       if(pp&&pp.then){pp.then(function(){btn.style.display='none';}).catch(function(){btn.style.display='flex';});}
       else{btn.style.display='none';}
+      var dc=d.querySelector('.reel-disc');if(dc)dc.classList.remove('paused');
       if(d.dataset.mp)reelAudioPlay(d.dataset.mp,parseFloat(d.dataset.ms)||0);
       else ytPlay(d.dataset.yt);
     }
-    else{v.pause();btn.style.display='flex';reelAudioStop();ytStop();}
+    else{v.pause();btn.style.display='flex';reelAudioStop();ytStop();
+      var dc2=d.querySelector('.reel-disc');if(dc2)dc2.classList.add('paused');}
   }else{
     if(d.dataset.playing==='1'){d.dataset.playing='';reelAudioStop();ytStop();}
     else{pauseAllReels(d);d.dataset.playing='1';
@@ -1021,6 +1023,16 @@ function observeReels(){
       var d=en.target,v=d.querySelector('video');
       if(en.isIntersecting&&en.intersectionRatio>=0.55){
         if(v&&!v.src&&v.dataset.src){v.src=v.dataset.src;v.load();}
+        // TikTok: حملي الجيران مسبقا باش السحب يكون فوري
+        try{
+          var nx=d.nextElementSibling, pv=d.previousElementSibling;
+          [nx,pv].forEach(function(nb){
+            if(nb&&nb.classList.contains('reelv')){
+              var nv=nb.querySelector('video');
+              if(nv&&!nv.src&&nv.dataset.src){nv.src=nv.dataset.src;nv.load();}
+            }
+          });
+        }catch(e2){}
         if(v&&v.paused)toggleReel(d);
         else if(!v&&d.dataset.playing!=='1')toggleReel(d);
       }else if(!en.isIntersecting){
