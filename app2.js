@@ -1053,6 +1053,19 @@ async function uploadProfilePhoto(inp,type){
     toast(type==='avatar'?'تبدلات تصويرة البروفايل 📷✨':'تبدل الغلاف 🎨✨');
   }catch(e){toast('تعذر الرفع: '+(e.message||'📡'));}
 }
+/* ===== نافذة تأكيد أنثوية 💕 ===== */
+var _cfResolve=null;
+function prettyConfirm(msg){
+  return new Promise(function(res){
+    _cfResolve=res;
+    document.getElementById('cf-msg').textContent=msg;
+    document.getElementById('cf-modal').style.display='flex';
+  });
+}
+function cfDone(v){
+  document.getElementById('cf-modal').style.display='none';
+  if(_cfResolve){var r=_cfResolve;_cfResolve=null;r(v);}
+}
 /* ===== عارض التصويرة الكبير + حذف 🖼️🗑️ ===== */
 var _pvType=null,_pvPaths={avatar:'',cover:''};
 function openPhoto(type){
@@ -1074,7 +1087,7 @@ function changePhotoFromViewer(){
 async function deletePhoto(){
   var type=_pvType,path=_pvPaths[type]||'';
   if(!type||!path)return;
-  if(!confirm('تمحي هاذ التصويرة نهائيا؟ 🗑️'))return;
+  if(!await prettyConfirm('تمحي هاذ التصويرة نهائيا؟'))return;
   try{
     try{await SB.storage.from('kb-avatars').remove([path]);}catch(e){}
     var col=type==='avatar'?'avatar_url':'cover_url';
