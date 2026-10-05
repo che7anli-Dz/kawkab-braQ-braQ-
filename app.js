@@ -2048,14 +2048,15 @@ async function loadOwnProfile(){
     if(r.data){var p=r.data;
       document.getElementById('pf-name').textContent=p.full_name||'';
       var mn=document.getElementById('mn-name');if(mn)mn.textContent=p.full_name||'بروفايلي';
+      var _cb='?t='+Date.now();
       var av=document.getElementById('pf-avatar');
       if(av){
-        if(p.avatar_url){av.innerHTML='<img src="'+avatarPublicUrl(p.avatar_url)+'" alt=""><span class="av-cam">📷</span>';}
+        if(p.avatar_url){av.innerHTML='<img src="'+avatarPublicUrl(p.avatar_url)+_cb+'" alt=""><span class="av-cam">📷</span>';}
         else{av.innerHTML=escapeHtml(p.avatar_emoji||'🌸')+'<span class="av-cam">📷</span>';}
       }
       var cv=document.getElementById('pf-cover');
       if(cv){
-        if(p.cover_url){cv.style.backgroundImage='url('+avatarPublicUrl(p.cover_url)+')';}
+        if(p.cover_url){cv.style.backgroundImage='url("'+avatarPublicUrl(p.cover_url)+_cb+'")';}
         else{cv.style.backgroundImage='';}
       }
       document.getElementById('pf-bio').innerHTML='📍 '+escapeHtml(p.wilaya||'')+'<br>'+escapeHtml(p.bio||'');
@@ -2084,6 +2085,14 @@ async function uploadProfilePhoto(inp,type){
   if(f.type.indexOf('image')!==0){toast('اختاري صورة برك 🖼️');return;}
   if(f.size>10*1024*1024){toast('الصورة كبيرة بزاف (أقصى 10MB) 📦');return;}
   if(!SB){toast('ما كاش اتصال 📡');return;}
+  var localUrl=URL.createObjectURL(f);
+  if(type==='avatar'){
+    var _av0=document.getElementById('pf-avatar');
+    if(_av0)_av0.innerHTML='<img src="'+localUrl+'" alt=""><span class="av-cam">📷</span>';
+  }else{
+    var _cv0=document.getElementById('pf-cover');
+    if(_cv0)_cv0.style.backgroundImage='url("'+localUrl+'")';
+  }
   toast('نرفعو الصورة... ⏳');
   try{
     var u=await sbUser();if(!u)throw new Error('سجلي الدخول أولا');
