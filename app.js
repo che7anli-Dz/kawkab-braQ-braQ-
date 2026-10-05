@@ -27,6 +27,8 @@ function go(id){
   if(id==='video'){loadReels(false);}
   if(id==='home'){loadStories(false);}
   if(id==='sahha'){loadFeed(false);}
+  if(id==='friends'){loadFriendsTab();}
+  if(id==='friendship'){loadFriendsTab();}
   if(id!=='video'){try{if(typeof pauseAllReels==='function')pauseAllReels();}catch(e){}}
   if(id!=='story'){try{if(typeof stopStoryMedia==='function')stopStoryMedia();}catch(e){}}
   if(id!=='story-new'){try{if(_stAudioEl){_stAudioEl.pause();_stPlaying=null;}}catch(e){}}
@@ -42,11 +44,6 @@ function go(id){
 }
 function openSheet(){document.getElementById('sheetbg').style.display='block'}
 function closeSheet(){document.getElementById('sheetbg').style.display='none'}
-function openChat(name,emoji){
-  document.getElementById('chat-name').textContent=name;
-  document.getElementById('chat-ava').textContent=emoji;
-  go('chat');
-}
 function sendMsg(){
   var i=document.getElementById('chat-in');
   if(i.value.trim()){
@@ -1307,3 +1304,95 @@ document.addEventListener('DOMContentLoaded',function(){
     }catch(e){go(_skipSplash?'login':'splash');}
   },_skipSplash?100:500);
 });
+
+/* ================= الصداقة الحقيقية 👭 ================= */
+async function frMe(){var u=await sbUser();return u?u.id:null;}
+function frCard(p,btnHtml){
+  var av=p.avatar_emoji||'🌸';
+  return '<div class="svc"><div class="avatar" style="width:56px;height:56px;font-size:26px">'+av+'</div>'
+    +'<div style="flex:1"><h4>'+escapeHtml(p.full_name||'بنت الكوكب')+(p.wilaya?' • '+escapeHtml(p.wilaya):'')+'</h4>'
+    +'<p>'+escapeHtml(p.bio||'عضوة في الكوكب 🪐')+'</p>'
+    +'<div class="row">'+btnHtml+'</div></div></div>';
+}
+async function frProfiles(ids){
+  var m={};if(!ids.length||!SB)return m;
+  try{var r=await SB.from('kb_profiles').select('id,full_name,wilaya,avatar_emoji,bio').in('id',ids);
+  (r.data||[]).forEach(function(p){m[p.id]=p;});}catch(e){}
+  return m;
+}
+async function sendFriendReq(toId,btn){
+  try{
+    var me=await frMe();if(!me){toast('سجلي الدخول أولا 🔑');return;}
+    if(btn){btn.disabled=true;btn.textContent='⏳';}
+    var r=await SB.from('kb_friendships').insert({from_id:me,to_id:toId});
+    if(r.error)throw r.error;
+    if(btn){btn.textContent='✅ تم الإرسال';btn.style.background='#9a8a97';}
+    toast('تبعث الطلب 💖');
+  }catch(e){
+    if(btn){btn.disabled=false;btn.textContent='👭 أضيفيها';}
+    var m=String((e&&e.message)||'');
+    toast(m.indexOf('duplicate')>-1||m.indexOf('unique')>-1?'الطلب مبعوث من قبل ✅':'تعذر الإرسال 📡');
+  }
+}
+async function acceptFriend(fid,btn){
+  try{
+    if(btn){btn.disabled=true;btn.textContent='⏳';}
+    var r=await SB.from('kb_friendships').update({status:'accepted'}).eq('id',fid);
+    if(r.error)throw r.error;
+    toast('وليتو صديقات 👭💖');await loadFriendsTab();
+  }catch(e){toast('تعذر القبول 📡');if(btn){btn.disabled=false;btn.textContent='قبول ✅';}}
+}
+async function rejectFriend(fid,btn){
+  try{
+    var r=await SB.from('kb_friendships').update({status:'rejected'}).eq('id',fid);
+    if(r.error)throw r.error;await loadFriendsTab();
+  }catch(e){toast('تعذر الرفض 📡');}
+}
+async function loadFriendsTab(){
+  var rq=document.getElementById('fr-requests');if(!rq)return;
+  var fl=document.getElementById('fr-list'),sg=document.getElementById('fr-suggest');
+  var me=await frMe();if(!me||!SB){rq.innerHTML='<p style="color:var(--muted);font-size:13px">سجلي الدخول أولا 🔑</p>';return;}
+  rq.innerHTML='<p style="color:var(--muted);font-size:13px">⏳ نحمل...</p>';fl.innerHTML='';sg.innerHTML='';
+  try{
+    var rel=await SB.from('kb_friendships').select('*').or('from_id.eq.'+me+',to_id.eq.'+me);
+    var rows=rel.data||[],known={},inc=[],frIds=[];
+    known[me]=1;
+    rows.forEach(function(x){
+      known[x.from_id]=1;known[x.to_id]=1;
+      if(x.status==='pending'&&x.to_id===me)inc.push(x);
+      if(x.status==='accepted')frIds.push(x.from_id===me?x.to_id:x.from_id);
+    });
+    var pm=await frProfiles(inc.map(function(x){return x.from_id;}).concat(frIds));
+    var c=document.getElementById('fr-count');if(c)c.textContent=inc.length||'';
+    rq.innerHTML=inc.length?inc.map(function(x){
+      var p=pm[x.from_id]||{};
+      return frCard(p,'<button class="btn" onclick="acceptFriend(\''+x.id+'\',this)">قبول ✅</button><button class="btn ghost" onclick="rejectFriend(\''+x.id+'\',this)">رفض</button>');
+    }).join(''):'<p style="color:var(--muted);font-size:13px">ما كاش طلبات جديدة 💤</p>';
+    fl.innerHTML=frIds.length?frIds.map(function(id){
+      var p=pm[id]||{};
+      return frCard(p,'<button class="btn" onclick="openChat(\''+escapeHtml(p.full_name||'صديقة').replace(/'/g,"\\'")+'\',\''+(p.avatar_emoji||'🌸')+'\',\''+id+'\')">💬 محادثة</button>');
+    }).join(''):'<p style="color:var(--muted);font-size:13px">ما عندكش صديقات بعد — أضيفي من لتحت 👇</p>';
+    var s=await SB.from('kb_profiles').select('id,full_name,wilaya,avatar_emoji,bio,is_banned,verification_status').eq('verification_status','approved').neq('id',me).limit(30);
+    var list=(s.data||[]).filter(function(p){return !known[p.id]&&p.is_banned!==true;}).slice(0,8);
+    var html=list.length?list.map(function(p){
+      return frCard(p,'<button class="btn" onclick="event.stopPropagation();sendFriendReq(\''+p.id+'\',this)">👭 أضيفيها</button>');
+    }).join(''):'<p style="color:var(--muted);font-size:13px">ما كاش اقتراحات دروك ✨</p>';
+    sg.innerHTML=html;
+    var fs=document.getElementById('fr-discover');if(fs)fs.innerHTML=html;
+  }catch(e){rq.innerHTML='<p style="color:var(--muted);font-size:13px">تعذر التحميل 📡</p>';}
+}
+/* بوابة المحادثة 🔒: غير بعد القبول المتبادل */
+function openChat(name,emoji,uid){
+  (async function(){
+    if(uid&&SB){
+      try{
+        var me=await frMe();
+        var r=await SB.rpc('kb_are_friends',{a:me,b:uid});
+        if(!r.data){toast('🔒 المحادثة تتفتح غير بعد ما تقبلو الصداقة');return;}
+      }catch(e){}
+    }
+    document.getElementById('chat-name').textContent=name;
+    document.getElementById('chat-ava').textContent=emoji;
+    go('chat');
+  })();
+}
