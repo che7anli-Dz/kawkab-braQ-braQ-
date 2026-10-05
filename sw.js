@@ -1,5 +1,5 @@
 /* كوكب برق برق — Service Worker بسيط */
-var CACHE = 'kawkab-bb-v5';
+var CACHE = 'kawkab-bb-v6';
 var ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function (e) {
