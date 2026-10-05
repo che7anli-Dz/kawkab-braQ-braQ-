@@ -524,7 +524,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
     <h1>أهلا بيك في الكوكب ✨</h1>
     <p>واش راح ديري اليوم يا ملكة؟</p>
   </div>
-  <div class="search">🔍 &nbsp; قلبي على منتج، خدمة، بنت...</div>
+  <div class="search" onclick="go('search')">🔍 &nbsp; قلبي على منتج، خدمة، بنت...</div>
   <div class="verify">🔒 مجتمع آمن: الدخول بالتحقق فقط — غير للبنات</div>
   <!-- القصص -->
   <div class="stories" id="story-row">
@@ -542,33 +542,28 @@ input[type=range]{width:100%;accent-color:var(--pink)}
     </div>
   </div>
   <div class="sec">
-    <div class="sec-title">🔥 تخفيضات الأسبوع</div>
-    <div class="grid">
-      <div class="prod" onclick="go('detail')"><div class="img" style="background:linear-gradient(135deg,#ffe0ec,#ffd6e8)">👗<span class="badge">-30%</span></div>
-        <div class="info"><h4>قفطان عصري</h4><div class="price">4,900 دج</div><div class="seller" style="cursor:pointer;color:var(--pink-d);font-weight:700" onclick="event.stopPropagation();openProfile('أمينة','الجزائر','👗 موضة • 🧵 خياطة يدوية','👗','👸 أميرة','home')">أمينة • الجزائر ⭐4.8</div></div></div>
-      <div class="prod" onclick="go('detail')"><div class="img" style="background:linear-gradient(135deg,#e9d5ff,#f5d0fe)">💄</div>
-        <div class="info"><h4>باليت مكياج أصلية</h4><div class="price">2,300 دج</div><div class="seller" style="cursor:pointer;color:var(--pink-d);font-weight:700" onclick="event.stopPropagation();openProfile('خديجة','وهران','💄 مكياج • 🧴 عناية بالبشرة','💄','⭐ نجمة','home')">خديجة • وهران ⭐4.9</div></div></div>
-    </div>
+    <div class="sec-title">🆕 جديد في السوق</div>
+    <div class="grid" id="home-deals"><p style="color:var(--muted);font-size:13px">⏳ نحمل...</p></div>
   </div>
   <div class="sec">
     <div class="challenge"><h3>🏆 تحدي الأسبوع</h3><p>أحسن ميكاب نهاري — صوتي لأحسن لوك والرابحة تربح شارة "نجمة الكوكب" ⭐</p>
-      <button class="btn" onclick="go('sahha')">شاركي دابا</button></div>
+      <button class="btn" onclick="openChallenge()">صوتي دابا 🗳️</button></div>
   </div>
 </div>
 
 <!-- السوق -->
 <div class="screen" id="souq">
   <div class="topbar"><span class="planet">🛍️</span><h1>السوق</h1><p>البيع باطل ديما 💖</p><button class="btn ghost" style="position:absolute;left:14px;top:14px;font-size:12px;padding:6px 12px" onclick="go('orders')">🛒 طلباتي</button></div>
-  <div class="search">🔍 &nbsp; قلبي في السوق...</div>
+  <div class="search" onclick="go('search')">🔍 &nbsp; قلبي في السوق...</div>
   <div class="store-choices">
     <div class="schoice" onclick="document.getElementById('souq-grid').scrollIntoView({behavior:'smooth'})"><div class="e">🛒</div><b>تشري؟</b><small>قلبي واشتري</small></div>
     <div class="schoice" onclick="go('sell')"><div class="e">💰</div><b>تبيعي؟</b><small>اعرضي منتجك باطل</small></div>
     <div class="schoice" onclick="document.getElementById('souq-grid').scrollIntoView({behavior:'smooth'})"><div class="e">👀</div><b>تسوقي؟</b><small>اكتشفي الجديد</small></div>
   </div>
   <div class="sec">
-    <div class="chips">
-      <div class="chip on">الكل</div><div class="chip">ملابس</div><div class="chip">مكياج</div>
-      <div class="chip">إكسسوارات</div><div class="chip">صناعة يدوية</div>
+    <div class="chips" id="souq-chips">
+      <div class="chip on" onclick="filterSouq('',this)">الكل</div><div class="chip" onclick="filterSouq('ملابس',this)">ملابس</div><div class="chip" onclick="filterSouq('مكياج',this)">مكياج</div>
+      <div class="chip" onclick="filterSouq('إكسسوارات',this)">إكسسوارات</div><div class="chip" onclick="filterSouq('صناعة يدوية',this)">صناعة يدوية</div>
     </div>
     <div class="grid" id="souq-grid">
       <div class="prod" onclick="go('detail')"><div class="img" style="background:linear-gradient(135deg,#ffe0ec,#ffd6e8)">👗<span class="badge">جديد</span></div>
@@ -611,16 +606,22 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 <!-- الخدمات -->
 <div class="screen" id="services">
   <div class="topbar"><span class="planet">💅</span><h1>الخدمات</h1><p>من بنت... لبنت 💖</p><button class="btn ghost" style="position:absolute;left:14px;top:14px;font-size:12px;padding:6px 12px" onclick="go('mybookings')">📅 حجوزاتي</button></div>
-  <div class="search">🔍 &nbsp; قلبي على خدمة في ولايتك...</div>
+  <div class="search" onclick="go('search')">🔍 &nbsp; قلبي على خدمة في ولايتك...</div>
   <div class="sec">
-    <div class="svc"><div class="ico">💇‍♀️</div><div style="flex:1"><h4>كوافيرة — صالون لمسة</h4><p>ياسمين • الجزائر ⭐ 4.9</p>
-      <div class="row"><span class="price">ابتداء من 1,500 دج</span><button class="btn" onclick="openBooking('كوافيرة — صالون لمسة','ياسمين')">احجزي 📅</button></div></div></div>
-    <div class="svc"><div class="ico">🧵</div><div style="flex:1"><h4>خياطة عصرية وتقليدية</h4><p>فاطمة • البليدة ⭐ 5.0</p>
-      <div class="row"><span class="price">حسب الموديل</span><button class="btn" onclick="openBooking('خياطة عصرية وتقليدية','فاطمة')">احجزي 📅</button></div></div></div>
-    <div class="svc"><div class="ico">💄</div><div style="flex:1"><h4>ميكاب أرتيست للأفراح</h4><p>نورهان • وهران ⭐ 4.7</p>
-      <div class="row"><span class="price">ابتداء من 5,000 دج</span><button class="btn" onclick="openBooking('ميكاب أرتيست للأفراح','نورهان')">احجزي 📅</button></div></div></div>
-    <div class="svc"><div class="ico">📚</div><div style="flex:1"><h4>دروس دعم رياضيات</h4><p>هبة • عنابة ⭐ 4.8</p>
-      <div class="row"><span class="price">800 دج / حصة</span><button class="btn" onclick="openBooking('دروس دعم رياضيات','هبة')">احجزي 📅</button></div></div></div>
+    <button class="btn block" onclick="openAddService()" style="margin-bottom:12px">💅 أضيفي خدمتك</button>
+    <div id="services-list"><p style="color:var(--muted);font-size:13px">⏳ نحمل الخدمات...</p></div>
+  </div>
+</div>
+
+<!-- نافذة إضافة خدمة -->
+<div id="svc-modal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeAddService()">
+  <div style="background:#fff;border-radius:20px;padding:22px;width:100%;max-width:380px">
+    <h3 style="margin-bottom:14px">💅 خدمة جديدة</h3>
+    <div class="field"><label>عنوان الخدمة</label><input id="svc-title" placeholder="مثلا: كوافيرة عرايس" style="width:100%;border:2px solid #ffe0ec;border-radius:12px;padding:11px;font-family:inherit"></div>
+    <div class="field"><label>الوصف</label><textarea id="svc-desc" rows="2" placeholder="واش تقدمي بالضبط..." style="width:100%;border:2px solid #ffe0ec;border-radius:12px;padding:11px;font-family:inherit"></textarea></div>
+    <div class="field"><label>السعر</label><input id="svc-price" placeholder="مثلا: 2000 دج" style="width:100%;border:2px solid #ffe0ec;border-radius:12px;padding:11px;font-family:inherit"></div>
+    <div class="field"><label>الولاية</label><input id="svc-wilaya" placeholder="ولايتك" style="width:100%;border:2px solid #ffe0ec;border-radius:12px;padding:11px;font-family:inherit"></div>
+    <div style="display:flex;gap:8px;margin-top:6px"><button class="btn" style="flex:1" onclick="submitService()">نشر الخدمة ✅</button><button class="btn ghost" onclick="closeAddService()">إلغاء</button></div>
   </div>
 </div>
 
@@ -645,7 +646,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 <div class="screen" id="sahha">
   <div class="topbar"><span class="planet">💬</span><h1>المجتمع</h1><p>هدرة البنات... بلا رقابة 😌</p></div>
   <div class="sec">
-    <div class="challenge"><h3>🏆 تحدي الأسبوع: أحسن ميكاب نهاري</h3><p>342 بنت مشاركة • التصويت يخلص في يومين</p>
+    <div class="challenge"><h3>🏆 تحدي الأسبوع: أحسن ميكاب نهاري</h3><p>صوتي للوك اللي عجبك 💖</p>
       <button class="btn" onclick="openChallenge()">صوتي وشاهدي المشاركات</button></div>
     <button class="btn block" onclick="go('post-new')" style="margin-bottom:12px">📝 نشري منشور</button>
     <div id="feed-list"></div>
@@ -655,7 +656,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 <!-- صداقة -->
 <div class="screen" id="friendship">
   <div class="topbar"><span class="planet">👭</span><h1>صداقة</h1><p>تعرفي على بنات كيفك 💖</p></div>
-  <div class="search">🔍 &nbsp; قلبي بالولاية ولا الاهتمام...</div>
+  <div class="search" onclick="go('search')">🔍 &nbsp; قلبي بالولاية ولا الاهتمام...</div>
   <div class="verify">🔒 المحادثة تتفتح غير بعد ما تقبلو بعضاكم — بلا إزعاج</div>
   <div class="sec">
     <div id="fr-discover"><p style="color:var(--muted);font-size:13px">⏳ نحمل...</p></div>
@@ -693,10 +694,10 @@ input[type=range]{width:100%;accent-color:var(--pink)}
       <div class="actions"><span>❤️ 96</span><span>💬 21</span><span>↗️</span></div></div>
   </div>
   <div class="menu">
-    <a>📅 <span>حجوزاتي</span></a>
+    <a onclick="go('mybookings')">📅 <span>حجوزاتي</span></a>
     <a onclick="openWallet()">💰 <span>رصيدي</span></a>
     <a onclick="openBoost()">🚀 <span>روّجي منتجك</span></a>
-    <a>👭 <span>جيبي صاحبتك</span></a>
+    <a onclick="shareApp()">👭 <span>جيبي صاحبتك</span></a>
     <a onclick="openSettings()">⚙️ <span>الإعدادات</span></a>
   </div>
 </div>
@@ -882,7 +883,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
       <a onclick="shareApp()">↗️ <span>شاركي التطبيق</span></a>
       <a onclick="doLogout()">🚪 <span>تسجيل الخروج</span></a>
     </div>
-    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v34</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
+    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v36</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
   </div>
 </div>
 
@@ -927,9 +928,9 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 <!-- الرصيد -->
 <div id="w-modal" style="display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);align-items:center;justify-content:center;padding:20px" onclick="if(event.target===this)closeWallet()">
   <div style="background:#fff;border-radius:20px;padding:26px;width:100%;max-width:340px;text-align:center">
-    <div style="font-size:48px">💰</div>
-    <h3>رصيدك: 0 دج</h3>
-    <p style="color:var(--muted);font-size:13px;margin:10px 0 16px">دخلي صاحباتك للكوكب واربحي نقاط وشارات ⭐<br>كل صاحبة تدخل = 100 نقطة 🎉</p>
+    <div style="font-size:48px">💖</div>
+    <h3>جيبي صاحباتك للكوكب</h3>
+    <p style="color:var(--muted);font-size:13px;margin:10px 0 16px">كل ما الكوكب يكبر بيكم، كل ما السوق يحلى 🪐<br>شاركي الرابط مع صاحباتك!</p>
     <button class="btn block" onclick="closeWallet();shareApp()">دعي صاحباتك 💖</button>
     <button class="btn ghost block" style="margin-top:8px" onclick="closeWallet()">إغلاق</button>
   </div>
@@ -1149,6 +1150,6 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 </nav>
 
 </div>
-<script src="app.js?v=34"></script>
+<script src="app.js?v=36"></script>
 </body>
 </html>
