@@ -1345,6 +1345,13 @@ document.addEventListener('DOMContentLoaded',function(){
 
 /* ================= الصداقة الحقيقية 👭 ================= */
 async function frMe(){var u=await sbUser();return u?u.id:null;}
+async function areFriends(a,b){
+  try{
+    var r=await SB.from('kb_friendships').select('id').eq('status','accepted')
+      .or('and(from_id.eq.'+a+',to_id.eq.'+b+'),and(from_id.eq.'+b+',to_id.eq.'+a+')').limit(1);
+    return !!(r.data&&r.data.length);
+  }catch(e){return false;}
+}
 function frCard(p,btnHtml){
   var av=p.avatar_emoji||'🌸';
   return '<div class="svc"><div class="avatar" style="width:56px;height:56px;font-size:26px">'+av+'</div>'
@@ -1430,8 +1437,7 @@ function openChat(name,emoji,uid){
     if(uid&&SB){
       try{
         var me=await frMe();
-        var r=await SB.rpc('kb_are_friends',{a:me,b:uid});
-        if(!r.data){toast('🔒 المحادثة تتفتح غير بعد ما تقبلو الصداقة');return;}
+        if(!(await areFriends(me,uid))){toast('🔒 المحادثة تتفتح غير بعد ما تقبلو الصداقة');return;}
       }catch(e){}
     }
     document.getElementById('chat-name').textContent=name;
@@ -1719,8 +1725,7 @@ async function chatSeller(){
   try{
     var sp=await SB.from('kb_profiles').select('full_name,avatar_emoji').eq('id',_curProduct.seller_id).single();
     var nm=(sp.data&&sp.data.full_name)||'البائعة',em=(sp.data&&sp.data.avatar_emoji)||'🌸';
-    var fr=await SB.rpc('kb_are_friends',{a:me,b:_curProduct.seller_id});
-    if(!fr.data){
+    if(!(await areFriends(me,_curProduct.seller_id))){
       if(confirm('💬 باش تراسلي البائعة لازم تكونو صديقات أولا.\nنبعثولها طلب صداقة دروك؟')){
         await SB.from('kb_friendships').insert({from_id:me,to_id:_curProduct.seller_id});
         toast('تبعث طلب الصداقة 👭');
