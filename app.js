@@ -124,7 +124,7 @@ function go(id){
   document.getElementById(id).classList.add('active');
   var main=['home','friends','video','souq','menu'];
   var isMain=main.indexOf(id)>-1;
-  document.querySelector('.phone').classList.toggle('withutil',isMain);
+  document.querySelector('.phone').classList.toggle('withutil',isMain&&id!=='video');
   document.getElementById('navbar').style.display=isMain?'flex':'none';
   document.getElementById('fab').style.display=isMain?'block':'none';
   var _noBack=['splash','login','signup','verify-email','quiz','quiz-pass','voice','pending','chat'];
