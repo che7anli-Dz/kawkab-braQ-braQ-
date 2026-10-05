@@ -14,6 +14,7 @@ async function sbUser(){
 function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function go(id){
   try{window.scrollTo(0,0);}catch(e){}
+  setTimeout(function(){try{window.scrollTo(0,0);}catch(e){}},120);
   var main=['home','friends','video','souq','menu'];
   if(SB&&main.indexOf(id)>-1&&!_verified){go('splash');return;}
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
