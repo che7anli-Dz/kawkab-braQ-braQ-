@@ -592,13 +592,19 @@ function rnTrimInit(dur){
   var mx=Math.max(1,Math.floor(dur));
   s.max=mx;e.max=mx;s.value=0;e.value=mx;
   document.getElementById('rn-trim').style.display='block';
+  var v=document.querySelector('#rn-prev video');
+  if(v){v.ontimeupdate=function(){
+    if(_trimE>_trimS&&v.currentTime>=_trimE){try{v.currentTime=_trimS;}catch(e){}}
+  };}
   updTrimLab();
 }
 function updTrimLab(){
   _trimS=parseFloat(document.getElementById('rn-ts').value)||0;
   _trimE=parseFloat(document.getElementById('rn-te').value)||_vidDur;
   if(_trimE<=_trimS)_trimE=_trimS+1;
-  document.getElementById('rn-trim-lab').textContent=fmtT(_trimS)+' - '+fmtT(_trimE);
+  document.getElementById('rn-trim-lab').textContent='▶ '+fmtT(_trimS)+' - '+fmtT(_trimE);
+  var v=document.querySelector('#rn-prev video');
+  if(v){try{v.currentTime=_trimS;}catch(e){}v.play().catch(function(){});}
 }
 function fmtT(s){s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
 /* ===== باحث الأغاني 🎶 (كيما انستغرام) ===== */
@@ -712,9 +718,10 @@ async function publishReel(){
   }catch(e){toast('تعذر النشر: '+e.message);}
   btn.disabled=false;btn.textContent='نشر الريلز 🚀';
 }
-function reelCard(x,name){
+function reelCard(x,name,isMine){
   var d=document.createElement('div');
   d.className='reelv';d.dataset.id=x.id;
+  d.dataset.path=x.video_url||'';
   d.dataset.yt=x.music_youtube_id||'';
   d.dataset.mp=x.music_preview_url||'';
   d.dataset.ms=x.music_start||0;
@@ -736,6 +743,8 @@ function reelCard(x,name){
     '<button onclick="likeReel(\''+x.id+'\',this)">'+(liked?'❤️':'🤍')+'<span>'+(x.likes_count||0)+'</span></button>'+
     '<button onclick="openReelComments(\''+x.id+'\')">💬<span>'+(x.comments_count||0)+'</span></button>'+
     '<button onclick="reportReel(\''+x.id+'\')" style="font-size:16px">🚩</button>'+
+    (isMine?'<button onclick="editReelTitle(\''+x.id+'\',this)" style="font-size:16px">✏️</button>':'')+
+    (isMine?'<button onclick="delReel(\''+x.id+'\',this)" style="font-size:16px">🗑️</button>':'')+
     '</div>'+
     '<div class="reel-info"><b>'+escapeHtml(x.title||'')+'</b><small>@'+escapeHtml(name)+'</small></div>';
   d.addEventListener('click',function(e){
@@ -754,6 +763,31 @@ function reelCard(x,name){
     toggleReel(d);
   });
   return d;
+}
+async function delReel(id,btn){
+  if(!confirm('تمحي هاذ الريلز نهائيا؟ 🗑️'))return;
+  try{
+    var card=btn.closest('.reelv');
+    var path=card?card.dataset.path:'';
+    var r=await SB.from('kb_reels').delete().eq('id',id);
+    if(r.error)throw r.error;
+    if(path&&path.indexOf('http')!==0){try{await SB.storage.from('kb-reels').remove([path]);}catch(e){}}
+    if(card)card.remove();
+    toast('تمحى الريلز 🗑️');
+  }catch(e){toast('تعذر المسح: '+e.message);}
+}
+async function editReelTitle(id,btn){
+  var card=btn.closest('.reelv');
+  var cur=card&&card.querySelector('.reel-info b')?card.querySelector('.reel-info b').textContent:'';
+  var t=prompt('✏️ عدلي العنوان:',cur);
+  if(t===null)return;
+  t=t.trim().slice(0,80);
+  try{
+    var r=await SB.from('kb_reels').update({title:t}).eq('id',id);
+    if(r.error)throw r.error;
+    if(card&&card.querySelector('.reel-info b'))card.querySelector('.reel-info b').textContent=t;
+    toast('تعدل العنوان ✏️');
+  }catch(e){toast('تعذر التعديل: '+e.message);}
 }
 function toggleReel(d){
   var v=d.querySelector('video');
@@ -855,7 +889,8 @@ async function loadReels(force){
       try{var pr=await SB.from('kb_profiles').select('id,full_name').in('id',ids);
         if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x.full_name;});}catch(e){}
       feed.innerHTML='';
-      rows.forEach(function(x){feed.appendChild(reelCard(x,names[x.author_id]||'بنت الكوكب'));});
+      var _me=null;try{_me=await frMe();}catch(e){}
+      rows.forEach(function(x){feed.appendChild(reelCard(x,names[x.author_id]||'بنت الكوكب',_me&&_me===x.author_id));});
     }
     _reelsLoaded=true;
     observeReels();
