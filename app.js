@@ -164,7 +164,7 @@ function handlePhoto(input,idx){
   var f=input.files&&input.files[0]; if(!f)return;
   window._pFiles=window._pFiles||{}; window._pFiles[idx]=f;
   var url=URL.createObjectURL(f);
-  document.getElementById('phv'+idx).innerHTML='<img src="'+url+'" style="width:100%;height:100%;object-fit:cover">';
+  document.getElementById('phv'+idx).innerHTML='<img loading="lazy" src="'+url+'" style="width:100%;height:100%;object-fit:cover">';
   if(idx===1)firstPhoto=url;
 }
 function toast(t){
@@ -202,7 +202,7 @@ async function publishProduct(){
     }catch(e){toast('تعذر الحفظ في القاعدة — تحققي من الاتصال 📡');}
   }
   if(!realSaved){toast('ما تنشرش المنتج — عاودي حاولي 📡');return;}
-  var imgHtml=firstPhoto?'<img src="'+firstPhoto+'" style="width:100%;height:100%;object-fit:cover">':'🛍️';
+  var imgHtml=firstPhoto?'<img loading="lazy" src="'+firstPhoto+'" style="width:100%;height:100%;object-fit:cover">':'🛍️';
   var d=document.createElement('div'); d.className='prod';
   d.onclick=(function(pid){return function(){openProduct(pid);};})(_newProductId);
   d.innerHTML='<div class="img" style="background:linear-gradient(135deg,#ffe0ec,#e9d5ff);overflow:hidden">'+imgHtml+'<span class="badge">'+cond+'</span></div><div class="info"><h4>'+escapeHtml(name)+'</h4><div class="price">'+(price?escapeHtml(price)+' دج':'السعر عند التواصل')+'</div><div class="seller">'+escapeHtml((_profile&&_profile.full_name)||'لينا')+' • '+escapeHtml(wilaya)+'</div></div>';
@@ -875,7 +875,7 @@ function reelCard(x,name,isMine,ava){
   var fc=FILTERCSS[x.photo_filter]||'none';
   var media=x.media_type==='photo'
     ?'<img class="wfull" src="'+reelUrl(x.video_url)+'" loading="lazy" alt="" style="filter:'+fc+'">'
-    :'<video src="'+reelUrl(x.video_url)+'" playsinline loop preload="metadata" style="filter:'+fc+'"></video>';
+    :'<video data-src="'+reelUrl(x.video_url)+'" playsinline loop preload="none" style="filter:'+fc+';background:#1a1a2e"></video>';
   var liked=_likedReels[x.id];
   var mt=x.music_title?('🎵 '+x.music_title):(x.music_youtube_id?'🎵 موسيقى':'');
   if(mt.length>24)mt=mt.slice(0,24)+'…';
@@ -1020,6 +1020,7 @@ function observeReels(){
     es.forEach(function(en){
       var d=en.target,v=d.querySelector('video');
       if(en.isIntersecting&&en.intersectionRatio>=0.55){
+        if(v&&!v.src&&v.dataset.src){v.src=v.dataset.src;v.load();}
         if(v&&v.paused)toggleReel(d);
         else if(!v&&d.dataset.playing!=='1')toggleReel(d);
       }else if(!en.isIntersecting){
@@ -1030,31 +1031,51 @@ function observeReels(){
   },{threshold:[0,0.55,1]});
   document.querySelectorAll('#reels-feed .reelv').forEach(function(d){_reelObs.observe(d);});
 }
+var _reelsPage=0,_reelsDone=false,_reelsLoading=false;
 async function loadReels(force){
-  if(!SB||(_reelsLoaded&&!force))return;
+  if(!SB||_reelsLoading)return;
+  if(_reelsLoaded&&!force)return;
+  if(force){_reelsPage=0;_reelsDone=false;}
+  _reelsLoading=true;
   var feed=document.getElementById('reels-feed');
   try{
-    var r=await SB.from('kb_reels').select('id,author_id,video_url,title,media_type,music_youtube_id,music_preview_url,music_title,music_start,likes_count,comments_count,photo_filter,trim_start,trim_end').order('created_at',{ascending:false}).limit(30);
+    var r=await SB.from('kb_reels').select('id,author_id,video_url,title,media_type,music_youtube_id,music_preview_url,music_title,music_start,likes_count,comments_count,photo_filter,trim_start,trim_end').order('created_at',{ascending:false}).range(_reelsPage*10,_reelsPage*10+9);
     if(r.error)throw r.error;
     var rows=r.data||[];
-    if(!rows.length){
+    if(_reelsPage===0&&!rows.length){
       feed.innerHTML='<div style="text-align:center;padding:44px 20px;color:var(--muted)">'+
         '<div style="font-size:52px">🎬</div><br>ما كاش ريلز بعد<br>كوني أول وحدة تنشر! 💖<br><br>'+
         '<button class="btn" onclick="go(\'reel-new\')">نشر أول ريلز 🚀</button></div>';
-    }else{
+    }else if(rows.length){
       var ids=[];rows.forEach(function(x){if(ids.indexOf(x.author_id)<0)ids.push(x.author_id);});
       var names={};
       try{var pr=await SB.from('kb_profiles').select('id,full_name,avatar_emoji,avatar_url').in('id',ids);
         if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]={n:x.full_name,a:x.avatar_emoji,u:x.avatar_url};});}catch(e){}
-      feed.innerHTML='';
+      if(_reelsPage===0)feed.innerHTML='';
       var _me=null;try{_me=await frMe();}catch(e){}
       rows.forEach(function(x){var nm=names[x.author_id]||{n:'بنت الكوكب',a:'🌸'};feed.appendChild(reelCard(x,nm.n,_me&&_me===x.author_id,avaHtml(nm)));});
-    }
+      _reelsPage++;
+      if(rows.length<10)_reelsDone=true;
+    }else{_reelsDone=true;}
     _reelsLoaded=true;
-    observeReels();
+    _reelsLoading=false;
+    observeReels();initReelScroll();
   }catch(e){
+    _reelsLoading=false;
     if(!_reelsLoaded)feed.innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">تعذر التحميل — تحققي من الاتصال</p>';
   }
+}
+// تمرير لانهائي للريلز
+var _reelScrollT=null;
+function initReelScroll(){
+  var feed=document.getElementById('reels-feed');if(!feed||feed._scInit)return;feed._scInit=true;
+  feed.addEventListener('scroll',function(){
+    if(_reelScrollT)clearTimeout(_reelScrollT);
+    _reelScrollT=setTimeout(function(){
+      if(_reelsDone||_reelsLoading)return;
+      if(feed.scrollTop+feed.clientHeight>feed.scrollHeight-800)loadReels(false);
+    },200);
+  });
 }
 /* ===== يومياتي 📖 (ستوري كيما انستغرام) ===== */
 var _stFile=null,_stType='photo',_stFilter='none',_stMusic=null;
@@ -1224,7 +1245,7 @@ async function loadStories(force){
     var mthumb=mine.length
       ?(mine[0].media_type==='video'
         ?'<video src="'+storyUrl(mine[0].media_url)+'" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;border-radius:13px"></video>'
-        :'<img src="'+storyUrl(mine[0].media_url)+'" style="width:100%;height:100%;object-fit:cover;border-radius:13px">')
+        :'<img loading="lazy" src="'+storyUrl(mine[0].media_url)+'" style="width:100%;height:100%;object-fit:cover;border-radius:13px">')
       :'<span style="font-size:36px">＋</span>';
     add.innerHTML='<div class="im" style="position:relative;overflow:hidden;'+(mine.length?'':'background:#fbe9f1;border-style:dashed')+'">'+mthumb+
       '<span style="position:absolute;bottom:4px;left:4px;background:var(--pink);color:#fff;width:24px;height:24px;border-radius:50%;font-size:15px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;z-index:2">＋</span></div><div class="nm">يومياتي 📷</div>';
@@ -1240,7 +1261,7 @@ async function loadStories(force){
       d.className='story';
       var th=s.media_type==='video'
         ?'<video src="'+storyUrl(s.media_url)+'" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;border-radius:13px"></video>'
-        :'<img src="'+storyUrl(s.media_url)+'" style="width:100%;height:100%;object-fit:cover;border-radius:13px">';
+        :'<img loading="lazy" src="'+storyUrl(s.media_url)+'" style="width:100%;height:100%;object-fit:cover;border-radius:13px">';
       d.innerHTML='<div class="im" style="overflow:hidden;padding:0">'+th+'</div><div class="nm">'+escapeHtml((s._aname||'بنت').split(' ')[0])+'</div>';
       (function(id){d.onclick=function(){openStoryViewer(id);};})(aid);
       row.appendChild(d);
@@ -1285,7 +1306,7 @@ function renderStory(){
     };
     v.play().catch(function(){startStoryTimer();});
   }else{
-    box.innerHTML='<img src="'+storyUrl(s.media_url)+'" style="width:100%;height:100%;object-fit:cover;filter:'+fc+'">';
+    box.innerHTML='<img loading="lazy" src="'+storyUrl(s.media_url)+'" style="width:100%;height:100%;object-fit:cover;filter:'+fc+'">';
     _stvDur=5000;
     startStoryTimer();
   }
