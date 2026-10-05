@@ -895,6 +895,10 @@ function reelCard(x,name,isMine,ava){
     (mt?'<small class="reel-mus">🎵 <i>'+escapeHtml(mt)+' — '+escapeHtml(mt)+'</i></small>':'')+'</div>'+
     (mt?'<div class="reel-disc'+(isPhoto?' paused':'')+'"></div>':'')+
     '<div class="reel-prog"><i></i></div>';
+  bindReelCard(d);
+  return d;
+}
+function bindReelCard(d){
   d.addEventListener('click',function(e){
     if(e.target.closest('.reel-side'))return;
     var now=Date.now();
@@ -910,7 +914,6 @@ function reelCard(x,name,isMine,ava){
     d._lt=now;
     toggleReel(d);
   });
-  return d;
 }
 async function delReel(id,btn){
   if(!confirm('تمحي هاذ الريلز نهائيا؟ 🗑️'))return;
@@ -1084,9 +1087,36 @@ function initReelScroll(){
   feed.addEventListener('scroll',function(){
     if(_reelScrollT)clearTimeout(_reelScrollT);
     _reelScrollT=setTimeout(function(){
-      if(_reelsDone||_reelsLoading)return;
-      if(feed.scrollTop+feed.clientHeight>feed.scrollHeight-800)loadReels(false);
-    },200);
+      if(_reelsLoading)return;
+      if(feed.scrollTop+feed.clientHeight<=feed.scrollHeight-800)return;
+      if(!_reelsDone){loadReels(false);return;}
+      // ♾️ كيما تيكتوك: الفيديوهات ما يكملوش — عاودي من الأول
+      var cards=feed.querySelectorAll('.reelv');
+      if(cards.length<2)return;
+      // نحي من الفوق باش ما يثقلش
+      while(feed.querySelectorAll('.reelv').length>=36){
+        var f0=feed.querySelector('.reelv');
+        var fh=f0.offsetHeight;
+        var fv=f0.querySelector('video');if(fv){try{fv.pause();}catch(e){}fv.removeAttribute('src');}
+        feed.removeChild(f0);
+        feed.scrollTop-=fh;
+      }
+      cards=feed.querySelectorAll('.reelv');
+      var n=Math.min(cards.length,10);
+      for(var i=0;i<n;i++){
+        var c=cards[i].cloneNode(true);
+        c._lt=0;
+        var cv=c.querySelector('video');
+        if(cv){cv.removeAttribute('src');}
+        var ch=c.querySelector('.reel-heart');if(ch)ch.classList.remove('boom');
+        var cp=c.querySelector('.reel-play');if(cp)cp.style.display='flex';
+        var cd=c.querySelector('.reel-disc');if(cd)cd.classList.add('paused');
+        c.dataset.playing='';
+        bindReelCard(c);
+        feed.appendChild(c);
+      }
+      observeReels();
+    },250);
   });
 }
 /* ===== يومياتي 📖 (ستوري كيما انستغرام) ===== */
