@@ -1,11 +1,47 @@
 
 /* ===== Supabase — الربط الحقيقي (مع fallback للوضع التجريبي) ===== */
 var SB=null;
+var SB_URL='https://chosrqzpuczmirrxmnkf.supabase.co';
+var SB_KEY='sb_publishable__e-8by0NKHyY-mnRowNtqg_zRr8Fq_q';
 try{
   if(typeof supabase!=='undefined'){
-    SB=supabase.createClient('https://chosrqzpuczmirrxmnkf.supabase.co','sb_publishable__e-8by0NKHyY-mnRowNtqg_zRr8Fq_q');
+    SB=supabase.createClient(SB_URL,SB_KEY);
   }
 }catch(e){SB=null;}
+/* رفع بتقدم حقيقي (كيما تيكتوك) عبر XMLHttpRequest */
+function uploadWithProgress(bucket,path,file,contentType,onProgress){
+  return new Promise(function(resolve,reject){
+    var done=false;
+    function fail(msg){if(!done){done=true;reject(new Error(msg));}}
+    try{
+      var xhr=new XMLHttpRequest();
+      xhr.open('POST',SB_URL+'/storage/v1/object/'+bucket+'/'+path);
+      xhr.setRequestHeader('apikey',SB_KEY);
+      xhr.setRequestHeader('x-upsert','false');
+      var to=setTimeout(function(){try{xhr.abort();}catch(e){}fail('الرفع طول بزاف ⏱️ جربي فيديو أصغر أو اتصال أقوى 📶');},180000);
+      SB.auth.getSession().then(function(s){
+        var token=(s.data&&s.data.session&&s.data.session.access_token)||SB_KEY;
+        xhr.setRequestHeader('Authorization','Bearer '+token);
+        if(contentType)xhr.setRequestHeader('Content-Type',contentType);
+        xhr.upload.onprogress=function(e){
+          if(e.lengthComputable&&onProgress){try{onProgress(Math.round(e.loaded/e.total*100));}catch(x){}}
+        };
+        xhr.onload=function(){
+          clearTimeout(to);
+          if(done)return;done=true;
+          if(xhr.status>=200&&xhr.status<300)resolve();
+          else{
+            var m='خطأ '+xhr.status;
+            try{var j=JSON.parse(xhr.responseText);if(j.message)m=j.message;}catch(x){}
+            reject(new Error(m));
+          }
+        };
+        xhr.onerror=function(){clearTimeout(to);fail('انقطع الاتصال أثناء الرفع 📡');};
+        xhr.send(file);
+      }).catch(function(){fail('تعذر التخويل 🔑');});
+    }catch(e){fail(e.message||'تعذر الرفع');}
+  });
+}
 var _profile=null;
 async function sbUser(){
   if(!SB)return null;
@@ -729,8 +765,11 @@ async function publishReel(){
     var u=await sbUser();if(!u)throw new Error('سجلي الدخول أولا');
     var ext=((_reelFile.name||'').split('.').pop()||(_reelType==='photo'?'jpg':'mp4')).toLowerCase().slice(0,4);
     var path=u.id+'/'+Date.now()+'.'+ext;
-    var up=await SB.storage.from('kb-reels').upload(path,_reelFile,{contentType:_reelFile.type||(_reelType==='photo'?'image/jpeg':'video/mp4')});
-    if(up.error)throw up.error;
+    btn.textContent='نرفعو... 0% ⏳';
+    await uploadWithProgress('kb-reels',path,_reelFile,_reelFile.type||(_reelType==='photo'?'image/jpeg':'video/mp4'),function(p){
+      btn.textContent='نرفعو... '+p+'% ⏳';
+    });
+    btn.textContent='ننشرو... 🚀';
     var ins=await SB.from('kb_reels').insert({author_id:u.id,video_url:path,
       title:document.getElementById('rn-title').value.trim(),
       media_type:_reelType,
