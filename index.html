@@ -1032,6 +1032,15 @@ async function doLogin(){
   try{
     var r=await SB.auth.signInWithPassword({email:e,password:p});
     if(r.error)throw r.error;
+    if(_wantClaim){
+      _wantClaim=false;
+      try{
+        var c=await SB.rpc('kb_claim_owner');
+        if(c.error)throw c.error;
+        _verified=true;await loadUserProfile();
+        toast('👑 راك مالك الكوكب دروك!');go('home');return;
+      }catch(ce){}
+    }
     if(await gateAndEnter())toast('مرحبا بيك في الكوكب 💖');
   }catch(err){toast('الدخول ما كملش: '+err.message);}
 }
@@ -1074,6 +1083,7 @@ async function sendVocal(){
 }
 /* ===== شفرة المالك: 4 ضغطات متتالية على اللوغو 👑 ===== */
 var _taps=[];
+var _wantClaim=false;
 async function secretTap(){
   var now=Date.now();
   _taps=_taps.filter(function(t){return now-t<2500;});
@@ -1084,7 +1094,7 @@ async function claimOwner(){
   if(!SB){toast('ما كاش اتصال');return;}
   try{
     var u=await sbUser();
-    if(!u){toast('أنشئي حسابك أولا 💖');go('signup');return;}
+    if(!u){_wantClaim=true;toast('سجل دخولك باش نفعل المالك 👑');go('login');return;}
     var r=await SB.rpc('kb_claim_owner');
     if(r.error)throw r.error;
     _verified=true;
