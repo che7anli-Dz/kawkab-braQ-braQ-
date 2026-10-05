@@ -844,8 +844,12 @@ async function publishReel(){
       music_title:_reelMusic?_reelMusic.title:null,
       music_artist:_reelMusic?_reelMusic.artist:null,
       music_start:_reelMusic?_reelMusic.start:0,
-      photo_filter:_reelFilter,trim_start:finalTS,trim_end:finalTE});
+      photo_filter:_reelFilter,trim_start:finalTS,trim_end:finalTE}).select('id');
     if(ins.error)throw ins.error;
+    var newId=ins.data&&ins.data[0]&&ins.data[0].id;
+    if(!newId)throw new Error('الحفظ ما تمش (بلا id)');
+    var chk=await SB.from('kb_reels').select('id').eq('id',newId).single();
+    if(chk.error)throw new Error('تنشر بصح ما يتقراش: '+chk.error.message);
     toast('تنشر الريلز 🎉');
     _reelFile=null;document.getElementById('rn-file').value='';
     document.getElementById('rn-title').value='';
@@ -855,7 +859,7 @@ async function publishReel(){
     document.getElementById('rn-mres').innerHTML='';
     document.getElementById('rn-edit').style.display='none';
     document.getElementById('rn-prev').innerHTML='<span style="font-size:15px;opacity:.75">📹 اختاري فيديو أو صورة</span>';
-    _reelsLoaded=false;go('video');
+    _reelsLoaded=false;go('video');setTimeout(function(){loadReels(true);},900);
   }catch(e){toast('تعذر النشر: '+e.message);}
   btn.disabled=false;btn.textContent='نشر الريلز 🚀';
 }
