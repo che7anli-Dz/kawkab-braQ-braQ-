@@ -1010,23 +1010,34 @@ async function uploadProfilePhoto(inp,type){
     try{var _op=await SB.from('kb_profiles').select(col).eq('id',u.id).single();
       if(_op.data)oldPath=_op.data[col]||'';}catch(e2){}
     var upd={};upd[col]=path;
+    // تشخيص مفصل
+    var _diag='uid:'+String(u.id).slice(0,8)+'|col:'+col;
     // 1) RPC يتجاوز RLS (security definer)
     var _saved=false;
     try{
       var _rr=await SB.rpc('kb_set_profile_photo',{p_col:col,p_path:path});
+      _diag+='|rpc_err:'+(_rr.error?String(_rr.error.message||_rr.error).slice(0,60):'none');
+      _diag+='|rpc_data:'+String(_rr.data);
       if(!_rr.error&&_rr.data===true)_saved=true;
-    }catch(e6){}
+    }catch(e6){_diag+='|rpc_catch:'+String(e6.message||e6).slice(0,60);}
     // 2) fallback: تحديث مباشر
     if(!_saved){
       var r=await SB.from('kb_profiles').update(upd).eq('id',u.id);
+      _diag+='|upd_err:'+(r.error?String(r.error.message||r.error).slice(0,60):'none');
       if(r.error)throw r.error;
     }
     // تحقق أن القاعدة حفظت فعلا
     try{
       var _vf=await SB.from('kb_profiles').select(col).eq('id',u.id).single();
-      var _saved=_vf.data?_vf.data[col]:'';
-      if(_saved!==path)throw new Error('ما تحفظتش في القاعدة');
-    }catch(e5){throw new Error('تعذر الحفظ: '+(e5.message||''));}
+      _diag+='|sel_err:'+(_vf.error?String(_vf.error.message||_vf.error).slice(0,60):'none');
+      var _savedV=_vf.data?_vf.data[col]:'';
+      _diag+='|got:'+String(_savedV).slice(0,40);
+      _diag+='|want:'+String(path).slice(0,40);
+      if(_savedV!==path)throw new Error('DIAG['+_diag+']');
+    }catch(e5){
+      if(String(e5.message||'').indexOf('DIAG[')===0)throw e5;
+      throw new Error('تعذر الحفظ: '+(e5.message||'')+' DIAG['+_diag+']');
+    }
     // تحديث مباشر بالرابط الجديد — مضمون
     try{
       _pvPaths[type]=path;
