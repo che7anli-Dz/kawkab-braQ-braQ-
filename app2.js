@@ -1001,11 +1001,16 @@ async function uploadProfilePhoto(inp,type){
     var u=await sbUser();if(!u)throw new Error('سجلي الدخول أولا');
     var ext=((f.name||'').split('.').pop()||'jpg').toLowerCase().slice(0,4);
     if(ext!=='jpg'&&ext!=='jpeg'&&ext!=='png'&&ext!=='webp')ext='jpg';
-    var path=u.id+'/'+type+'.'+ext;
+    var path=u.id+'/'+type+'_'+Date.now()+'.'+ext;
     await uploadWithProgress('kb-avatars',path,f,f.type||'image/jpeg',function(){});
-    var upd={};upd[type==='avatar'?'avatar_url':'cover_url']=path;
+    var col=type==='avatar'?'avatar_url':'cover_url';
+    var oldPath='';
+    try{var _op=await SB.from('kb_profiles').select(col).eq('id',u.id).single();
+      if(_op.data)oldPath=_op.data[col]||'';}catch(e2){}
+    var upd={};upd[col]=path;
     var r=await SB.from('kb_profiles').update(upd).eq('id',u.id);
     if(r.error)throw r.error;
+    if(oldPath&&oldPath!==path){try{await SB.storage.from('kb-avatars').remove([oldPath]);}catch(e3){}}
     toast(type==='avatar'?'تبدلات تصويرة البروفايل 📷✨':'تبدل الغلاف 🎨✨');
     loadOwnProfile(true);
   }catch(e){toast('تعذر الرفع: '+(e.message||'📡'));}
