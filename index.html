@@ -4,7 +4,23 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>كوكب برق برق 🪐</title>
+<script>
+/* إخفاء اللاندينغ فوريا للعائدين — قبل أول رسمة */
+try{
+  var _kbSkip=localStorage.getItem('kb_seen')==='1';
+  if(!_kbSkip){
+    for(var _i=0;_i<localStorage.length;_i++){
+      var _k=localStorage.key(_i);
+      if(_k&&_k.indexOf('sb-')===0&&_k.slice(-11)==='-auth-token'){
+        try{var _o=JSON.parse(localStorage.getItem(_k)||'null');if(_o&&_o.access_token){_kbSkip=true;break;}}catch(_e){}
+      }
+    }
+  }
+  if(_kbSkip)document.documentElement.className+=' kb-skip';
+}catch(_e2){}
+</script>
 <style>
+.kb-skip #splash{display:none!important}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{
   --pink:#ff4d94; --pink-d:#e0337c; --purple:#8b5cf6; --purple-d:#6d28d9;
