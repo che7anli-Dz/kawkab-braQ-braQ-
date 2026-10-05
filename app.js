@@ -8,6 +8,60 @@ try{
     SB=supabase.createClient(SB_URL,SB_KEY);
   }
 }catch(e){SB=null;}
+/* استخراج المقطع المختار مضغوطا (كيما تيكتوك) — يصغر الفيديو قبل الرفع */
+function extractClip(file,start,end,onTick){
+  return new Promise(function(resolve,reject){
+    try{
+      var v=document.createElement('video');
+      v.preload='auto';v.playsInline=true;v.muted=false;
+      v.src=URL.createObjectURL(file);
+      var dur=Math.max(1,end-start);
+      var to=setTimeout(function(){cleanup();reject(new Error('timeout'));},(dur+20)*1000);
+      function cleanup(){clearTimeout(to);try{URL.revokeObjectURL(v.src);}catch(e){}}
+      v.onloadedmetadata=function(){
+        var scale=Math.min(1,720/(v.videoWidth||1280));
+        var cw=Math.max(2,Math.round(v.videoWidth*scale/2)*2);
+        var ch=Math.max(2,Math.round(v.videoHeight*scale/2)*2);
+        var canvas=document.createElement('canvas');canvas.width=cw;canvas.height=ch;
+        var ctx=canvas.getContext('2d');
+        var cStream=null;
+        try{cStream=canvas.captureStream(30);}catch(e){cleanup();reject(e);return;}
+        try{
+          var vs=v.captureStream?v.captureStream():(v.mozCaptureStream?v.mozCaptureStream():null);
+          if(vs)vs.getAudioTracks().forEach(function(t){try{cStream.addTrack(t);}catch(x){}});
+        }catch(e){}
+        var mime='video/webm;codecs=vp9,opus';
+        if(typeof MediaRecorder==='undefined'||!MediaRecorder.isTypeSupported(mime))mime='video/webm';
+        var rec;
+        try{rec=new MediaRecorder(cStream,mime?{mimeType:mime,videoBitsPerSecond:2200000}:{videoBitsPerSecond:2200000});}
+        catch(e){cleanup();reject(e);return;}
+        var chunks=[];
+        rec.ondataavailable=function(e){if(e.data&&e.data.size)chunks.push(e.data);};
+        rec.onstop=function(){cleanup();resolve(new Blob(chunks,{type:'video/webm'}));};
+        v.currentTime=Math.max(0,start-0.2);
+        v.onseeked=function(){
+          v.onseeked=null;
+          var playP=v.play();
+          if(playP&&playP.catch)playP.catch(function(){v.muted=true;v.play().catch(function(){});});
+          var raf=0,t0=Date.now();
+          function draw(){
+            try{ctx.drawImage(v,0,0,cw,ch);}catch(e){}
+            if(onTick)onTick((Date.now()-t0)/1000);
+            raf=requestAnimationFrame(draw);
+          }
+          draw();
+          try{rec.start(500);}catch(e){cleanup();reject(e);return;}
+          setTimeout(function(){
+            cancelAnimationFrame(raf);
+            try{if(rec.state!=='inactive')rec.stop();}catch(e){cleanup();reject(e);}
+            try{v.pause();}catch(e){}
+          },dur*1000+500);
+        };
+      };
+      v.onerror=function(){cleanup();reject(new Error('video'));};
+    }catch(e){reject(e);}
+  });
+}
 /* رفع بتقدم حقيقي (كيما تيكتوك) عبر XMLHttpRequest */
 function uploadWithProgress(bucket,path,file,contentType,onProgress){
   return new Promise(function(resolve,reject){
@@ -763,10 +817,23 @@ async function publishReel(){
   var btn=document.getElementById('rn-pub');btn.disabled=true;btn.textContent='ننشرو... ⏳';
   try{
     var u=await sbUser();if(!u)throw new Error('سجلي الدخول أولا');
-    var ext=((_reelFile.name||'').split('.').pop()||(_reelType==='photo'?'jpg':'mp4')).toLowerCase().slice(0,4);
+    var fileToUpload=_reelFile,finalTS=_trimS,finalTE=_reelType==='video'?_trimE:0;
+    var ctype=_reelFile.type||(_reelType==='photo'?'image/jpeg':'video/mp4');
+    if(_reelType==='video'&&_reelFile.size>8*1024*1024){
+      btn.textContent='نجهزو الفيديو... ⏳';
+      try{
+        var _t0=Date.now();
+        var blob=await extractClip(_reelFile,_trimS,_trimE,function(sec){
+          btn.textContent='نجهزو الفيديو... '+Math.floor(sec)+'s ⏳';
+        });
+        fileToUpload=new File([blob],'clip.webm',{type:'video/webm'});
+        ctype='video/webm';finalTS=0;finalTE=0;
+      }catch(e){/* نكمل بالملف الأصلي */}
+    }
+    var ext=((fileToUpload.name||'').split('.').pop()||'mp4').toLowerCase().slice(0,4);
     var path=u.id+'/'+Date.now()+'.'+ext;
     btn.textContent='نرفعو... 0% ⏳';
-    await uploadWithProgress('kb-reels',path,_reelFile,_reelFile.type||(_reelType==='photo'?'image/jpeg':'video/mp4'),function(p){
+    await uploadWithProgress('kb-reels',path,fileToUpload,ctype,function(p){
       btn.textContent='نرفعو... '+p+'% ⏳';
     });
     btn.textContent='ننشرو... 🚀';
@@ -777,7 +844,7 @@ async function publishReel(){
       music_title:_reelMusic?_reelMusic.title:null,
       music_artist:_reelMusic?_reelMusic.artist:null,
       music_start:_reelMusic?_reelMusic.start:0,
-      photo_filter:_reelFilter,trim_start:_trimS,trim_end:_reelType==='video'?_trimE:0});
+      photo_filter:_reelFilter,trim_start:finalTS,trim_end:finalTE});
     if(ins.error)throw ins.error;
     toast('تنشر الريلز 🎉');
     _reelFile=null;document.getElementById('rn-file').value='';
