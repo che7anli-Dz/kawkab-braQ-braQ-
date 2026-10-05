@@ -71,7 +71,7 @@ function uploadWithProgress(bucket,path,file,contentType,onProgress){
       var xhr=new XMLHttpRequest();
       xhr.open('POST',SB_URL+'/storage/v1/object/'+bucket+'/'+path);
       xhr.setRequestHeader('apikey',SB_KEY);
-      xhr.setRequestHeader('x-upsert','false');
+      xhr.setRequestHeader('x-upsert','true');
       var to=setTimeout(function(){try{xhr.abort();}catch(e){}fail('الرفع طول بزاف ⏱️ جربي فيديو أصغر أو اتصال أقوى 📶');},180000);
       SB.auth.getSession().then(function(s){
         var token=(s.data&&s.data.session&&s.data.session.access_token)||SB_KEY;
