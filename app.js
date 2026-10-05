@@ -134,6 +134,7 @@ function go(id){
   if(id==='souq'){loadProducts(false);}
   if(id==='video'){loadReels(false);}
   if(id==='home'){loadStories(false);loadHomeDeals(false);}
+  if(id==='services'){loadServices(false);}
   if(id==='sahha'){loadFeed(false);}
   if(id==='friends'){loadFriendsTab();}
   if(id==='friendship'){loadFriendsTab();}
@@ -202,15 +203,16 @@ async function publishProduct(){
           if(pub.data&&pub.data.publicUrl)photoUrls.push(pub.data.publicUrl);
         }
       }
-      var ins=await SB.from('kb_products').insert({seller_id:me.id,name:name,description:desc,price:price||null,category:cat,wilaya:wilaya,condition:cond,photos:photoUrls,status:'active'});
-      if(ins.error)throw ins.error;
-      _productsLoaded=false; realSaved=true;
+      var ins=await SB.from('kb_products').insert({seller_id:me.id,name:name,description:desc,price:price||null,category:cat,wilaya:wilaya,condition:cond,photos:photoUrls,status:'active'}).select('id').single();
+      if(ins.error||!ins.data)throw ins.error||new Error('no id');
+      _productsLoaded=false; realSaved=true; _newProductId=ins.data.id;
       toast('🎉 تم نشر منتجك بنجاح!');
-    }catch(e){toast('تعذر الحفظ في القاعدة — تحققي من الاتصال');}
+    }catch(e){toast('تعذر الحفظ في القاعدة — تحققي من الاتصال 📡');}
   }
-  if(!realSaved)toast('🎉 تم نشر منتجك بنجاح!');
+  if(!realSaved){toast('ما تنشرش المنتج — عاودي حاولي 📡');return;}
   var imgHtml=firstPhoto?'<img src="'+firstPhoto+'" style="width:100%;height:100%;object-fit:cover">':'🛍️';
-  var d=document.createElement('div'); d.className='prod'; d.setAttribute('onclick',"go('detail')");
+  var d=document.createElement('div'); d.className='prod';
+  d.onclick=(function(pid){return function(){openProduct(pid);};})(_newProductId);
   d.innerHTML='<div class="img" style="background:linear-gradient(135deg,#ffe0ec,#e9d5ff);overflow:hidden">'+imgHtml+'<span class="badge">'+cond+'</span></div><div class="info"><h4>'+escapeHtml(name)+'</h4><div class="price">'+(price?escapeHtml(price)+' دج':'السعر عند التواصل')+'</div><div class="seller">'+escapeHtml((_profile&&_profile.full_name)||'لينا')+' • '+escapeHtml(wilaya)+'</div></div>';
   var g=document.getElementById('souq-grid'); g.insertBefore(d,g.firstChild);
   document.getElementById('p-name').value=''; document.getElementById('p-desc').value='';
@@ -1537,20 +1539,31 @@ async function loadHomeDeals(force){
     _homeDealsLoaded=true;
   }catch(e){g.innerHTML='<p style="color:var(--muted);font-size:13px">تعذر التحميل 📡</p>';}
 }
+/* ===== فلترة السوق حسب القسم ===== */
+var _souqCat='';
+function filterSouq(cat,el){
+  _souqCat=cat;
+  var chips=document.querySelectorAll('#souq-chips .chip');
+  chips.forEach(function(c){c.classList.remove('on');});
+  if(el)el.classList.add('on');
+  _productsLoaded=false;loadProducts(true);
+}
 /* ===== السوق: تحميل المنتجات الحقيقية ===== */
 var _productsLoaded=false;
 async function loadProducts(force){
   if(!SB||(_productsLoaded&&!force))return;
   try{
-    var r=await SB.from('kb_products').select('id,name,price,wilaya,condition,photos,seller_id').eq('status','active').order('created_at',{ascending:false}).limit(30);
-    if(r.error||!r.data||!r.data.length)return;
+    var q=SB.from('kb_products').select('id,name,price,wilaya,condition,photos,seller_id,category').eq('status','active');
+    if(_souqCat)q=q.eq('category',_souqCat);
+    var r=await q.order('created_at',{ascending:false}).limit(30);
+    var g=document.getElementById('souq-grid');g.innerHTML='';
+    if(r.error||!r.data||!r.data.length){g.innerHTML='<p style="color:var(--muted);font-size:13px;grid-column:span 2;text-align:center;padding:20px">ما كاش منتجات بعد — كوني أول بائعة! 💖</p>';return;}
     var ids=[];r.data.forEach(function(p){if(ids.indexOf(p.seller_id)<0)ids.push(p.seller_id);});
     var names={};
     try{
       var pr=await SB.from('kb_profiles').select('id,full_name').in('id',ids);
       if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x.full_name;});
     }catch(e){}
-    var g=document.getElementById('souq-grid');g.innerHTML='';
     r.data.forEach(function(p){
       var img=(p.photos&&p.photos.length)?'<img src="'+p.photos[0]+'" style="width:100%;height:100%;object-fit:cover">':'🛍️';
       var d=document.createElement('div');d.className='prod';d.style.cursor='pointer';
@@ -1794,9 +1807,60 @@ async function updateBadges(){
 
 /* ================= حجز الخدمات 📅 ================= */
 var _bkService='',_bkProvider='';
-function openBooking(svc,prov){
-  _bkService=svc;_bkProvider=prov||'';
-  document.getElementById('bk-title').textContent='📅 '+svc;
+/* ===== الخدمات الحقيقية ===== */
+var _servicesLoaded=false;
+async function loadServices(force){
+  if(!SB||(_servicesLoaded&&!force))return;
+  var el=document.getElementById('services-list');if(!el)return;
+  el.innerHTML='<p style="color:var(--muted);font-size:13px">⏳ نحمل الخدمات...</p>';
+  try{
+    var r=await SB.from('kb_services').select('id,title,description,price,wilaya,provider_id').order('created_at',{ascending:false}).limit(40);
+    if(r.error)throw r.error;
+    var rows=r.data||[];
+    if(!rows.length){el.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px">ما كاش خدمات بعد — كوني أول وحدة تقدم خدمتها! 💅</p>';_servicesLoaded=true;return;}
+    var ids=[];rows.forEach(function(s){if(ids.indexOf(s.provider_id)<0)ids.push(s.provider_id);});
+    var names={};
+    try{var pr=await SB.from('kb_profiles').select('id,full_name').in('id',ids);
+      if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x.full_name;});}catch(e){}
+    el.innerHTML=rows.map(function(s){
+      return '<div class="svc"><div class="ico">💅</div><div style="flex:1"><h4>'+escapeHtml(s.title)+'</h4>'
+        +'<p>'+escapeHtml(names[s.provider_id]||'بنت الكوكب')+(s.wilaya?' • '+escapeHtml(s.wilaya):'')+'</p>'
+        +(s.description?'<p style="font-size:12px;color:var(--muted)">'+escapeHtml(s.description)+'</p>':'')
+        +'<div class="row"><span class="price">'+escapeHtml(s.price||'السعر عند التواصل')+'</span><button class="btn" onclick="openBooking(\''+s.id+'\')">احجزي 📅</button></div></div></div>';
+    }).join('');
+    _servicesLoaded=true;
+  }catch(e){el.innerHTML='<p style="color:var(--muted);font-size:13px">تعذر التحميل 📡</p>';}
+}
+function openAddService(){document.getElementById('svc-modal').style.display='flex';}
+function closeAddService(){document.getElementById('svc-modal').style.display='none';}
+async function submitService(){
+  var t=document.getElementById('svc-title').value.trim();
+  if(!t){toast('اكتبي عنوان الخدمة 💅');return;}
+  if(!SB){toast('ما كاش اتصال 📡');return;}
+  try{
+    var me=await frMe();if(!me){toast('سجلي الدخول أولا 🔑');return;}
+    var r=await SB.from('kb_services').insert({provider_id:me,
+      title:t,
+      description:document.getElementById('svc-desc').value.trim()||null,
+      price:document.getElementById('svc-price').value.trim()||null,
+      wilaya:document.getElementById('svc-wilaya').value.trim()||null});
+    if(r.error)throw r.error;
+    closeAddService();_servicesLoaded=false;loadServices(true);
+    document.getElementById('svc-title').value='';document.getElementById('svc-desc').value='';
+    document.getElementById('svc-price').value='';document.getElementById('svc-wilaya').value='';
+    toast('تنشرت خدمتك بنجاح! 💅✨');
+  }catch(e){toast('تعذر النشر: '+(e.message||'📡'));}
+}
+var _bkServiceId=null,_bkProviderId=null;
+async function openBooking(sid){
+  _bkServiceId=sid;_bkProviderId=null;
+  try{
+    var r=await SB.from('kb_services').select('id,title,provider_id').eq('id',sid).single();
+    if(r.data){_bkProviderId=r.data.provider_id;
+      document.getElementById('bk-title').textContent='📅 حجز: '+r.data.title;}
+  }catch(e){}
+  var dt=document.getElementById('bk-date');
+  if(dt)dt.min=new Date().toISOString().slice(0,10);
   document.getElementById('bk-date').value='';
   document.getElementById('bk-phone').value='';
   document.getElementById('bk-note').value='';
@@ -1811,10 +1875,14 @@ async function submitBooking(){
   if(!ph){toast('اكتبي رقم الهاتف 📱');return;}
   try{
     var me=await frMe();if(!me){toast('سجلي الدخول أولا 🔑');return;}
-    var r=await SB.from('kb_bookings').insert({client_id:me,service_name:_bkService,provider_name:_bkProvider,booking_date:d,phone:ph,note:nt});
+    var svcName=document.getElementById('bk-title').textContent.replace('📅 حجز: ','').replace('📅 ','')||'خدمة';
+    var r=await SB.from('kb_bookings').insert({client_id:me,service_name:svcName,provider_id:_bkProviderId,service_id:_bkServiceId,booking_date:d,phone:ph,note:nt});
     if(r.error)throw r.error;
-    closeBooking();toast('تبعث الحجز ✅ نعيطولك للتأكيد 📞');
-    try{await SB.rpc('kb_notify',{p_user:me,p_to:me,p_type:'booking',p_title:'حجز جديد 📅',p_body:_bkService+' — '+d});}catch(e){}
+    closeBooking();toast('تبعث الحجز ✅ مقدمة الخدمة تشوفو دروك 📅');
+    try{
+      var mn=(_profile&&_profile.full_name)||'بنت الكوكب';
+      if(_bkProviderId)await SB.rpc('kb_notify',{p_user:me,p_to:_bkProviderId,p_type:'booking',p_title:'حجز جديد 📅',p_body:mn+' حجزت عندك — '+d});
+    }catch(e){}
   }catch(e){toast('تعذر الحجز 📡');}
 }
 var BK_ST={pending:'⏳ معلق',confirmed:'✅ مؤكد',done:'🏁 مكتمل',cancelled:'❌ ملغي'};
@@ -1834,6 +1902,7 @@ async function loadMyBookings(){
   }catch(e){el.innerHTML='<p style="color:var(--muted);font-size:13px">تعذر التحميل 📡</p>';}
 }
 async function cancelBooking(id){
+  if(!confirm('متأكدة تحبي تلغي هاذ الحجز؟'))return;
   try{var r=await SB.from('kb_bookings').update({status:'cancelled'}).eq('id',id);
     if(r.error)throw r.error;toast('تلغى الحجز');loadMyBookings();
   }catch(e){toast('تعذر الإلغاء 📡');}
@@ -2138,28 +2207,45 @@ function shareApp(){
   if(navigator.share){navigator.share({title:'كوكب برق برق 🪐',text:'كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑',url:url}).catch(function(){});}
   else{try{navigator.clipboard.writeText(url);toast('تنسخ الرابط ✅ شاركيه مع صاحباتك 💖');}catch(e){toast(url);}}
 }
-// تحدي الأسبوع 🏆 — تصويت حقيقي (محلي)
+// تحدي الأسبوع 🏆 — تصويت حقيقي في القاعدة
 var CH_OPTS=['💄 ميكاب نهاري ناعم','🌸 ميكاب وردي','✨ ميكاب سموكي خفيف'];
-function openChallenge(){
-  var v={};try{v=JSON.parse(localStorage.getItem('kb_vote')||'{}');}catch(e){}
-  var mine=localStorage.getItem('kb_myvote');
-  var total=CH_OPTS.reduce(function(s,_,i){return s+(v[i]||0);},0)||1;
-  document.getElementById('ch-opts').innerHTML=CH_OPTS.map(function(o,i){
-    var n=v[i]||0,pct=Math.round(100*n/total);
-    return '<div onclick="voteCh('+i+')" style="cursor:pointer;background:#fff;border:2px solid '+(mine==String(i)?'var(--pink)':'#ffe0ec')+';border-radius:14px;padding:12px;margin-bottom:8px">'
-      +'<div style="font-weight:700;font-size:14px">'+o+(mine==String(i)?' ✅':'')+'</div>'
+function chWeek(){var d=new Date();d.setDate(d.getDate()-((d.getDay()+6)%7));return d.toISOString().slice(0,10);}
+async function openChallenge(){
+  var box=document.getElementById('ch-opts');
+  box.innerHTML='<p style="color:var(--muted);font-size:13px">⏳ نحمل الأصوات...</p>';
+  document.getElementById('ch-modal').style.display='flex';
+  var counts={},mine=-1,total=0;
+  try{
+    if(SB){
+      var r=await SB.from('kb_challenge_votes').select('option_idx,user_id').eq('week',chWeek());
+      if(!r.error&&r.data){
+        var me=await frMe();
+        r.data.forEach(function(v){counts[v.option_idx]=(counts[v.option_idx]||0)+1;total++;
+          if(v.user_id===me)mine=v.option_idx;});
+      }
+    }
+  }catch(e){}
+  total=total||1;
+  box.innerHTML=CH_OPTS.map(function(o,i){
+    var n=counts[i]||0,pct=Math.round(100*n/total);
+    return '<div onclick="voteCh('+i+')" style="cursor:pointer;background:#fff;border:2px solid '+(mine===i?'var(--pink)':'#ffe0ec')+';border-radius:14px;padding:12px;margin-bottom:8px">'
+      +'<div style="font-weight:700;font-size:14px">'+o+(mine===i?' ✅':'')+'</div>'
       +'<div style="height:8px;background:#ffe0ec;border-radius:4px;margin-top:8px"><i style="display:block;height:100%;width:'+pct+'%;background:linear-gradient(90deg,var(--pink),var(--purple));border-radius:4px"></i></div>'
       +'<small style="color:var(--muted)">'+pct+'% • '+n+' صوت</small></div>';
   }).join('');
-  document.getElementById('ch-modal').style.display='flex';
 }
-function voteCh(i){
-  var v={};try{v=JSON.parse(localStorage.getItem('kb_vote')||'{}');}catch(e){}
-  var mine=localStorage.getItem('kb_myvote');
-  if(mine!=null&&v[mine]!=null)v[mine]=Math.max(0,v[mine]-1);
-  v[i]=(v[i]||0)+1;
-  try{localStorage.setItem('kb_vote',JSON.stringify(v));localStorage.setItem('kb_myvote',String(i));}catch(e){}
-  openChallenge();toast('تسجل صوتك 🗳️💖');
+async function voteCh(i){
+  if(!SB){toast('ما كاش اتصال 📡');return;}
+  try{
+    var me=await frMe();if(!me){toast('سجلي الدخول أولا 🔑');return;}
+    var wk=chWeek();
+    var ex=await SB.from('kb_challenge_votes').select('id').eq('user_id',me).eq('week',wk).maybeSingle();
+    var r;
+    if(ex.data){r=await SB.from('kb_challenge_votes').update({option_idx:i}).eq('id',ex.data.id);}
+    else{r=await SB.from('kb_challenge_votes').insert({user_id:me,week:wk,option_idx:i});}
+    if(r.error)throw r.error;
+    toast('تسجل صوتك 🗳️💖');openChallenge();
+  }catch(e){toast('تعذر التصويت 📡');}
 }
 function closeChallenge(){document.getElementById('ch-modal').style.display='none';}
 
