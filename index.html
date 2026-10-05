@@ -678,6 +678,18 @@ input[type=range]{width:100%;accent-color:var(--pink)}
   <input type="file" id="pf-file-ava" accept="image/*" style="display:none" onchange="uploadProfilePhoto(this,'avatar')">
   <input type="file" id="pf-file-cover" accept="image/*" style="display:none" onchange="uploadProfilePhoto(this,'cover')">
 
+<!-- نافذة تأكيد أنثوية 💕 -->
+<div id="cf-modal" style="display:none;position:fixed;inset:0;background:rgba(60,10,40,.55);z-index:10001;align-items:center;justify-content:center;padding:24px">
+  <div style="background:linear-gradient(135deg,#fff0f6,#ffe4ef);border-radius:22px;padding:26px 22px;max-width:340px;width:100%;text-align:center;box-shadow:0 12px 40px rgba(200,50,120,.35);border:2px solid #ffb3d1">
+    <div style="font-size:42px;margin-bottom:10px">💕</div>
+    <p id="cf-msg" style="font-size:16px;color:#7a2e52;margin:0 0 20px;font-weight:700"></p>
+    <div style="display:flex;gap:10px">
+      <button class="btn ghost" style="flex:1;border:2px solid #f0a0c0;color:#c04a7c;background:#fff" onclick="cfDone(false)">لالا خليها</button>
+      <button class="btn" style="flex:1;background:linear-gradient(135deg,#f0508c,#d63384)" onclick="cfDone(true)">إيه امحيها 🗑️</button>
+    </div>
+  </div>
+</div>
+
 <!-- عارض التصويرة الكبير 🖼️ -->
 <div id="pv-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;flex-direction:column">
   <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px">
@@ -896,7 +908,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
       <a onclick="shareApp()">↗️ <span>شاركي التطبيق</span></a>
       <a onclick="doLogout()">🚪 <span>تسجيل الخروج</span></a>
     </div>
-    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v51</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
+    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v52</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
   </div>
 </div>
 
@@ -1163,7 +1175,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 </nav>
 
 </div>
-<script src="app.js?v=51"></script>
-<script src="app2.js?v=51"></script>
+<script src="app.js?v=52"></script>
+<script src="app2.js?v=52"></script>
 </body>
 </html>
