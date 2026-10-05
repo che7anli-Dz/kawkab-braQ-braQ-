@@ -324,7 +324,16 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 .reel-info{position:absolute;right:12px;left:74px;bottom:104px;width:auto;padding:0;background:none;z-index:2;color:#fff;text-align:right}
 .reel-info b{display:block;font-size:15px;font-weight:800;text-shadow:0 1px 6px rgba(0,0,0,.7)}
 .reel-info span{display:block;font-size:13.5px;margin-top:3px;text-shadow:0 1px 6px rgba(0,0,0,.7);opacity:.95}
-.reel-info .reel-mus{display:block;font-size:12px;margin-top:6px;opacity:.9;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.reel-info .reel-mus{display:block;font-size:12px;margin-top:6px;opacity:.9;text-shadow:0 1px 6px rgba(0,0,0,.7);white-space:nowrap;overflow:hidden;max-width:220px}
+.reel-info .reel-mus i{display:inline-block;font-style:normal;padding-right:20px;animation:musmq 8s linear infinite}
+@keyframes musmq{0%{transform:translateX(0)}100%{transform:translateX(50%)}}
+.reel-disc{position:absolute;left:14px;bottom:100px;width:52px;height:52px;border-radius:50%;z-index:2;
+  background:conic-gradient(#222 0 20%,#444 20% 40%,#222 40% 60%,#444 60% 80%,#222 80%);
+  border:3px solid rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;
+  animation:spindisc 4s linear infinite;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+.reel-disc::after{content:'🎵';font-size:18px}
+.reel-disc.paused{animation-play-state:paused}
+@keyframes spindisc{to{transform:rotate(360deg)}}
 /* استوديو الريلز 🎶 */
 .mq-item{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;padding:8px 10px;margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .mq-item img{width:44px;height:44px;border-radius:8px;object-fit:cover;flex:none}
