@@ -1014,8 +1014,22 @@ function openProfile(name,wilaya,tags,emoji,rank,ret){
 /* ===== بوابة الدخول: غير المتحققين ما يدخلوش للتطبيق ===== */
 var _verified=false;
 var _seen=false;
+var _skipSplash=false;
+function hasStoredSession(){
+  try{
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.indexOf('sb-')===0&&k.lastIndexOf('-auth-token')===k.length-11){
+        var o=JSON.parse(localStorage.getItem(k)||'null');
+        if(o&&o.access_token)return true;
+      }
+    }
+  }catch(e){}
+  return false;
+}
 try{_seen=localStorage.getItem('kb_seen')==='1';}catch(e){}
-function markSeen(){_seen=true;try{localStorage.setItem('kb_seen','1');}catch(e){}}
+_skipSplash=_seen||hasStoredSession();
+function markSeen(){_seen=true;_skipSplash=true;try{localStorage.setItem('kb_seen','1');}catch(e){}}
 async function checkVerified(){
   if(!SB)return true;
   try{
@@ -1040,7 +1054,7 @@ async function gateAndEnter(){
   }
   try{if(SB)await SB.auth.signOut();}catch(e){}
   _verified=false;
-  go(_seen?'login':'splash');
+  go((_skipSplash||_seen)?'login':'splash');
   toast(v==='banned'?'هاذ الحساب محظور 🚫':'كملي التحقق أولا باش تدخلي 🔐');
   return false;
 }
@@ -1280,18 +1294,18 @@ async function loadProducts(force){
 /* ===== تهيئة: جلسة محفوظة + PWA ===== */
 document.addEventListener('DOMContentLoaded',function(){
   if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){}}
-  if(_seen){
+  if(_skipSplash){
     var sp=document.getElementById('splash');
     if(sp)sp.classList.remove('active');
   }
   setTimeout(async function(){
-    if(!SB){go(_seen?'login':'splash');return;}
+    if(!SB){go(_skipSplash?'login':'splash');return;}
     try{
       var s=await SB.auth.getSession();
       if(s.data&&s.data.session){await gateAndEnter();}
-      else{go(_seen?'login':'splash');}
-    }catch(e){go(_seen?'login':'splash');}
-  },_seen?100:500);
+      else{go(_skipSplash?'login':'splash');}
+    }catch(e){go(_skipSplash?'login':'splash');}
+  },_skipSplash?100:500);
 });
 </script>
 </body>
