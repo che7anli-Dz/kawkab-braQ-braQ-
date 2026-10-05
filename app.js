@@ -133,7 +133,7 @@ function go(id){
   document.querySelectorAll('.nav-it').forEach(n=>n.classList.toggle('on',n.dataset.s===id));
   if(id==='souq'){loadProducts(false);}
   if(id==='video'){loadReels(false);}
-  if(id==='home'){loadStories(false);}
+  if(id==='home'){loadStories(false);loadHomeDeals(false);}
   if(id==='sahha'){loadFeed(false);}
   if(id==='friends'){loadFriendsTab();}
   if(id==='friendship'){loadFriendsTab();}
@@ -1512,6 +1512,30 @@ async function reportReel(id){
     if(r.error)throw r.error;
     toast('وصل البلاغ، شكرا 🚩');
   }catch(e){toast('تعذر الإبلاغ: '+e.message);}
+}
+/* ===== الرئيسية: منتجات حقيقية بدل الوهمية ===== */
+var _homeDealsLoaded=false;
+async function loadHomeDeals(force){
+  if(!SB||(_homeDealsLoaded&&!force))return;
+  var g=document.getElementById('home-deals');if(!g)return;
+  try{
+    var r=await SB.from('kb_products').select('id,name,price,wilaya,condition,photos,seller_id').eq('status','active').order('created_at',{ascending:false}).limit(6);
+    if(r.error)throw r.error;
+    if(!r.data||!r.data.length){g.innerHTML='<p style="color:var(--muted);font-size:13px">ما كاش منتجات بعد — كوني أول بائعة! 💖</p>';return;}
+    var ids=[];r.data.forEach(function(p){if(ids.indexOf(p.seller_id)<0)ids.push(p.seller_id);});
+    var names={};
+    try{var pr=await SB.from('kb_profiles').select('id,full_name').in('id',ids);
+      if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x.full_name;});}catch(e){}
+    g.innerHTML='';
+    r.data.forEach(function(p){
+      var img=(p.photos&&p.photos.length)?'<img src="'+p.photos[0]+'" style="width:100%;height:100%;object-fit:cover" loading="lazy">':'🛍️';
+      var d=document.createElement('div');d.className='prod';d.style.cursor='pointer';
+      d.onclick=(function(id){return function(){openProduct(id);};})(p.id);
+      d.innerHTML='<div class="img" style="background:linear-gradient(135deg,#ffe0ec,#e9d5ff);overflow:hidden">'+img+'</div><div class="info"><h4>'+escapeHtml(p.name)+'</h4><div class="price">'+(p.price?escapeHtml(p.price)+' دج':'السعر عند التواصل')+'</div><div class="seller">'+escapeHtml(names[p.seller_id]||'بنت الكوكب')+(p.wilaya?' • '+escapeHtml(p.wilaya):'')+'</div></div>';
+      g.appendChild(d);
+    });
+    _homeDealsLoaded=true;
+  }catch(e){g.innerHTML='<p style="color:var(--muted);font-size:13px">تعذر التحميل 📡</p>';}
 }
 /* ===== السوق: تحميل المنتجات الحقيقية ===== */
 var _productsLoaded=false;
