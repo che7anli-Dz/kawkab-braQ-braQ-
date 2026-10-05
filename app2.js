@@ -1008,8 +1008,17 @@ async function uploadProfilePhoto(inp,type){
     try{var _op=await SB.from('kb_profiles').select(col).eq('id',u.id).single();
       if(_op.data)oldPath=_op.data[col]||'';}catch(e2){}
     var upd={};upd[col]=path;
-    var r=await SB.from('kb_profiles').update(upd).eq('id',u.id);
-    if(r.error)throw r.error;
+    // 1) RPC يتجاوز RLS (security definer)
+    var _saved=false;
+    try{
+      var _rr=await SB.rpc('kb_set_profile_photo',{p_col:col,p_path:path});
+      if(!_rr.error&&_rr.data===true)_saved=true;
+    }catch(e6){}
+    // 2) fallback: تحديث مباشر
+    if(!_saved){
+      var r=await SB.from('kb_profiles').update(upd).eq('id',u.id);
+      if(r.error)throw r.error;
+    }
     // تحقق أن القاعدة حفظت فعلا
     try{
       var _vf=await SB.from('kb_profiles').select(col).eq('id',u.id).single();
