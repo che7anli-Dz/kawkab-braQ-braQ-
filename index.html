@@ -606,22 +606,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
   <div class="search">🔍 &nbsp; قلبي بالولاية ولا الاهتمام...</div>
   <div class="verify">🔒 المحادثة تتفتح غير بعد ما تقبلو بعضاكم — بلا إزعاج</div>
   <div class="sec">
-    <div class="chips">
-      <div class="chip on">الكل</div><div class="chip">🍳 طبخ</div><div class="chip">🏃‍♀️ رياضة</div>
-      <div class="chip">📚 دراسة</div><div class="chip">👗 موضة</div><div class="chip">✈️ سفر</div>
-    </div>
-    <div class="svc" style="cursor:pointer" onclick="openProfile('إيمان','الجزائر','🍳 طبخ • 📚 دراسة • 🎬 أفلام','🌸','⭐ نجمة','friendship')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🌸</div>
-      <div style="flex:1"><h4>إيمان • الجزائر</h4><p>🍳 طبخ &nbsp;📚 دراسة &nbsp;🎬 أفلام</p>
-      <div class="row"><small style="color:var(--muted)">نشطة دابا 🟢</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
-    <div class="svc" style="cursor:pointer" onclick="openProfile('نسرين','وهران','🏃‍♀️ رياضة • ✈️ سفر • 📸 تصوير','🦋','⭐ نجمة','friendship')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🦋</div>
-      <div style="flex:1"><h4>نسرين • وهران</h4><p>🏃‍♀️ رياضة &nbsp;✈️ سفر &nbsp;📸 تصوير</p>
-      <div class="row"><small style="color:var(--muted)">نشطة منذ ساعة</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
-    <div class="svc" style="cursor:pointer" onclick="openProfile('آية','قسنطينة','👗 موضة • 💄 مكياج • 🎨 رسم','🌙','⭐ نجمة','friendship')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🌙</div>
-      <div style="flex:1"><h4>آية • قسنطينة</h4><p>👗 موضة &nbsp;💄 مكياج &nbsp;🎨 رسم</p>
-      <div class="row"><small style="color:var(--muted)">نشطة دابا 🟢</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
-    <div class="svc" style="cursor:pointer" onclick="openProfile('هاجر','سطيف','📚 دراسة • 🍳 طبخ • 🌱 طبيعة','☀️','🌱 مواطنة','friendship')"><div class="avatar" style="width:56px;height:56px;font-size:26px">☀️</div>
-      <div style="flex:1"><h4>هاجر • سطيف</h4><p>📚 دراسة &nbsp;🍳 طبخ &nbsp;🌱 طبيعة</p>
-      <div class="row"><small style="color:var(--muted)">نشطة منذ يوم</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
+    <div id="fr-discover"><p style="color:var(--muted);font-size:13px">⏳ نحمل...</p></div>
   </div>
 </div>
 
@@ -698,25 +683,16 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 <div class="screen" id="friends">
   <div class="topbar"><span class="planet">👥</span><h1>الأصدقاء</h1><p>كبري دائرتك 💖</p></div>
   <div class="sec">
-    <div class="sec-title">🙋‍♀️ طلبات الصداقة <span style="background:var(--pink);color:#fff;font-size:11px;padding:2px 10px;border-radius:10px">2</span></div>
-    <div class="svc"><div class="avatar" style="width:56px;height:56px;font-size:26px">🍓</div>
-      <div style="flex:1"><h4>دنيا • الجزائر</h4><p>👭 12 صديقة مشتركة</p>
-      <div class="row"><button class="btn" onclick="this.closest('.svc').style.display='none'">قبول ✅</button><button class="btn ghost" onclick="this.closest('.svc').style.display='none'">رفض</button></div></div></div>
-    <div class="svc"><div class="avatar" style="width:56px;height:56px;font-size:26px">🍒</div>
-      <div style="flex:1"><h4>شيماء • البليدة</h4><p>👭 5 صديقات مشتركات</p>
-      <div class="row"><button class="btn" onclick="this.closest('.svc').style.display='none'">قبول ✅</button><button class="btn ghost" onclick="this.closest('.svc').style.display='none'">رفض</button></div></div></div>
+    <div class="sec-title">🙋‍♀️ طلبات الصداقة <span id="fr-count" style="background:var(--pink);color:#fff;font-size:11px;padding:2px 10px;border-radius:10px"></span></div>
+    <div id="fr-requests"></div>
+  </div>
+  <div class="sec">
+    <div class="sec-title">👭 صديقاتي</div>
+    <div id="fr-list"></div>
   </div>
   <div class="sec">
     <div class="sec-title">✨ بنات جدد للصداقة</div>
-    <div class="svc" style="cursor:pointer" onclick="openProfile('إيمان','الجزائر','🍳 طبخ • 📚 دراسة • 🎬 أفلام','🌸','⭐ نجمة','friends')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🌸</div>
-      <div style="flex:1"><h4>إيمان • الجزائر</h4><p>🍳 طبخ • 📚 دراسة</p>
-      <div class="row"><small style="color:var(--muted)">نشطة دابا 🟢</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
-    <div class="svc" style="cursor:pointer" onclick="openProfile('نسرين','وهران','🏃‍♀️ رياضة • ✈️ سفر • 📸 تصوير','🦋','⭐ نجمة','friends')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🦋</div>
-      <div style="flex:1"><h4>نسرين • وهران</h4><p>🏃‍♀️ رياضة • ✈️ سفر</p>
-      <div class="row"><small style="color:var(--muted)">نشطة منذ ساعة</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
-    <div class="svc" style="cursor:pointer" onclick="openProfile('آية','قسنطينة','👗 موضة • 💄 مكياج • 🎨 رسم','🌙','⭐ نجمة','friends')"><div class="avatar" style="width:56px;height:56px;font-size:26px">🌙</div>
-      <div style="flex:1"><h4>آية • قسنطينة</h4><p>👗 موضة • 💄 مكياج</p>
-      <div class="row"><small style="color:var(--muted)">نشطة دابا 🟢</small><button class="btn" onclick="event.stopPropagation();this.textContent='تم الإرسال ✅';this.style.background='#9a8a97'">👭 أضيفيها</button></div></div></div>
+    <div id="fr-suggest"></div>
   </div>
 </div>
 
@@ -1061,6 +1037,6 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 </nav>
 
 </div>
-<script src="app.js?v=18"></script>
+<script src="app.js?v=19"></script>
 </body>
 </html>
