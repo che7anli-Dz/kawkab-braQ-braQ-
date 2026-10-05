@@ -1010,7 +1010,12 @@ async function uploadProfilePhoto(inp,type){
     var upd={};upd[col]=path;
     var r=await SB.from('kb_profiles').update(upd).eq('id',u.id);
     if(r.error)throw r.error;
-    if(oldPath&&oldPath!==path){try{await SB.storage.from('kb-avatars').remove([oldPath]);}catch(e3){}}
+    // تحقق أن القاعدة حفظت فعلا
+    try{
+      var _vf=await SB.from('kb_profiles').select(col).eq('id',u.id).single();
+      var _saved=_vf.data?_vf.data[col]:'';
+      if(_saved!==path)throw new Error('ما تحفظتش في القاعدة');
+    }catch(e5){throw new Error('تعذر الحفظ: '+(e5.message||''));}
     // تحديث مباشر بالرابط الجديد — مضمون
     try{
       var _pub=avatarPublicUrl(path)+'?t='+Date.now();
