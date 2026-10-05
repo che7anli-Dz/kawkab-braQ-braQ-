@@ -674,9 +674,21 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 
 <!-- حسابي -->
 <div class="screen" id="profile">
-  <div class="cover" id="pf-cover"><span class="cover-cam" onclick="changeCover()">📷 بدلي الغلاف</span><div class="fb-avatar" id="pf-avatar" onclick="changeAvatar()">🌸<span class="av-cam">📷</span></div></div>
+  <div class="cover" id="pf-cover" onclick="openPhoto('cover')"><span class="cover-cam" onclick="event.stopPropagation();changeCover()">📷 بدلي الغلاف</span><div class="fb-avatar" id="pf-avatar" onclick="event.stopPropagation();openPhoto('avatar')">🌸<span class="av-cam">📷</span></div></div>
   <input type="file" id="pf-file-ava" accept="image/*" style="display:none" onchange="uploadProfilePhoto(this,'avatar')">
   <input type="file" id="pf-file-cover" accept="image/*" style="display:none" onchange="uploadProfilePhoto(this,'cover')">
+
+<!-- عارض التصويرة الكبير 🖼️ -->
+<div id="pv-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;flex-direction:column">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px">
+    <span style="color:#fff;font-size:26px;cursor:pointer" onclick="closePhotoViewer()">✕</span>
+    <span style="color:#fff;font-size:26px;cursor:pointer" onclick="deletePhoto()">🗑️</span>
+  </div>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:10px;min-height:0">
+    <img id="pv-img" style="max-width:100%;max-height:100%;border-radius:12px;object-fit:contain" alt="">
+  </div>
+  <div style="padding:18px"><button class="btn" style="max-width:320px;margin:0 auto" onclick="changePhotoFromViewer()">🔄 بدلي التصويرة</button></div>
+</div>
   <div class="fb-head">
     <h2><span id="pf-name">لينا بن علي</span> <span class="rank" id="pf-rank">⭐ نجمة</span></h2>
     <p class="fb-bio" id="pf-bio">🛍️ نبيع كلش حلو للبنات<br>📍 الجزائر • انضمت في أكتوبر 2026<br>💖 الكوكب داري الثاني</p>
@@ -884,7 +896,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
       <a onclick="shareApp()">↗️ <span>شاركي التطبيق</span></a>
       <a onclick="doLogout()">🚪 <span>تسجيل الخروج</span></a>
     </div>
-    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v48</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
+    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v49</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
   </div>
 </div>
 
@@ -1151,7 +1163,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 </nav>
 
 </div>
-<script src="app.js?v=48"></script>
-<script src="app2.js?v=48"></script>
+<script src="app.js?v=49"></script>
+<script src="app2.js?v=49"></script>
 </body>
 </html>
