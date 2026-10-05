@@ -116,14 +116,15 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 .menu a:last-child{border:none}
 .menu a .ico{font-size:20px}
 /* facebook-style profile */
-.cover{height:168px;background:linear-gradient(120deg,#8b5cf6,#ec4899 55%,#ff8a5c);position:relative}
+.cover{height:168px;background:linear-gradient(120deg,#8b5cf6,#ec4899 55%,#ff8a5c);position:relative;background-size:cover;background-position:center}
 .cover-cam{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,.92);font-size:12px;font-weight:700;
-  padding:7px 13px;border-radius:16px;cursor:pointer;color:#5c4a5a}
+  padding:7px 13px;border-radius:16px;cursor:pointer;color:#5c4a5a;z-index:2}
 .fb-avatar{width:112px;height:112px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--purple));
   border:5px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:54px;
-  position:absolute;bottom:-56px;right:20px}
+  position:absolute;bottom:-56px;right:20px;overflow:hidden;cursor:pointer}
+.fb-avatar img{width:100%;height:100%;object-fit:cover}
 .av-cam{position:absolute;bottom:4px;left:4px;background:#fff;border-radius:50%;width:32px;height:32px;
-  display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:pointer}
+  display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:pointer;z-index:2}
 .fb-head{padding:66px 16px 0}
 .fb-head h2{font-size:21px;font-weight:800}
 .fb-head .rank{font-size:13px;color:#b45309;background:#fef3c7;padding:3px 10px;border-radius:12px;font-weight:800}
@@ -663,7 +664,9 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 
 <!-- حسابي -->
 <div class="screen" id="profile">
-  <div class="cover"><span class="cover-cam">📷 بدلي الغلاف</span><div class="fb-avatar">🌸<span class="av-cam">📷</span></div></div>
+  <div class="cover" id="pf-cover"><span class="cover-cam" onclick="changeCover()">📷 بدلي الغلاف</span><div class="fb-avatar" id="pf-avatar" onclick="changeAvatar()">🌸<span class="av-cam">📷</span></div></div>
+  <input type="file" id="pf-file-ava" accept="image/*" style="display:none" onchange="uploadProfilePhoto(this,'avatar')">
+  <input type="file" id="pf-file-cover" accept="image/*" style="display:none" onchange="uploadProfilePhoto(this,'cover')">
   <div class="fb-head">
     <h2><span id="pf-name">لينا بن علي</span> <span class="rank" id="pf-rank">⭐ نجمة</span></h2>
     <p class="fb-bio" id="pf-bio">🛍️ نبيع كلش حلو للبنات<br>📍 الجزائر • انضمت في أكتوبر 2026<br>💖 الكوكب داري الثاني</p>
@@ -879,7 +882,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
       <a onclick="shareApp()">↗️ <span>شاركي التطبيق</span></a>
       <a onclick="doLogout()">🚪 <span>تسجيل الخروج</span></a>
     </div>
-    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v31</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
+    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v32</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
   </div>
 </div>
 
@@ -1146,6 +1149,6 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 </nav>
 
 </div>
-<script src="app.js?v=31"></script>
+<script src="app.js?v=32"></script>
 </body>
 </html>
