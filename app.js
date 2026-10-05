@@ -12,9 +12,24 @@ async function sbUser(){
   try{var r=await SB.auth.getUser();return (r.data&&r.data.user)?r.data.user:null;}catch(e){return null;}
 }
 function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+var _navStack=[];
+var _goingBack=false;
+function goBack(){
+  var prev=_navStack.pop();
+  _goingBack=true;
+  try{if(prev&&document.getElementById(prev)){go(prev);}else{go('home');}}
+  catch(e){go('home');}
+  _goingBack=false;
+}
 function go(id){
   var main=['home','friends','video','souq','menu'];
   if(SB&&main.indexOf(id)>-1&&!_verified){go('splash');return;}
+  var _prevEl=document.querySelector('.screen.active');
+  var _prevId=_prevEl?_prevEl.id:null;
+  if(!_goingBack&&_prevId&&_prevId!==id){
+    if(main.indexOf(id)>-1){_navStack=[];}
+    else{_navStack.push(_prevId);if(_navStack.length>25)_navStack.shift();}
+  }
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   var main=['home','friends','video','souq','menu'];
@@ -22,6 +37,9 @@ function go(id){
   document.querySelector('.phone').classList.toggle('withutil',isMain);
   document.getElementById('navbar').style.display=isMain?'flex':'none';
   document.getElementById('fab').style.display=isMain?'block':'none';
+  var _noBack=['splash','login','signup','verify-email','quiz','quiz-pass','voice','pending','chat'];
+  var _bb=document.getElementById('backbtn');
+  if(_bb){_bb.style.display=(!isMain&&_noBack.indexOf(id)<0)?'flex':'none';}
   document.querySelectorAll('.nav-it').forEach(n=>n.classList.toggle('on',n.dataset.s===id));
   if(id==='souq'){loadProducts(false);}
   if(id==='video'){loadReels(false);}
