@@ -941,6 +941,8 @@ async function loadOwnProfile(){
     var me=await frMe();if(!me||!SB)return;
     var r=await SB.from('kb_profiles').select('full_name,wilaya,bio,avatar_emoji,avatar_url,cover_url').eq('id',me).single();
     if(r.data){var p=r.data;
+      _pvPaths.avatar=p.avatar_url||'';
+      _pvPaths.cover=p.cover_url||'';
       document.getElementById('pf-name').textContent=p.full_name||'';
       var mn=document.getElementById('mn-name');if(mn)mn.textContent=p.full_name||'بروفايلي';
       var _cb='?t='+Date.now();
@@ -1027,6 +1029,7 @@ async function uploadProfilePhoto(inp,type){
     }catch(e5){throw new Error('تعذر الحفظ: '+(e5.message||''));}
     // تحديث مباشر بالرابط الجديد — مضمون
     try{
+      _pvPaths[type]=path;
       var _pub=avatarPublicUrl(path)+'?t='+Date.now();
       if(type==='avatar'){
         var _av1=document.getElementById('pf-avatar');
@@ -1039,8 +1042,47 @@ async function uploadProfilePhoto(inp,type){
     toast(type==='avatar'?'تبدلات تصويرة البروفايل 📷✨':'تبدل الغلاف 🎨✨');
   }catch(e){toast('تعذر الرفع: '+(e.message||'📡'));}
 }
+/* ===== عارض التصويرة الكبير + حذف 🖼️🗑️ ===== */
+var _pvType=null,_pvPaths={avatar:'',cover:''};
+function openPhoto(type){
+  var path=_pvPaths[type]||'';
+  if(!path){if(type==='avatar')changeAvatar();else changeCover();return;}
+  _pvType=type;
+  document.getElementById('pv-img').src=avatarPublicUrl(path)+'?t='+Date.now();
+  document.getElementById('pv-modal').style.display='flex';
+}
+function closePhotoViewer(){
+  document.getElementById('pv-modal').style.display='none';
+  document.getElementById('pv-img').src='';
+  _pvType=null;
+}
+function changePhotoFromViewer(){
+  var t=_pvType;closePhotoViewer();
+  if(t==='avatar')changeAvatar();else changeCover();
+}
+async function deletePhoto(){
+  var type=_pvType,path=_pvPaths[type]||'';
+  if(!type||!path)return;
+  if(!confirm('تمحي هاذ التصويرة نهائيا؟ 🗑️'))return;
+  try{
+    try{await SB.storage.from('kb-avatars').remove([path]);}catch(e){}
+    var col=type==='avatar'?'avatar_url':'cover_url';
+    try{await SB.rpc('kb_set_profile_photo',{p_col:col,p_path:null});}catch(e){}
+    try{var me=await frMe();var u0={};u0[col]=null;await SB.from('kb_profiles').update(u0).eq('id',me);}catch(e){}
+    _pvPaths[type]='';
+    if(type==='avatar'){
+      var av=document.getElementById('pf-avatar');
+      if(av)av.innerHTML='🌸<span class="av-cam">📷</span>';
+    }else{
+      var cv=document.getElementById('pf-cover');
+      if(cv)cv.style.backgroundImage='';
+    }
+    closePhotoViewer();
+    toast('تمحات التصويرة 🗑️');
+  }catch(e){toast('تعذر المسح: '+(e.message||''));}
+}
 // مشاركة ↗️
-function shareApp(){
+function shareApp() {
   var url=location.href;
   if(navigator.share){navigator.share({title:'كوكب برق برق 🪐',text:'كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑',url:url}).catch(function(){});}
   else{try{navigator.clipboard.writeText(url);toast('تنسخ الرابط ✅ شاركيه مع صاحباتك 💖');}catch(e){toast(url);}}
