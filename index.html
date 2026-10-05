@@ -751,8 +751,14 @@ input[type=range]{width:100%;accent-color:var(--pink)}
       </div>
       <div id="rn-trim" style="display:none">
         <span class="rn-lab">✂️ قص الفيديو <small id="rn-trim-lab"></small></span>
+        <div style="font-size:13px;margin:6px 0 2px">📍 بداية المقطع</div>
         <input type="range" id="rn-ts" min="0" max="100" value="0" oninput="updTrimLab()">
-        <input type="range" id="rn-te" min="0" max="100" value="100" oninput="updTrimLab()" style="margin-top:6px">
+        <div style="font-size:13px;margin:10px 0 4px">⏱️ مدة المقطع</div>
+        <div class="frow" id="rn-dur-row">
+          <button onclick="setTrimDur(15,this)" class="on">15 ثانية</button>
+          <button onclick="setTrimDur(30,this)">30 ثانية</button>
+          <button onclick="setTrimDur(0,this)">كامل الفيديو</button>
+        </div>
       </div>
     </div>
     <div class="field" style="margin-top:12px"><label>✍️ العنوان</label><input id="rn-title" maxlength="80" placeholder="مثلا: روتين مكياجي الصباحي 💄"></div>
@@ -1120,6 +1126,6 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 </nav>
 
 </div>
-<script src="app.js?v=23"></script>
+<script src="app.js?v=24"></script>
 </body>
 </html>
