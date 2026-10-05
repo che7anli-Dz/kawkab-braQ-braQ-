@@ -299,20 +299,31 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 .reel-info b{font-size:15px;display:block}
 .reel-info small{font-size:12px;opacity:.9}
 /* ريلز حقيقي 🎬 */
-.reels-feed{display:flex;flex-direction:column;gap:14px}
-.reelv{position:relative;height:68vh;min-height:430px;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#2a1430,#4a1d5e);color:#fff}
+/* ===== ريلز كيما تيكتوك 🎬💖 ===== */
+#video{padding-bottom:0;height:100vh;height:100dvh;overflow:hidden}
+#video .v-head{position:absolute;top:0;right:0;left:0;z-index:20;display:flex;align-items:center;justify-content:center;
+  padding:16px 14px 34px;background:linear-gradient(180deg,rgba(20,5,20,.55),transparent);color:#fff;pointer-events:none}
+#video .v-head b{font-size:18px;font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+#video .v-head .v-new{pointer-events:auto;position:absolute;left:14px;top:12px;width:42px;height:42px;border-radius:50%;border:none;
+  background:linear-gradient(135deg,#ff6fae,#c86bff);color:#fff;font-size:24px;cursor:pointer;box-shadow:0 4px 14px rgba(255,77,148,.5)}
+.reels-feed{display:block;height:100vh;height:100dvh;overflow-y:auto;scroll-snap-type:y mandatory;scrollbar-width:none;overscroll-behavior:contain}
+.reels-feed::-webkit-scrollbar{display:none}
+.reelv{position:relative;height:100vh;height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;background:linear-gradient(160deg,#2a1430,#4a1d5e);color:#fff}
 .reelv video,.reelv img.wfull{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.reel-play{position:absolute;top:50%;right:50%;transform:translate(50%,-50%);font-size:40px;width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;pointer-events:none}
-.reel-side{position:absolute;left:10px;bottom:76px;display:flex;flex-direction:column;gap:12px;align-items:center;z-index:2}
-.reel-side button{background:rgba(0,0,0,.4);border:none;color:#fff;min-width:52px;padding:8px 6px;border-radius:26px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:2px;flex-direction:column}
-.reel-side button span{font-size:11px;font-weight:700}
-.reel-prog{position:absolute;bottom:0;right:0;left:0;height:3px;background:rgba(255,255,255,.3);z-index:3}
-.reel-prog i{display:block;height:100%;width:0;background:#ff4d94}
+.reel-play{position:absolute;top:50%;right:50%;transform:translate(50%,-50%);font-size:38px;width:74px;height:74px;border-radius:50%;background:rgba(255,255,255,.3);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:2}
+.reel-side{position:absolute;left:8px;bottom:120px;display:flex;flex-direction:column;gap:13px;align-items:center;z-index:2}
+.reel-side button{background:none;border:none;color:#fff;font-size:30px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:2px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.55))}
+.reel-side button span{font-size:12px;font-weight:700;text-shadow:0 1px 5px rgba(0,0,0,.7)}
+.reel-ava{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#ffb3d4,#d49aff);display:flex;align-items:center;justify-content:center;font-size:25px;border:2px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,.35)}
+.reel-prog{position:absolute;bottom:0;right:0;left:0;height:4px;background:rgba(255,255,255,.28);z-index:3}
+.reel-prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff6fae,#c86bff)}
 .reel-heart{position:absolute;top:50%;right:50%;transform:translate(50%,-50%) scale(0);font-size:90px;z-index:4;pointer-events:none;opacity:0}
 .reel-heart.boom{animation:heartboom .7s ease forwards}
 @keyframes heartboom{0%{transform:translate(50%,-50%) scale(0);opacity:0}30%{transform:translate(50%,-50%) scale(1.3);opacity:1}60%{transform:translate(50%,-50%) scale(1);opacity:1}100%{transform:translate(50%,-70%) scale(1);opacity:0}}
-.reel-music{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;z-index:2}
-.reelv .reel-info{z-index:2}
+.reel-info{position:absolute;right:12px;left:74px;bottom:104px;z-index:2;color:#fff}
+.reel-info b{display:block;font-size:15px;font-weight:800;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.reel-info span{display:block;font-size:13.5px;margin-top:3px;text-shadow:0 1px 6px rgba(0,0,0,.7);opacity:.95}
+.reel-info .reel-mus{display:block;font-size:12px;margin-top:6px;opacity:.9;text-shadow:0 1px 6px rgba(0,0,0,.7)}
 /* استوديو الريلز 🎶 */
 .mq-item{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;padding:8px 10px;margin-bottom:6px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .mq-item img{width:44px;height:44px;border-radius:8px;object-fit:cover;flex:none}
@@ -738,9 +749,8 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 
 <!-- ريلز -->
 <div class="screen" id="video">
-  <div class="topbar"><span class="planet">🎬</span><h1>ريلز</h1><p>فيديوهات البنات 🎥</p></div>
-  <div class="sec"><button class="btn block" onclick="go('reel-new')">＋ نشري ريلز 🎬</button></div>
-  <div class="sec reels-feed" id="reels-feed" style="padding-top:12px"></div>
+  <div class="v-head"><b>🪐 ريلز</b><button class="v-new" onclick="go('reel-new')">＋</button></div>
+  <div class="reels-feed" id="reels-feed"></div>
 </div>
 
 <!-- نشر ريلز جديد -->
@@ -869,7 +879,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
       <a onclick="shareApp()">↗️ <span>شاركي التطبيق</span></a>
       <a onclick="doLogout()">🚪 <span>تسجيل الخروج</span></a>
     </div>
-    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v29</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
+    <p style="text-align:center;color:var(--muted);font-size:12px;margin-top:20px">كوكب برق برق 🪐 <span id="appver">v30</span><br>كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑</p>
   </div>
 </div>
 
@@ -1136,6 +1146,6 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 </nav>
 
 </div>
-<script src="app.js?v=29"></script>
+<script src="app.js?v=30"></script>
 </body>
 </html>
