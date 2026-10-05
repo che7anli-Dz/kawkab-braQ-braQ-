@@ -211,6 +211,16 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 .reel-info{position:absolute;bottom:0;width:100%;padding:38px 14px 14px;background:linear-gradient(transparent,rgba(0,0,0,.7))}
 .reel-info b{font-size:15px;display:block}
 .reel-info small{font-size:12px;opacity:.9}
+/* ريلز حقيقي 🎬 */
+.reels-feed{display:flex;flex-direction:column;gap:14px}
+.reelv{position:relative;height:68vh;min-height:430px;border-radius:20px;overflow:hidden;background:linear-gradient(160deg,#2a1430,#4a1d5e);color:#fff}
+.reelv video,.reelv img.wfull{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.reel-play{position:absolute;top:50%;right:50%;transform:translate(50%,-50%);font-size:40px;width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.28);display:flex;align-items:center;justify-content:center;pointer-events:none}
+.reel-side{position:absolute;left:10px;bottom:76px;display:flex;flex-direction:column;gap:12px;align-items:center;z-index:2}
+.reel-side button{background:rgba(0,0,0,.4);border:none;color:#fff;min-width:52px;padding:8px 6px;border-radius:26px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:2px;flex-direction:column}
+.reel-side button span{font-size:11px;font-weight:700}
+.reel-music{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;font-weight:700;padding:6px 12px;border-radius:20px;z-index:2}
+.reelv .reel-info{z-index:2}
 /* story viewer */
 #story{padding:0!important}
 .story-view{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:60;
@@ -539,13 +549,23 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 <!-- ريلز -->
 <div class="screen" id="video">
   <div class="topbar"><span class="planet">🎬</span><h1>ريلز</h1><p>فيديوهات البنات 🎥</p></div>
+  <div class="sec"><button class="btn block" onclick="go('reel-new')">＋ نشري ريلز 🎬</button></div>
+  <div class="sec reels-feed" id="reels-feed" style="padding-top:12px"></div>
+</div>
+
+<!-- نشر ريلز جديد -->
+<div class="screen" id="reel-new">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('video')">→</div><h2 style="font-size:18px">🎬 ريلز جديد</h2></div>
   <div class="sec">
-    <div class="reel" style="background:linear-gradient(160deg,#8b5cf6,#ec4899)"><div class="play">▶</div>
-      <div class="reel-info"><b>روتين مكياجي الصباحي 💄</b><small>@نورهان • ❤️ 2.3k &nbsp; 💬 184</small></div></div>
-    <div class="reel" style="background:linear-gradient(160deg,#f43f5e,#fb923c)"><div class="play">▶</div>
-      <div class="reel-info"><b>جولة في سوق الكوكب 🛍️</b><small>@سيرين • ❤️ 5.1k &nbsp; 💬 402</small></div></div>
-    <div class="reel" style="background:linear-gradient(160deg,#0ea5e9,#14b8a6)"><div class="play">▶</div>
-      <div class="reel-info"><b>وصفة كيكة الشوكولاتة 🍰</b><small>@خديجة • ❤️ 3.8k &nbsp; 💬 296</small></div></div>
+    <div id="rn-prev" class="reelv" style="height:320px;min-height:320px;display:flex;align-items:center;justify-content:center">
+      <span style="font-size:15px;opacity:.75">📹 اختاري فيديو أو صورة</span>
+    </div>
+    <button class="btn block" style="margin-top:12px" onclick="document.getElementById('rn-file').click()">📁 اختاري الملف</button>
+    <input type="file" id="rn-file" accept="video/*,image/*" style="display:none" onchange="rnPreview(this)">
+    <div class="field" style="margin-top:12px"><label>✍️ العنوان</label><input id="rn-title" maxlength="80" placeholder="مثلا: روتين مكياجي الصباحي 💄"></div>
+    <div class="field"><label>🎵 موسيقى من يوتيوب <small style="color:var(--muted);font-weight:400">(اختياري)</small></label><input id="rn-yt" dir="ltr" style="text-align:right" placeholder="الصقي رابط الأغنية من YouTube Music"></div>
+    <button class="btn block" id="rn-pub" onclick="publishReel()">نشر الريلز 🚀</button>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px">💡 افتحي YouTube Music، شاركي الأغنية، والصقي الرابط هنا</p>
   </div>
 </div>
 
@@ -815,6 +835,8 @@ function go(id){
   document.getElementById('fab').style.display=isMain?'block':'none';
   document.querySelectorAll('.nav-it').forEach(n=>n.classList.toggle('on',n.dataset.s===id));
   if(id==='souq'){loadProducts(false);}
+  if(id==='video'){loadReels(false);}
+  if(id!=='video'){try{if(typeof pauseAllReels==='function')pauseAllReels();}catch(e){}}
   window.scrollTo(0,0);
 }
 function openSheet(){document.getElementById('sheetbg').style.display='block'}
@@ -1283,6 +1305,151 @@ async function unbanUser(uid){
     await SB.from('kb_profiles').update({is_banned:false}).eq('id',uid);
     toast('تفك الحظر ✅');loadMembers();
   }catch(e){toast('تعذر فك الحظر: '+e.message);}
+}
+/* ===== الريلز الحقيقي 🎬 (فيديو/صور + موسيقى يوتيوب) ===== */
+var _reelsLoaded=false,_reelFile=null,_reelType='video',_reelObs=null;
+var _likedReels={};
+try{_likedReels=JSON.parse(localStorage.getItem('kb_liked_reels')||'{}');}catch(e){}
+function ytId(url){
+  if(!url)return null;
+  var m=String(url).match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/|music\.youtube\.com\/watch\?v=)([A-Za-z0-9_-]{11})/);
+  return m?m[1]:null;
+}
+function reelUrl(path){
+  if(!path)return '';
+  if(path.indexOf('http')===0)return path;
+  try{return SB.storage.from('kb-reels').getPublicUrl(path).data.publicUrl;}catch(e){return '';}
+}
+function rnPreview(inp){
+  var f=inp.files&&inp.files[0];if(!f)return;
+  if(f.size>80*1024*1024){toast('الملف كبير بزاف (أقصى 80MB) 📦');return;}
+  _reelFile=f;
+  _reelType=f.type.indexOf('image')===0?'photo':'video';
+  var box=document.getElementById('rn-prev');
+  var url=URL.createObjectURL(f);
+  box.innerHTML=_reelType==='photo'
+    ?'<img class="wfull" src="'+url+'">'
+    :'<video src="'+url+'" playsinline muted loop style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">';
+  if(_reelType==='video'){var v=box.querySelector('video');if(v)v.play().catch(function(){});}
+}
+async function publishReel(){
+  if(!_reelFile){toast('اختاري فيديو أو صورة أولا 📹');return;}
+  if(!SB){toast('ما كاش اتصال');return;}
+  var btn=document.getElementById('rn-pub');btn.disabled=true;btn.textContent='ننشرو... ⏳';
+  try{
+    var u=await sbUser();if(!u)throw new Error('سجلي الدخول أولا');
+    var ext=((_reelFile.name||'').split('.').pop()||(_reelType==='photo'?'jpg':'mp4')).toLowerCase().slice(0,4);
+    var path=u.id+'/'+Date.now()+'.'+ext;
+    var up=await SB.storage.from('kb-reels').upload(path,_reelFile,{contentType:_reelFile.type||(_reelType==='photo'?'image/jpeg':'video/mp4')});
+    if(up.error)throw up.error;
+    var ins=await SB.from('kb_reels').insert({author_id:u.id,video_url:path,
+      title:document.getElementById('rn-title').value.trim(),
+      media_type:_reelType,music_youtube_id:ytId(document.getElementById('rn-yt').value)});
+    if(ins.error)throw ins.error;
+    toast('تنشر الريلز 🎉');
+    _reelFile=null;document.getElementById('rn-file').value='';
+    document.getElementById('rn-title').value='';document.getElementById('rn-yt').value='';
+    document.getElementById('rn-prev').innerHTML='<span style="font-size:15px;opacity:.75">📹 اختاري فيديو أو صورة</span>';
+    _reelsLoaded=false;go('video');
+  }catch(e){toast('تعذر النشر: '+e.message);}
+  btn.disabled=false;btn.textContent='نشر الريلز 🚀';
+}
+function reelCard(x,name){
+  var d=document.createElement('div');
+  d.className='reelv';d.dataset.id=x.id;d.dataset.yt=x.music_youtube_id||'';
+  var media=x.media_type==='photo'
+    ?'<img class="wfull" src="'+reelUrl(x.video_url)+'" loading="lazy" alt="">'
+    :'<video src="'+reelUrl(x.video_url)+'" playsinline loop preload="metadata"></video>';
+  var liked=_likedReels[x.id];
+  d.innerHTML=media+
+    '<div class="reel-play">▶</div>'+
+    (x.music_youtube_id?'<div class="reel-music">🎵 موسيقى</div>':'')+
+    '<div class="reel-side"><button onclick="likeReel(\''+x.id+'\',this)">'+(liked?'❤️':'🤍')+'<span>'+(x.likes_count||0)+'</span></button></div>'+
+    '<div class="reel-info"><b>'+escapeHtml(x.title||'')+'</b><small>@'+escapeHtml(name)+'</small></div>';
+  d.addEventListener('click',function(e){
+    if(e.target.closest('.reel-side'))return;
+    toggleReel(d);
+  });
+  return d;
+}
+function toggleReel(d){
+  var v=d.querySelector('video');
+  var btn=d.querySelector('.reel-play');
+  if(v){
+    if(v.paused){pauseAllReels(d);v.play().catch(function(){});btn.style.display='none';ytPlay(d.dataset.yt);}
+    else{v.pause();btn.style.display='flex';ytStop();}
+  }else{
+    if(d.dataset.playing==='1'){d.dataset.playing='';ytStop();}
+    else{pauseAllReels(d);d.dataset.playing='1';ytPlay(d.dataset.yt);if(d.dataset.yt)toast('🎵 تشغل الموسيقى');}
+  }
+}
+function pauseAllReels(except){
+  document.querySelectorAll('#reels-feed .reelv').forEach(function(d){
+    if(d===except)return;
+    var v=d.querySelector('video');
+    if(v&&!v.paused){v.pause();var b=d.querySelector('.reel-play');if(b)b.style.display='flex';}
+    d.dataset.playing='';
+  });
+  ytStop();
+}
+function ytPlay(ytid){
+  ytStop();
+  if(!ytid)return;
+  var f=document.createElement('iframe');
+  f.id='yt-audio';
+  f.style.cssText='position:fixed;width:2px;height:2px;bottom:0;left:0;opacity:.01;pointer-events:none;border:0';
+  f.setAttribute('allow','autoplay; encrypted-media');
+  f.src='https://www.youtube-nocookie.com/embed/'+ytid+'?autoplay=1&loop=1&playlist='+ytid;
+  document.body.appendChild(f);
+}
+function ytStop(){var f=document.getElementById('yt-audio');if(f)f.remove();}
+async function likeReel(id,btn){
+  var liked=_likedReels[id];
+  var span=btn.querySelector('span');
+  var n=parseInt(span.textContent||'0',10)||0;
+  if(liked){delete _likedReels[id];btn.childNodes[0].textContent='🤍';span.textContent=Math.max(0,n-1);}
+  else{_likedReels[id]=1;btn.childNodes[0].textContent='❤️';span.textContent=n+1;}
+  try{localStorage.setItem('kb_liked_reels',JSON.stringify(_likedReels));}catch(e){}
+  if(SB){try{await SB.rpc('kb_like_reel',{p_id:id,p_delta:liked?-1:1});}catch(e){}}
+}
+function observeReels(){
+  if(_reelObs){try{_reelObs.disconnect();}catch(e){}}
+  if(!('IntersectionObserver' in window))return;
+  _reelObs=new IntersectionObserver(function(es){
+    es.forEach(function(en){
+      if(!en.isIntersecting){
+        var d=en.target,v=d.querySelector('video');
+        if(v&&!v.paused){v.pause();var b=d.querySelector('.reel-play');if(b)b.style.display='flex';}
+        if(d.dataset.playing==='1'){d.dataset.playing='';ytStop();}
+      }
+    });
+  },{threshold:0.25});
+  document.querySelectorAll('#reels-feed .reelv').forEach(function(d){_reelObs.observe(d);});
+}
+async function loadReels(force){
+  if(!SB||(_reelsLoaded&&!force))return;
+  var feed=document.getElementById('reels-feed');
+  try{
+    var r=await SB.from('kb_reels').select('id,author_id,video_url,title,media_type,music_youtube_id,likes_count').order('created_at',{ascending:false}).limit(30);
+    if(r.error)throw r.error;
+    var rows=r.data||[];
+    if(!rows.length){
+      feed.innerHTML='<div style="text-align:center;padding:44px 20px;color:var(--muted)">'+
+        '<div style="font-size:52px">🎬</div><br>ما كاش ريلز بعد<br>كوني أول وحدة تنشر! 💖<br><br>'+
+        '<button class="btn" onclick="go(\'reel-new\')">نشر أول ريلز 🚀</button></div>';
+    }else{
+      var ids=[];rows.forEach(function(x){if(ids.indexOf(x.author_id)<0)ids.push(x.author_id);});
+      var names={};
+      try{var pr=await SB.from('kb_profiles').select('id,full_name').in('id',ids);
+        if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x.full_name;});}catch(e){}
+      feed.innerHTML='';
+      rows.forEach(function(x){feed.appendChild(reelCard(x,names[x.author_id]||'بنت الكوكب'));});
+    }
+    _reelsLoaded=true;
+    observeReels();
+  }catch(e){
+    if(!_reelsLoaded)feed.innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">تعذر التحميل — تحققي من الاتصال</p>';
+  }
 }
 /* ===== السوق: تحميل المنتجات الحقيقية ===== */
 var _productsLoaded=false;
