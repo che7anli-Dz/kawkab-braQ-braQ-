@@ -135,18 +135,10 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 .tab{flex:1;text-align:center;padding:11px 4px;font-size:14px;font-weight:700;color:var(--muted);border-bottom:3px solid transparent;cursor:pointer}
 .tab.on{color:var(--pink-d);border-color:var(--pink)}
 /* splash */
-#splash{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;
+#splash{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
   background:linear-gradient(160deg,#3b1157,#a21caf 60%,#ff4d94);color:#fff;padding:30px;min-height:100vh}
 #splash .big{font-size:90px;animation:float 3s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-14px) rotate(8deg)}}
-@keyframes twinkle{0%,100%{opacity:.25;transform:scale(.8) rotate(0deg)}50%{opacity:1;transform:scale(1.15) rotate(20deg)}}
-.spark{position:absolute;font-size:26px;animation:twinkle 2.6s ease-in-out infinite;pointer-events:none;filter:drop-shadow(0 0 6px rgba(255,255,255,.7))}
-#splash .cute-row{display:flex;gap:14px;justify-content:center;margin:2px 0 18px;font-size:22px}
-#splash .cute-row span{display:inline-block;animation:twinkle 3s ease-in-out infinite}
-#splash .cute-row span:nth-child(2){animation-delay:.6s}
-#splash .cute-row span:nth-child(3){animation-delay:1.2s}
-#splash .cute-row span:nth-child(4){animation-delay:1.8s}
-#splash .cute-row span:nth-child(5){animation-delay:2.4s}
 #splash h1{font-size:34px;font-weight:900;margin-top:14px}
 #splash p{font-size:15px;opacity:.92;margin:10px 0 26px;line-height:1.8}
 #splash .btn{background:#fff;color:#a21caf;font-size:17px;padding:15px 44px;border-radius:30px}
@@ -295,19 +287,11 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 
 <!-- شاشة البداية -->
 <div class="screen active" id="splash">
-  <span class="spark" style="top:12%;right:14%">✨</span>
-  <span class="spark" style="top:20%;left:10%;animation-delay:.8s">💖</span>
-  <span class="spark" style="top:38%;right:6%;animation-delay:1.6s">🌸</span>
-  <span class="spark" style="top:55%;left:7%;animation-delay:2.2s">🦋</span>
-  <span class="spark" style="top:70%;right:12%;animation-delay:1s">⭐</span>
-  <span class="spark" style="top:82%;left:16%;animation-delay:2.8s">💫</span>
   <div class="big"><img id="logo-tap" src="icon-512.png" alt="كوكب برق برق" onclick="secretTap()" style="width:150px;height:150px;border-radius:38px;box-shadow:0 10px 30px rgba(0,0,0,.35);cursor:pointer"></div>
   <h1>كوكب برق برق</h1>
   <p>كوكب بلا ملكة...<br>لأن كل وحدة فيكم ملكة 👑<br><small>سوق • خدمات • بنات فقط</small></p>
-  <div class="cute-row"><span>🌷</span><span>💄</span><span>👜</span><span>🌙</span><span>🍰</span></div>
   <button class="btn" onclick="go('signup')">أنشئي حسابك 💖</button>
   <button class="btn" onclick="go('login')" style="margin-top:12px;background:transparent;border:2px solid #fff;color:#fff;box-shadow:none">تسجيل الدخول 🔑</button>
-  <div class="cute-row" style="margin:18px 0 0"><span>💅</span><span>👑</span><span>🌺</span><span>✨</span><span>💎</span></div>
 </div>
 
 <!-- الرئيسية -->
@@ -724,6 +708,7 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
     <div class="field"><label>💌 الإيميل</label><input id="li-email" type="email" placeholder="amina.dz@gmail.com" dir="ltr" style="text-align:right"></div>
     <div class="field"><label>🔑 كلمة السر</label><input id="li-pass" type="password" placeholder="••••••••"></div>
     <button class="btn block" onclick="doLogin()">ادخلي 🪐</button>
+    <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:12px">ما عندكش حساب؟ <u style="cursor:pointer;font-weight:800;color:var(--pink-d)" onclick="go('signup')">أنشئي واحد 💖</u></p>
   </div>
 </div>
 
