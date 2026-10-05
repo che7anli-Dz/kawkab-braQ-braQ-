@@ -240,6 +240,14 @@ body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:#2a1430;color:var
 input[type=range]{width:100%;accent-color:var(--pink)}
 .rn-lab{font-size:13px;font-weight:700;color:var(--txt);margin:12px 0 4px;display:block}
 .rn-lab small{color:var(--muted);font-weight:400}
+/* عارض الستوري 📖 */
+#sprog{display:flex;gap:6px;padding:12px 12px 0;position:absolute;top:0;right:0;left:0;z-index:5}
+#sprog .seg{flex:1;height:3px;background:rgba(255,255,255,.35);border-radius:2px;overflow:hidden}
+#sprog .seg i{display:block;height:100%;width:0;background:#fff;border-radius:2px}
+.story-tap{position:absolute;top:0;bottom:0;width:35%;z-index:4}
+.post .actions button{background:none;border:none;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 2px;font-family:inherit}
+.post .pimg{border-radius:14px;overflow:hidden;margin-top:10px}
+.post .pimg img,.post .pimg video{width:100%;max-height:420px;object-fit:cover;display:block}
 /* story viewer */
 #story{padding:0!important}
 .story-view{position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;z-index:60;
@@ -250,6 +258,9 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 .shead{position:absolute;top:28px;right:16px;left:16px;display:flex;align-items:center;gap:10px}
 .sbig{font-size:130px;animation:float 3s ease-in-out infinite}
 .scap{font-size:19px;font-weight:800;margin-top:14px}
+#story .scap{position:absolute;bottom:34px;right:16px;left:16px;text-align:center;z-index:3;text-shadow:0 2px 8px rgba(0,0,0,.5);margin:0}
+#story .shead{z-index:5}
+#story .shead .avatar{flex:none}
 /* create sheet */
 .sheet-bg{display:none;position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;
   background:rgba(0,0,0,.45);z-index:50}
@@ -332,12 +343,8 @@ input[type=range]{width:100%;accent-color:var(--pink)}
   <div class="search">🔍 &nbsp; قلبي على منتج، خدمة، بنت...</div>
   <div class="verify">🔒 مجتمع آمن: الدخول بالتحقق فقط — غير للبنات</div>
   <!-- القصص -->
-  <div class="stories">
-    <div class="story" onclick="openSheet()"><div class="im" style="background:#fbe9f1;border-style:dashed;font-size:36px">＋</div><div class="nm">قصتك 📷</div></div>
-    <div class="story" onclick="openStory('إيمان','🌸','linear-gradient(160deg,#8b5cf6,#ec4899)','يوم جديد 🌅')"><div class="im" style="background:linear-gradient(160deg,#8b5cf6,#ec4899)">🌸</div><div class="nm">إيمان</div></div>
-    <div class="story" onclick="openStory('نورهان','💄','linear-gradient(160deg,#f43f5e,#fb923c)','لوك اليوم 💄')"><div class="im" style="background:linear-gradient(160deg,#f43f5e,#fb923c)">💄</div><div class="nm">نورهان</div></div>
-    <div class="story" onclick="openStory('سيرين','🌺','linear-gradient(160deg,#0ea5e9,#8b5cf6)','رحلة للشاطئ 🏖️')"><div class="im" style="background:linear-gradient(160deg,#0ea5e9,#8b5cf6)">🌺</div><div class="nm">سيرين</div></div>
-    <div class="story" onclick="openStory('خديجة','🦋','linear-gradient(160deg,#14b8a6,#8b5cf6)','وصفة اليوم 🍰')"><div class="im" style="background:linear-gradient(160deg,#14b8a6,#8b5cf6)">🦋</div><div class="nm">خديجة</div></div>
+  <div class="stories" id="story-row">
+    <div class="story" onclick="go('story-new')"><div class="im" style="background:#fbe9f1;border-style:dashed;font-size:36px">＋</div><div class="nm">يومياتي 📷</div></div>
   </div>
   <!-- منشور جديد -->
   <div class="composer" onclick="openSheet()"><div class="avatar" style="width:42px;height:42px;font-size:22px">🌸</div><div class="ph">📝 واش في خاطرك يا ملكة؟</div></div>
@@ -433,14 +440,8 @@ input[type=range]{width:100%;accent-color:var(--pink)}
   <div class="sec">
     <div class="challenge"><h3>🏆 تحدي الأسبوع: أحسن ميكاب نهاري</h3><p>342 بنت مشاركة • التصويت يخلص في يومين</p>
       <button class="btn">صوتي وشاهدي المشاركات</button></div>
-    <div class="post"><div class="head" style="cursor:pointer" onclick="openProfile('ريان','الجزائر','🧴 عناية • 👗 موضة','🌷','⭐ نجمة','sahha')"><div class="avatar">ر</div>
-      <div><h4>ريان <span class="rank">⭐ نجمة</span></h4><small>منذ ساعتين • الجزائر</small></div></div>
-      <div class="txt">بنات جربت كريم الأرز الطبيعي تاع وحدة في السوق، بشرتي ولات حرير 😍 شكون جرباتو؟</div>
-      <div class="actions"><span>❤️ 214</span><span>💬 48</span><span>↗️</span></div></div>
-    <div class="post"><div class="head" style="cursor:pointer" onclick="openProfile('سيرين','وهران','💼 بيزنس • 📚 دراسة','🌺','👸 أميرة','sahha')"><div class="avatar">س</div>
-      <div><h4>سيرين <span class="rank">👸 أميرة</span></h4><small>منذ 5 ساعات • وهران</small></div></div>
-      <div class="txt">نصيحة للي يحبو يبداو مشروع: ابداو باللي تعرفو تديروه، والكوكب هو السوق تاعكم 💪</div>
-      <div class="actions"><span>❤️ 389</span><span>💬 96</span><span>↗️</span></div></div>
+    <button class="btn block" onclick="go('post-new')" style="margin-bottom:12px">📝 نشري منشور</button>
+    <div id="feed-list"></div>
   </div>
 </div>
 
@@ -611,7 +612,7 @@ input[type=range]{width:100%;accent-color:var(--pink)}
   <div class="sec" id="rc-list" style="padding-bottom:96px"></div>
   <div style="position:fixed;bottom:0;right:0;left:0;max-width:480px;margin:0 auto;background:#fff;padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:8px;box-shadow:0 -2px 12px rgba(0,0,0,.08);z-index:5">
     <input id="rc-input" maxlength="500" placeholder="اكتبي تعليقك... 💖" style="flex:1;border:2px solid #ffd6e8;border-radius:24px;padding:10px 14px;font-size:14px;outline:none;font-family:inherit">
-    <button class="btn" style="padding:10px 18px" onclick="sendReelComment()">📩</button>
+    <button class="btn" style="padding:10px 18px" onclick="sendComment()">📩</button>
   </div>
 </div>
 
@@ -705,12 +706,61 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 
 <!-- عارض القصة -->
 <div class="screen" id="story">
-  <div class="story-view" id="story-view" style="background:linear-gradient(160deg,#8b5cf6,#ec4899)">
-    <div class="sprog"><div class="sfill" id="sfill"></div></div>
+  <div class="story-view" id="story-view" style="background:#1c0f24">
+    <div id="sprog"></div>
     <div class="shead"><div class="avatar" id="st-ava" style="width:40px;height:40px;font-size:20px">🌸</div>
-      <b id="st-name">إيمان</b><span style="margin-right:auto;cursor:pointer;font-size:24px" onclick="go('home')">✕</span></div>
-    <div class="sbig" id="st-emoji">🌸</div>
-    <div class="scap" id="st-cap">يوم جديد 🌅</div>
+      <b id="st-name" style="font-size:14px">—</b><span id="st-time" style="font-size:11px;opacity:.8"></span>
+      <span style="margin-right:auto;cursor:pointer;font-size:24px" onclick="closeStory()">✕</span></div>
+    <div id="st-media" style="position:absolute;inset:0"></div>
+    <div class="scap" id="st-cap"></div>
+    <div class="reel-music" id="st-music" style="display:none;top:64px"></div>
+    <div class="story-tap" style="right:0" onclick="storyNav(1)"></div>
+    <div class="story-tap" style="left:0" onclick="storyNav(-1)"></div>
+  </div>
+</div>
+
+<!-- يومية جديدة -->
+<div class="screen" id="story-new">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('home')">→</div><h2 style="font-size:18px">📖 يومية جديدة</h2></div>
+  <div class="sec">
+    <div id="st-prev" class="reelv" style="height:420px;min-height:420px;display:flex;align-items:center;justify-content:center">
+      <span style="font-size:15px;opacity:.75">📷 اختاري صورة أو فيديو</span>
+    </div>
+    <button class="btn block" style="margin-top:12px" onclick="document.getElementById('st-file').click()">📁 اختاري الملف</button>
+    <input type="file" id="st-file" accept="video/*,image/*" style="display:none" onchange="stPreview(this)">
+    <div id="st-filters" style="display:none">
+      <span class="rn-lab">✨ الفلتر</span>
+      <div class="frow" id="st-frow"></div>
+    </div>
+    <div class="field" style="margin-top:12px"><label>💬 تعليق</label><input id="st-cap-in" maxlength="120" placeholder="اكتبي شي حاجة..."></div>
+    <div class="field"><label>🎵 الموسيقى <small style="color:var(--muted);font-weight:400">(اختياري)</small></label>
+      <div id="st-song-chip" style="display:none;align-items:center;gap:10px;background:#fff0f6;border:2px solid #ffb3d4;border-radius:12px;padding:8px 10px;margin-bottom:8px">
+        <img id="st-chip-art" src="" style="width:44px;height:44px;border-radius:8px;flex:none">
+        <div style="flex:1;min-width:0"><b id="st-chip-t" style="font-size:13px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></b><small id="st-chip-a" style="font-size:11px;color:var(--muted);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></small></div>
+        <button onclick="stClear()" style="border:none;background:none;font-size:16px;cursor:pointer;flex:none">✖</button>
+      </div>
+      <input id="st-mq" placeholder="🔍 اكتبي اسم الأغنية..." oninput="stSearchMusic(this.value)">
+      <div id="st-mres" style="margin-top:6px"></div>
+      <div id="st-mseg" style="display:none">
+        <span class="rn-lab">🎵 مقطع الأغنية <small>(15 ثانية — <span id="st-ms-lab">0s</span>)</small></span>
+        <input type="range" id="st-ms" min="0" max="15" value="0" oninput="stSeg(this.value)">
+      </div>
+    </div>
+    <button class="btn block" id="st-pub" onclick="publishStory()">نشر في يومياتي 🚀</button>
+    <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px">⏰ تختفي بعد 24 ساعة</p>
+  </div>
+</div>
+
+<!-- منشور جديد -->
+<div class="screen" id="post-new">
+  <div class="chat-head"><div class="back" style="position:static;background:rgba(255,255,255,.25);color:#fff" onclick="go('sahha')">→</div><h2 style="font-size:18px">📝 منشور جديد</h2></div>
+  <div class="sec">
+    <div class="field"><label>✍️ واش في خاطرك يا ملكة؟</label>
+      <textarea id="np-txt" rows="4" maxlength="1000" placeholder="شاركي هدرتك مع البنات... 💖"></textarea></div>
+    <div id="np-prev" style="display:none;margin-bottom:10px"></div>
+    <button class="btn block" onclick="document.getElementById('np-file').click()">📷 زيدي صورة/فيديو <small style="font-weight:400;opacity:.8">(اختياري)</small></button>
+    <input type="file" id="np-file" accept="video/*,image/*" style="display:none" onchange="npPreview(this)">
+    <button class="btn block" id="np-pub" onclick="publishPost()" style="margin-top:12px">نشر 📩</button>
   </div>
 </div>
 
@@ -719,8 +769,9 @@ input[type=range]{width:100%;accent-color:var(--pink)}
   <div class="sheet">
     <h3 style="text-align:center;margin-bottom:12px">➕ إنشاء جديد</h3>
     <div class="menu" style="margin:0">
-      <a onclick="closeSheet();go('home')">📝 <span>منشور جديد</span></a>
-      <a onclick="closeSheet()">📖 <span>قصة / يومية</span></a>
+      <a onclick="closeSheet();go('post-new')">📝 <span>منشور جديد</span></a>
+      <a onclick="closeSheet();go('story-new')">📖 <span>قصة / يومية</span></a>
+      <a onclick="closeSheet();go('reel-new')">🎬 <span>ريلز جديد</span></a>
       <a onclick="closeSheet();go('sell')">🛍️ <span>منتج للبيع</span></a>
       <a onclick="closeSheet();go('services')">💅 <span>خدمة جديدة</span></a>
     </div>
@@ -855,920 +906,6 @@ input[type=range]{width:100%;accent-color:var(--pink)}
 </nav>
 
 </div>
-<script>
-/* ===== Supabase — الربط الحقيقي (مع fallback للوضع التجريبي) ===== */
-var SB=null;
-try{
-  if(typeof supabase!=='undefined'){
-    SB=supabase.createClient('https://chosrqzpuczmirrxmnkf.supabase.co','sb_publishable__e-8by0NKHyY-mnRowNtqg_zRr8Fq_q');
-  }
-}catch(e){SB=null;}
-var _profile=null;
-async function sbUser(){
-  if(!SB)return null;
-  try{var r=await SB.auth.getUser();return (r.data&&r.data.user)?r.data.user:null;}catch(e){return null;}
-}
-function escapeHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-function go(id){
-  var main=['home','friends','video','souq','menu'];
-  if(SB&&main.indexOf(id)>-1&&!_verified){go('splash');return;}
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  var main=['home','friends','video','souq','menu'];
-  var isMain=main.indexOf(id)>-1;
-  document.querySelector('.phone').classList.toggle('withutil',isMain);
-  document.getElementById('navbar').style.display=isMain?'flex':'none';
-  document.getElementById('fab').style.display=isMain?'block':'none';
-  document.querySelectorAll('.nav-it').forEach(n=>n.classList.toggle('on',n.dataset.s===id));
-  if(id==='souq'){loadProducts(false);}
-  if(id==='video'){loadReels(false);}
-  if(id!=='video'){try{if(typeof pauseAllReels==='function')pauseAllReels();}catch(e){}}
-  if(id!=='reel-new'){try{if(_mqAudioEl){_mqAudioEl.pause();_mqPlaying=null;}}catch(e){}}
-  window.scrollTo(0,0);
-}
-function openSheet(){document.getElementById('sheetbg').style.display='block'}
-function closeSheet(){document.getElementById('sheetbg').style.display='none'}
-function openStory(name,emoji,bg,cap){
-  document.getElementById('st-name').textContent=name;
-  document.getElementById('st-ava').textContent=emoji;
-  document.getElementById('st-emoji').textContent=emoji;
-  document.getElementById('st-cap').textContent=cap;
-  document.getElementById('story-view').style.background=bg;
-  var f=document.getElementById('sfill'); f.style.animation='none'; void f.offsetWidth; f.style.animation='';
-  go('story');
-}
-function openChat(name,emoji){
-  document.getElementById('chat-name').textContent=name;
-  document.getElementById('chat-ava').textContent=emoji;
-  go('chat');
-}
-function sendMsg(){
-  var i=document.getElementById('chat-in');
-  if(i.value.trim()){
-    var d=document.createElement('div'); d.className='msg out'; d.textContent=i.value;
-    document.getElementById('msgs').appendChild(d); i.value='';
-    window.scrollTo(0,document.body.scrollHeight);
-  }
-}
-var firstPhoto='';
-function handlePhoto(input,idx){
-  var f=input.files&&input.files[0]; if(!f)return;
-  window._pFiles=window._pFiles||{}; window._pFiles[idx]=f;
-  var url=URL.createObjectURL(f);
-  document.getElementById('phv'+idx).innerHTML='<img src="'+url+'" style="width:100%;height:100%;object-fit:cover">';
-  if(idx===1)firstPhoto=url;
-}
-function toast(t){
-  var e=document.getElementById('toast'); e.textContent=t; e.style.display='block';
-  clearTimeout(window._tt); window._tt=setTimeout(function(){e.style.display='none'},2300);
-}
-async function publishProduct(){
-  var name=document.getElementById('p-name').value.trim()||'منتج جديد 🛍️';
-  var desc=document.getElementById('p-desc').value.trim();
-  var price=document.getElementById('p-price').value.trim();
-  var wilaya=document.getElementById('p-wilaya').value;
-  var cat=document.getElementById('p-cat').value;
-  var cond=document.querySelector('.pcond.on').textContent;
-  var files=window._pFiles||{};
-  var photoUrls=[];
-  var me=await sbUser();
-  var realSaved=false;
-  if(SB&&me){
-    try{
-      var idxs=Object.keys(files);
-      for(var k=0;k<idxs.length;k++){
-        var f=files[idxs[k]];
-        var safeName=String(f.name||'photo.jpg').replace(/[^a-zA-Z0-9.]/g,'_');
-        var path=me.id+'/'+Date.now()+'_'+idxs[k]+'_'+safeName;
-        var up=await SB.storage.from('kb-products').upload(path,f,{upsert:true});
-        if(!up.error){
-          var pub=SB.storage.from('kb-products').getPublicUrl(path);
-          if(pub.data&&pub.data.publicUrl)photoUrls.push(pub.data.publicUrl);
-        }
-      }
-      var ins=await SB.from('kb_products').insert({seller_id:me.id,name:name,description:desc,price:price||null,category:cat,wilaya:wilaya,condition:cond,photos:photoUrls,status:'active'});
-      if(ins.error)throw ins.error;
-      _productsLoaded=false; realSaved=true;
-      toast('🎉 تم نشر منتجك بنجاح!');
-    }catch(e){toast('تعذر الحفظ في القاعدة — تحققي من الاتصال');}
-  }
-  if(!realSaved)toast('🎉 تم نشر منتجك بنجاح!');
-  var imgHtml=firstPhoto?'<img src="'+firstPhoto+'" style="width:100%;height:100%;object-fit:cover">':'🛍️';
-  var d=document.createElement('div'); d.className='prod'; d.setAttribute('onclick',"go('detail')");
-  d.innerHTML='<div class="img" style="background:linear-gradient(135deg,#ffe0ec,#e9d5ff);overflow:hidden">'+imgHtml+'<span class="badge">'+cond+'</span></div><div class="info"><h4>'+escapeHtml(name)+'</h4><div class="price">'+(price?escapeHtml(price)+' دج':'السعر عند التواصل')+'</div><div class="seller">'+escapeHtml((_profile&&_profile.full_name)||'لينا')+' • '+escapeHtml(wilaya)+'</div></div>';
-  var g=document.getElementById('souq-grid'); g.insertBefore(d,g.firstChild);
-  document.getElementById('p-name').value=''; document.getElementById('p-desc').value='';
-  document.getElementById('p-price').value=''; firstPhoto=''; window._pFiles={};
-  for(var i=1;i<=4;i++){document.getElementById('phv'+i).innerHTML=i===1?'📷<small>رئيسية</small>':'＋';}
-  go('souq');
-}
-/* signup + quiz + voice */
-var QUIZ=[
- {q:'الكونسيلر البرتقالي واش يغطي؟',o:['الهالات الغامقة','حب الشباب','النمش'],c:0},
- {q:'"البايكينغ" واش هو؟',o:['تسخين الفرشاة','خلط كريمات','تثبيت بالبودرة'],c:2},
- {q:'المكياج المتكتل سببه؟',o:['ماركة غالية','منتج زايد','وجه مغسول'],c:1},
- {q:'الفوندوتان تجربيه وين؟',o:['خط الفك','على اليد','على الخد'],c:0},
- {q:'"الفال آوت" واش هو؟',o:['سيلان الماسكارا','تشقق الروج','تساقط الظل'],c:2},
- {q:'الماسكارا المقاومة للماء علاش تتجنب؟',o:['غالية بزاف','تقطع الرموش','ما تطولش'],c:1},
- {q:'البرايمر يندار قبل واش؟',o:['الفوندوتان','الماسكارا','أحمر الشفايف'],c:0}
-];
-var MALENAMES=['mohamed','mohammed','ahmed','amine','yacine','yassine','islam','riad','riyad','karim','walid','samir','bilal','hichem','houssem','oussama','abdel','mehdi','rayan','adam','yousef','omar','khaled','sofiane','anis','rafik','nassim'];
-var qIdx=0,qScore=0,qOrder=[];
-function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
-var ACTIVE_QUIZ=QUIZ;
-async function fetchQuiz(){
-  if(!SB)return QUIZ;
-  try{
-    var r=await SB.from('kb_quiz_questions').select('question,options,correct_index').eq('active',true).limit(20);
-    if(r.error||!r.data||!r.data.length)return QUIZ;
-    return r.data.map(function(x){return{q:x.question,o:x.options,c:x.correct_index};});
-  }catch(e){return QUIZ;}
-}
-async function startQuiz(){
-  var n=document.getElementById('su-name').value.trim();
-  var e=document.getElementById('su-email').value.trim();
-  var p=document.getElementById('su-phone').value.trim();
-  var w=document.getElementById('su-wilaya').value;
-  var pw=document.getElementById('su-pass').value;
-  if(!n||!e||!p){toast('عمري الاسم والإيميل والهاتف 📝');return;}
-  if(e.indexOf('@')<1){toast('الإيميل ما راهوش صحيح 💌');return;}
-  var local=e.split('@')[0].toLowerCase();
-  for(var i=0;i<MALENAMES.length;i++){if(local.indexOf(MALENAMES[i])>-1){toast('هاذ الإيميل ما يبانش تاع بنت 💌');return;}}
-  if(!pw||pw.length<6){toast('كلمة السر لازم 6 حروف على الأقل 🔑');return;}
-  try{localStorage.setItem('kb_pending',JSON.stringify({n:n,e:e,p:p,w:w}));}catch(_){}
-  if(SB){
-    try{
-      var s=await SB.auth.signUp({email:e,password:pw});
-      if(s.error)throw s.error;
-      var sess=s.data&&s.data.session;
-      var u=s.data&&s.data.user;
-      if(sess&&u){
-        try{await SB.from('kb_profiles').insert({id:u.id,full_name:n,email:e,phone:p,wilaya:w,verification_status:'pending'});}
-        catch(_){}
-        try{localStorage.removeItem('kb_pending');}catch(_){}
-      }else{
-        go('verify-email');return;
-      }
-    }catch(err){toast('التسجيل تعثر: '+err.message+' — نكمل تجريبيا');}
-  }
-  ACTIVE_QUIZ=await fetchQuiz();
-  qIdx=0;qScore=0;qOrder=shuffle(ACTIVE_QUIZ.map(function(_,i){return i;}));
-  renderQ();go('quiz');
-}
-function renderQ(){
-  var Q=ACTIVE_QUIZ[qOrder[qIdx]];
-  var opts=shuffle(Q.o.map(function(t,i){return{t:t,ok:i===Q.c};}));
-  document.getElementById('q-num').textContent='سؤال '+(qIdx+1)+' من '+ACTIVE_QUIZ.length;
-  document.getElementById('q-bar').style.width=(qIdx/ACTIVE_QUIZ.length*100)+'%';
-  document.getElementById('q-text').textContent=Q.q;
-  var box=document.getElementById('q-opts');box.innerHTML='';
-  opts.forEach(function(op){
-    var b=document.createElement('button');b.className='qopt';b.textContent=op.t;
-    b.onclick=function(){answer(op.ok,b);};box.appendChild(b);
-  });
-}
-function answer(ok,btn){
-  if(ok){qScore++;btn.classList.add('ok');}else{btn.classList.add('no');}
-  var all=document.querySelectorAll('.qopt');for(var i=0;i<all.length;i++)all[i].disabled=true;
-  setTimeout(function(){qIdx++;if(qIdx<ACTIVE_QUIZ.length)renderQ();else finishQuiz();},650);
-}
-async function finishQuiz(){
-  document.getElementById('q-bar').style.width='100%';
-  if(qScore>=4){
-    document.getElementById('pass-score').textContent=qScore+' / '+ACTIVE_QUIZ.length;
-    if(SB){
-      try{
-        var u=await sbUser();
-        if(u)await SB.from('kb_profiles').update({quiz_score:qScore,verification_status:'quiz_passed'}).eq('id',u.id);
-      }catch(e){}
-    }
-    _verified=true;
-    go('quiz-pass');
-  }
-  else{document.getElementById('fail-score').textContent=qScore+' / '+ACTIVE_QUIZ.length;go('voice');}
-}
-var mrRec=null,mrStream=null,mrChunks=[],mrTimer=null,mrSec=0;
-function toggleRec(){
-  var btn=document.getElementById('rec-btn');
-  if(mrRec&&mrRec.state==='recording'){mrRec.stop();return;}
-  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('المتصفح ما يدعمش التسجيل 🎤');return;}
-  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
-    mrStream=stream;mrChunks=[];
-    mrRec=new MediaRecorder(stream);
-    mrRec.ondataavailable=function(e){mrChunks.push(e.data);};
-    mrRec.onstop=function(){
-      var blob=new Blob(mrChunks,{type:'audio/webm'});
-      window._vocalBlob=blob;
-      document.getElementById('rec-play').src=URL.createObjectURL(blob);
-      document.getElementById('rec-done').style.display='block';
-      document.getElementById('rec-live').style.display='none';
-      btn.innerHTML='🎤 سجلي الفوكال';btn.classList.remove('recording');
-      if(mrStream)mrStream.getTracks().forEach(function(t){t.stop();});
-      clearInterval(mrTimer);
-    };
-    mrRec.start();mrSec=0;
-    document.getElementById('rec-time').textContent='0:00';
-    document.getElementById('rec-done').style.display='none';
-    document.getElementById('rec-live').style.display='block';
-    btn.innerHTML='⏹️ وقفي التسجيل';btn.classList.add('recording');
-    mrTimer=setInterval(function(){
-      mrSec++;document.getElementById('rec-time').textContent=Math.floor(mrSec/60)+':'+String(mrSec%60).padStart(2,'0');
-      if(mrSec>=90&&mrRec.state==='recording')mrRec.stop();
-    },1000);
-  }).catch(function(){toast('ما قدرناش نوصلو للميكروفون 🎤');});
-}
-function uploadVocal(input){
-  var f=input.files&&input.files[0];if(!f)return;
-  window._vocalBlob=f;
-  document.getElementById('rec-play').src=URL.createObjectURL(f);
-  document.getElementById('rec-done').style.display='block';
-  toast('تم رفع الفوكال ✅');
-}
-function openProfile(name,wilaya,tags,emoji,rank,ret){
-  document.getElementById('op-name').textContent=name;
-  document.getElementById('op-name2').textContent=name;
-  document.getElementById('op-rank').textContent=rank;
-  document.getElementById('op-emoji').textContent=emoji;
-  document.getElementById('op-emoji2').textContent=emoji;
-  document.getElementById('op-bio').innerHTML='📍 '+wilaya+'<br>'+tags;
-  document.getElementById('op-back').setAttribute('onclick',"go('"+ret+"')");
-  document.getElementById('op-add').textContent='👭 أضيفيها صديقة';
-  go('oprofile');
-}
-/* ===== الدخول / الخروج / البروفايل ===== */
-/* ===== بوابة الدخول: غير المتحققين ما يدخلوش للتطبيق ===== */
-var _verified=false;
-var _seen=false;
-var _skipSplash=false;
-function hasStoredSession(){
-  try{
-    for(var i=0;i<localStorage.length;i++){
-      var k=localStorage.key(i);
-      if(k&&k.indexOf('sb-')===0&&k.lastIndexOf('-auth-token')===k.length-11){
-        var o=JSON.parse(localStorage.getItem(k)||'null');
-        if(o&&o.access_token)return true;
-      }
-    }
-  }catch(e){}
-  return false;
-}
-try{_seen=localStorage.getItem('kb_seen')==='1';}catch(e){}
-_skipSplash=_seen||hasStoredSession();
-function markSeen(){_seen=true;_skipSplash=true;try{localStorage.setItem('kb_seen','1');}catch(e){}}
-async function checkVerified(){
-  if(!SB)return true;
-  try{
-    var u=await sbUser();if(!u)return false;
-    var r=await SB.from('kb_profiles').select('verification_status,role,is_banned').eq('id',u.id).single();
-    if(r.error||!r.data)return false;
-    if(r.data.is_banned)return 'banned';
-    if(r.data.role==='owner')return true;
-    var st=r.data.verification_status;
-    return (st==='quiz_passed'||st==='approved');
-  }catch(e){return false;}
-}
-async function gateAndEnter(){
-  await ensureProfile();
-  var v=await checkVerified();
-  if(v===true){
-    _verified=true;
-    markSeen();
-    await loadUserProfile();
-    go('home');
-    return true;
-  }
-  try{if(SB)await SB.auth.signOut();}catch(e){}
-  _verified=false;
-  go((_skipSplash||_seen)?'login':'splash');
-  toast(v==='banned'?'هاذ الحساب محظور 🚫':'كملي التحقق أولا باش تدخلي 🔐');
-  return false;
-}
-async function doLogin(){
-  var e=document.getElementById('li-email').value.trim();
-  var p=document.getElementById('li-pass').value;
-  if(!e||!p){toast('عمري الإيميل وكلمة السر 🔑');return;}
-  if(!SB){toast('ما كاش اتصال — دخول تجريبي');markSeen();go('home');return;}
-  try{
-    var r=await SB.auth.signInWithPassword({email:e,password:p});
-    if(r.error)throw r.error;
-    await ensureProfile();
-    /* تفعيل المالك تلقائيا عند أول دخول — قبل بوابة التحقق */
-    try{
-      var c=await SB.rpc('kb_claim_owner');
-      if(!c.error){
-        _verified=true;_wantClaim=false;markSeen();await loadUserProfile();
-        toast('👑 راك مالك الكوكب دروك!');go('home');return;
-      }
-    }catch(_){}
-    _wantClaim=false;
-    if(await gateAndEnter())toast('مرحبا بيك في الكوكب 💖');
-  }catch(err){toast('الدخول ما كملش: '+err.message);}
-}
-async function doLogout(){
-  try{if(SB)await SB.auth.signOut();}catch(e){}
-  _profile=null;_verified=false;go('splash');
-}
-/* إنشاء البروفايل إذا ما كاش (حالة تأكيد الإيميل) */
-async function ensureProfile(){
-  if(!SB)return;
-  try{
-    var u=await sbUser();if(!u)return;
-    var r=await SB.from('kb_profiles').select('id').eq('id',u.id).single();
-    if(r.data)return;
-    var pd=null;
-    try{pd=JSON.parse(localStorage.getItem('kb_pending')||'null');}catch(_){}
-    var row={id:u.id,verification_status:'pending'};
-    if(pd&&pd.n){row.full_name=pd.n;row.email=pd.e||u.email;row.phone=pd.p;row.wilaya=pd.w;}
-    else{var em=u.email||'عضوة';row.full_name=em.split('@')[0];row.email=u.email;}
-    await SB.from('kb_profiles').insert(row);
-    try{localStorage.removeItem('kb_pending');}catch(_){}
-  }catch(e){}
-}
-async function loadUserProfile(){
-  if(!SB)return;
-  try{
-    var u=await sbUser();if(!u)return;
-    var r=await SB.from('kb_profiles').select('full_name,wilaya,rank,bio,avatar_emoji,role').eq('id',u.id).single();
-    if(r.error||!r.data)return;
-    _profile=r.data;
-    document.getElementById('pf-name').textContent=r.data.full_name||'ملكة الكوكب';
-    document.getElementById('pf-rank').textContent='⭐ '+(r.data.rank||'مواطنة');
-    document.getElementById('pf-bio').innerHTML='📍 '+escapeHtml(r.data.wilaya||'الجزائر')+'<br>'+escapeHtml(r.data.bio||'💖 عضوة في كوكب برق برق');
-    var al=document.getElementById('admin-link');
-    if(al)al.style.display=(r.data.role==='owner')?'flex':'none';
-  }catch(e){}
-}
-/* ===== الفوكال: رفع + تسجيل للمراجعة ===== */
-async function sendVocal(){
-  var blob=window._vocalBlob||null;
-  if(!blob){toast('سجلي الفوكال أولا 🎤');return;}
-  if(SB){
-    try{
-      var u=await sbUser();
-      if(u){
-        var path=u.id+'/'+Date.now()+'.webm';
-        var up=await SB.storage.from('kb-voice').upload(path,blob,{contentType:'audio/webm',upsert:true});
-        if(up.error)throw up.error;
-        await SB.from('kb_voice_notes').insert({user_id:u.id,audio_url:path,status:'pending'});
-        await SB.from('kb_profiles').update({verification_status:'voice_pending'}).eq('id',u.id);
-        toast('وصل الفوكال ✅');
-      }
-    }catch(e){toast('تعذر إرسال الفوكال — تحققي من الاتصال');}
-  }
-  go('pending');
-}
-/* ===== شفرة المالك: 4 ضغطات متتالية على اللوغو 👑 ===== */
-var _taps=[];
-var _wantClaim=false;
-async function secretTap(){
-  var now=Date.now();
-  _taps=_taps.filter(function(t){return now-t<2500;});
-  _taps.push(now);
-  if(_taps.length>=4){_taps=[];claimOwner();}
-}
-async function claimOwner(){
-  if(!SB){toast('ما كاش اتصال');return;}
-  try{
-    var u=await sbUser();
-    if(!u){_wantClaim=true;toast('سجل دخولك باش نفعل المالك 👑');go('login');return;}
-    var r=await SB.rpc('kb_claim_owner');
-    if(r.error)throw r.error;
-    _verified=true;
-    await loadUserProfile();
-    toast('👑 راك مالك الكوكب دروك!');
-    markSeen();
-    go('home');
-  }catch(e){
-    var m=String((e&&e.message)||'');
-    if(m.indexOf('ALREADY_CLAIMED')>-1)toast('كاين مالك من قبل 👑');
-    else if(m.indexOf('NO_PROFILE')>-1)toast('كملي التسجيل أولا 📝');
-    else if(m.indexOf('NOT_LOGGED_IN')>-1){toast('أنشئي حسابك أولا 💖');go('signup');}
-    else toast('تعذر التفعيل');
-  }
-}
-/* ===== لوحة المالك 👑 ===== */
-function admTab(t){
-  document.getElementById('adm-pending').style.display=t==='pending'?'block':'none';
-  document.getElementById('adm-members').style.display=t==='members'?'block':'none';
-  document.getElementById('adm-t1').style.cssText='flex:1;padding:10px'+(t==='pending'?'':'\;background:transparent;border:2px solid var(--pink);color:var(--pink-d);box-shadow:none');
-  document.getElementById('adm-t2').style.cssText='flex:1;padding:10px'+(t==='members'?'':'\;background:transparent;border:2px solid var(--pink);color:var(--pink-d);box-shadow:none');
-  if(t==='pending')loadPending();else loadMembers();
-}
-async function openAdmin(){
-  if(!SB){toast('ما كاش اتصال');return;}
-  if(!_profile||_profile.role!=='owner'){toast('هاذ البلاصة للمالك برك 👑');return;}
-  _verified=true;
-  go('admin');admTab('pending');
-}
-async function loadPending(){
-  var box=document.getElementById('adm-pending');
-  box.innerHTML='<p style="text-align:center;color:var(--muted)">نحمل الطلبات... ⏳</p>';
-  try{
-    var r=await SB.from('kb_voice_notes').select('id,user_id,audio_url,created_at').eq('status','pending').order('created_at',{ascending:true}).limit(50);
-    if(r.error)throw r.error;
-    var notes=r.data||[];
-    document.getElementById('adm-count').textContent=notes.length?('('+notes.length+')'):'';
-    if(!notes.length){box.innerHTML='<p style="text-align:center;color:var(--muted)">ما كاش طلبات معلقة 🎉</p>';return;}
-    var ids=[];notes.forEach(function(n){if(ids.indexOf(n.user_id)<0)ids.push(n.user_id);});
-    var names={};
-    try{
-      var pr=await SB.from('kb_profiles').select('id,full_name,wilaya,quiz_score').in('id',ids);
-      if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x;});
-    }catch(e){}
-    box.innerHTML='';
-    notes.forEach(function(n){
-      var p=names[n.user_id]||{};
-      var d=document.createElement('div');d.className='svc';d.id='vn-'+n.id;
-      d.innerHTML='<div class="avatar" style="width:48px;height:48px;font-size:24px">🎤</div>'+
-        '<div style="flex:1"><h4>'+escapeHtml(p.full_name||'بنت جديدة')+'</h4>'+
-        '<p>'+escapeHtml(p.wilaya||'')+' • نتيجة الكويز: '+(p.quiz_score==null?'—':p.quiz_score+' / 7')+'</p>'+
-        '<div id="vp-'+n.id+'"></div></div>'+
-        '<div style="display:flex;flex-direction:column;gap:6px">'+
-        '<button class="btn" style="padding:8px 12px;font-size:13px" onclick="playVoice(\''+n.audio_url+'\',\'vp-'+n.id+'\')">▶️ اسمعي</button>'+
-        '<button class="btn" style="padding:8px 12px;font-size:13px;background:#22c55e" onclick="approveUser(\''+n.user_id+'\',\''+n.id+'\')">✅ قبول</button>'+
-        '<button class="btn" style="padding:8px 12px;font-size:13px;background:#ef4444" onclick="rejectUser(\''+n.user_id+'\',\''+n.id+'\')">❌ رفض</button></div>';
-      box.appendChild(d);
-    });
-  }catch(e){box.innerHTML='<p style="text-align:center;color:var(--muted)">تعذر التحميل: '+escapeHtml(e.message)+'</p>';}
-}
-async function playVoice(path,slot){
-  var el=document.getElementById(slot);
-  el.innerHTML='⏳...';
-  try{
-    var s=await SB.storage.from('kb-voice').createSignedUrl(path,600);
-    if(s.error)throw s.error;
-    el.innerHTML='<audio controls style="width:100%;margin-top:6px" src="'+s.data.signedUrl+'"></audio>';
-  }catch(e){el.innerHTML='تعذر التشغيل 🎤';}
-}
-async function approveUser(uid,nid){
-  try{
-    await SB.from('kb_profiles').update({verification_status:'approved',is_verified:true}).eq('id',uid);
-    await SB.from('kb_voice_notes').update({status:'approved'}).eq('id',nid);
-    var d=document.getElementById('vn-'+nid);if(d)d.remove();
-    toast('تقبلت ✅ مرحبا بيها في الكوكب');
-  }catch(e){toast('تعذر القبول: '+e.message);}
-}
-async function rejectUser(uid,nid){
-  if(!confirm('ترفضي هاذ العضوة؟ ما راحش تقدر تدخل.'))return;
-  try{
-    await SB.from('kb_profiles').update({verification_status:'rejected'}).eq('id',uid);
-    await SB.from('kb_voice_notes').update({status:'rejected'}).eq('id',nid);
-    var d=document.getElementById('vn-'+nid);if(d)d.remove();
-    toast('ترفضت ❌');
-  }catch(e){toast('تعذر الرفض: '+e.message);}
-}
-async function loadMembers(){
-  var q=(document.getElementById('adm-q').value||'').trim();
-  var box=document.getElementById('adm-list');
-  try{
-    var qry=SB.from('kb_profiles').select('id,full_name,wilaya,role,verification_status,is_banned,created_at').order('created_at',{ascending:false}).limit(50);
-    if(q)qry=qry.ilike('full_name','%'+q+'%');
-    var r=await qry;
-    if(r.error)throw r.error;
-    var rows=(r.data||[]).filter(function(x){return x.role!=='owner';});
-    if(!rows.length){box.innerHTML='<p style="text-align:center;color:var(--muted)">ما كاش نتائج</p>';return;}
-    box.innerHTML='';
-    rows.forEach(function(x){
-      var d=document.createElement('div');d.className='svc';
-      var st=x.is_banned?'🚫 محظورة':({pending:'⏳ مسجلة',quiz_passed:'✅ كويز',voice_pending:'🎤 فوكال',approved:'✅ مقبولة',rejected:'❌ مرفوضة'}[x.verification_status]||x.verification_status);
-      d.innerHTML='<div class="avatar" style="width:48px;height:48px;font-size:24px">🌸</div>'+
-        '<div style="flex:1"><h4>'+escapeHtml(x.full_name||'—')+'</h4><p>'+escapeHtml(x.wilaya||'')+' • '+st+'</p></div>'+
-        (x.is_banned
-          ?'<button class="btn" style="padding:8px 12px;font-size:13px;background:#22c55e" onclick="unbanUser(\''+x.id+'\')">فك الحظر</button>'
-          :'<button class="btn" style="padding:8px 12px;font-size:13px;background:#ef4444" onclick="banUser(\''+x.id+'\',\''+escapeHtml(x.full_name||'')+'\')">🚫 حظر</button>');
-      box.appendChild(d);
-    });
-  }catch(e){box.innerHTML='<p style="text-align:center;color:var(--muted)">تعذر التحميل</p>';}
-}
-async function banUser(uid,name){
-  if(!confirm('تحظري '+name+'؟ ما راحش تقدر تدخل للتطبيق.'))return;
-  try{
-    await SB.from('kb_profiles').update({is_banned:true}).eq('id',uid);
-    toast('تحظرت 🚫');loadMembers();
-  }catch(e){toast('تعذر الحظر: '+e.message);}
-}
-async function unbanUser(uid){
-  try{
-    await SB.from('kb_profiles').update({is_banned:false}).eq('id',uid);
-    toast('تفك الحظر ✅');loadMembers();
-  }catch(e){toast('تعذر فك الحظر: '+e.message);}
-}
-/* ===== الريلز الحقيقي 🎬 (فيديو/صور + موسيقى يوتيوب) ===== */
-var _reelsLoaded=false,_reelFile=null,_reelType='video',_reelObs=null;
-var _reelFilter='none',_trimS=0,_trimE=0,_vidDur=0;
-var _reelMusic=null,_mqTimer=null,_mqAudioEl=null,_mqPlaying=null;
-var FILTERCSS={none:'none',noir:'grayscale(1) contrast(1.1)',warm:'sepia(.45) saturate(1.4)',cool:'hue-rotate(-15deg) saturate(1.2) brightness(1.05)',bright:'brightness(1.25) saturate(1.1)',drama:'contrast(1.35) saturate(.7)'};
-var FILTERLBL={none:'عادي ✨',noir:'كلاسيك ⬛',warm:'دافئ 🌅',cool:'بارد 🧊',bright:'مشرق ☀️',drama:'درامي 🎭'};
-var _likedReels={};
-try{_likedReels=JSON.parse(localStorage.getItem('kb_liked_reels')||'{}');}catch(e){}
-function ytId(url){
-  if(!url)return null;
-  var m=String(url).match(/(?:youtube\.com\/(?:watch\?v=|shorts\/|embed\/)|youtu\.be\/|music\.youtube\.com\/watch\?v=)([A-Za-z0-9_-]{11})/);
-  return m?m[1]:null;
-}
-function reelUrl(path){
-  if(!path)return '';
-  if(path.indexOf('http')===0)return path;
-  try{return SB.storage.from('kb-reels').getPublicUrl(path).data.publicUrl;}catch(e){return '';}
-}
-function rnPreview(inp){
-  var f=inp.files&&inp.files[0];if(!f)return;
-  if(f.size>80*1024*1024){toast('الملف كبير بزاف (أقصى 80MB) 📦');return;}
-  _reelFile=f;
-  _reelType=f.type.indexOf('image')===0?'photo':'video';
-  _reelFilter='none';_trimS=0;_trimE=0;_vidDur=0;
-  var box=document.getElementById('rn-prev');
-  var url=URL.createObjectURL(f);
-  box.innerHTML=_reelType==='photo'
-    ?'<img class="wfull" src="'+url+'">'
-    :'<video src="'+url+'" playsinline muted loop style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">';
-  document.getElementById('rn-edit').style.display='block';
-  if(_reelType==='photo'){
-    document.getElementById('rn-filters').style.display='block';
-    document.getElementById('rn-trim').style.display='none';
-    buildFilters();
-  }else{
-    document.getElementById('rn-filters').style.display='none';
-    document.getElementById('rn-trim').style.display='none';
-    var v=box.querySelector('video');
-    if(v){v.play().catch(function(){});
-      v.onloadedmetadata=function(){if(v.duration&&isFinite(v.duration))rnTrimInit(v.duration);};}
-  }
-}
-function buildFilters(){
-  var row=document.getElementById('rn-frow');
-  row.innerHTML='';
-  Object.keys(FILTERLBL).forEach(function(k){
-    var b=document.createElement('button');
-    b.textContent=FILTERLBL[k];
-    if(k==='none')b.className='on';
-    b.onclick=function(){rnSetFilter(k,b);};
-    row.appendChild(b);
-  });
-}
-function rnSetFilter(f,btn){
-  _reelFilter=f;
-  var m=document.querySelector('#rn-prev img,#rn-prev video');
-  if(m)m.style.filter=FILTERCSS[f]||'none';
-  var btns=document.querySelectorAll('#rn-frow button');
-  for(var i=0;i<btns.length;i++)btns[i].classList.remove('on');
-  if(btn)btn.classList.add('on');
-}
-function rnTrimInit(dur){
-  _vidDur=dur;_trimS=0;_trimE=dur;
-  var s=document.getElementById('rn-ts'),e=document.getElementById('rn-te');
-  var mx=Math.max(1,Math.floor(dur));
-  s.max=mx;e.max=mx;s.value=0;e.value=mx;
-  document.getElementById('rn-trim').style.display='block';
-  updTrimLab();
-}
-function updTrimLab(){
-  _trimS=parseFloat(document.getElementById('rn-ts').value)||0;
-  _trimE=parseFloat(document.getElementById('rn-te').value)||_vidDur;
-  if(_trimE<=_trimS)_trimE=_trimS+1;
-  document.getElementById('rn-trim-lab').textContent=fmtT(_trimS)+' - '+fmtT(_trimE);
-}
-function fmtT(s){s=Math.max(0,Math.floor(s));return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2);}
-/* ===== باحث الأغاني 🎶 (كيما انستغرام) ===== */
-function rnSearchMusic(q){
-  var box=document.getElementById('rn-mres');
-  if(!q||q.trim().length<2){box.innerHTML='';return;}
-  clearTimeout(_mqTimer);
-  _mqTimer=setTimeout(function(){mqDoSearch(q.trim(),box);},450);
-}
-async function mqDoSearch(q,box){
-  box.innerHTML='<p style="text-align:center;color:var(--muted);font-size:13px;padding:10px">نبحث... 🔍</p>';
-  var res=await mqFetch(q);
-  if(!res.length){box.innerHTML='<p style="text-align:center;color:var(--muted);font-size:13px;padding:10px">ما لقينا والو 😕 جربي كلمة أخرى</p>';return;}
-  box.innerHTML='';
-  res.forEach(function(t){
-    var d=document.createElement('div');
-    d.className='mq-item';
-    var im=document.createElement('img');im.src=t.art;im.alt='';
-    var go=document.createElement('div');go.className='mq-go';
-    var b=document.createElement('b');b.textContent=t.title;
-    var sm=document.createElement('small');sm.textContent=t.artist;
-    go.appendChild(b);go.appendChild(sm);
-    var bp=document.createElement('button');bp.className='mq-play';bp.textContent='▶';bp.title='استمعي';
-    var ba=document.createElement('button');ba.textContent='＋';ba.title='اختاري';
-    bp.onclick=function(){mqPreview(t,bp);};
-    ba.onclick=function(){mqSelect(t);};
-    d.appendChild(im);d.appendChild(go);d.appendChild(bp);d.appendChild(ba);
-    box.appendChild(d);
-  });
-}
-async function mqFetch(q){
-  var urls=[
-    'https://itunes.apple.com/search?term='+encodeURIComponent(q)+'&media=music&entity=song&limit=12&country=DZ',
-    'https://itunes.apple.com/search?term='+encodeURIComponent(q)+'&media=music&entity=song&limit=12&country=US'
-  ];
-  for(var i=0;i<urls.length;i++){
-    try{
-      var r=await fetch(urls[i]);
-      var j=await r.json();
-      if(j.results&&j.results.length){
-        return j.results.filter(function(x){return x.previewUrl;}).map(function(x){
-          return {preview:x.previewUrl,title:x.trackName||'؟',artist:x.artistName||'؟',
-            art:(x.artworkUrl100||'').replace('100x100bb','200x200bb')};
-        });
-      }
-    }catch(e){}
-  }
-  return [];
-}
-function mqPreview(t,btn){
-  if(!_mqAudioEl){_mqAudioEl=new Audio();_mqAudioEl.preload='none';}
-  var btns=document.querySelectorAll('#rn-mres .mq-play');
-  for(var i=0;i<btns.length;i++)btns[i].textContent='▶';
-  if(_mqPlaying===t.preview&&!_mqAudioEl.paused){_mqAudioEl.pause();_mqPlaying=null;return;}
-  _mqAudioEl.src=t.preview;
-  _mqAudioEl.play().catch(function(){});
-  _mqPlaying=t.preview;btn.textContent='⏸';
-}
-function mqSelect(t){
-  _reelMusic={preview:t.preview,title:t.title,artist:t.artist,start:0};
-  if(_mqAudioEl){try{_mqAudioEl.pause();}catch(e){}_mqPlaying=null;}
-  document.getElementById('rn-chip-art').src=t.art;
-  document.getElementById('rn-chip-t').textContent=t.title;
-  document.getElementById('rn-chip-a').textContent=t.artist;
-  document.getElementById('rn-song-chip').style.display='flex';
-  document.getElementById('rn-mres').innerHTML='';
-  document.getElementById('rn-mq').value='';
-  document.getElementById('rn-mseg').style.display='block';
-  document.getElementById('rn-ms').value=0;
-  document.getElementById('rn-ms-lab').textContent='0s';
-}
-function mqClear(){
-  _reelMusic=null;
-  document.getElementById('rn-song-chip').style.display='none';
-  document.getElementById('rn-mseg').style.display='none';
-}
-function mqSeg(v){
-  if(!_reelMusic)return;
-  _reelMusic.start=parseInt(v,10)||0;
-  document.getElementById('rn-ms-lab').textContent=_reelMusic.start+'s';
-}
-async function publishReel(){
-  if(!_reelFile){toast('اختاري فيديو أو صورة أولا 📹');return;}
-  if(!SB){toast('ما كاش اتصال');return;}
-  var btn=document.getElementById('rn-pub');btn.disabled=true;btn.textContent='ننشرو... ⏳';
-  try{
-    var u=await sbUser();if(!u)throw new Error('سجلي الدخول أولا');
-    var ext=((_reelFile.name||'').split('.').pop()||(_reelType==='photo'?'jpg':'mp4')).toLowerCase().slice(0,4);
-    var path=u.id+'/'+Date.now()+'.'+ext;
-    var up=await SB.storage.from('kb-reels').upload(path,_reelFile,{contentType:_reelFile.type||(_reelType==='photo'?'image/jpeg':'video/mp4')});
-    if(up.error)throw up.error;
-    var ins=await SB.from('kb_reels').insert({author_id:u.id,video_url:path,
-      title:document.getElementById('rn-title').value.trim(),
-      media_type:_reelType,
-      music_preview_url:_reelMusic?_reelMusic.preview:null,
-      music_title:_reelMusic?_reelMusic.title:null,
-      music_artist:_reelMusic?_reelMusic.artist:null,
-      music_start:_reelMusic?_reelMusic.start:0,
-      photo_filter:_reelFilter,trim_start:_trimS,trim_end:_reelType==='video'?_trimE:0});
-    if(ins.error)throw ins.error;
-    toast('تنشر الريلز 🎉');
-    _reelFile=null;document.getElementById('rn-file').value='';
-    document.getElementById('rn-title').value='';
-    _reelMusic=null;_reelFilter='none';_trimS=0;_trimE=0;_vidDur=0;
-    mqClear();
-    document.getElementById('rn-mq').value='';
-    document.getElementById('rn-mres').innerHTML='';
-    document.getElementById('rn-edit').style.display='none';
-    document.getElementById('rn-prev').innerHTML='<span style="font-size:15px;opacity:.75">📹 اختاري فيديو أو صورة</span>';
-    _reelsLoaded=false;go('video');
-  }catch(e){toast('تعذر النشر: '+e.message);}
-  btn.disabled=false;btn.textContent='نشر الريلز 🚀';
-}
-function reelCard(x,name){
-  var d=document.createElement('div');
-  d.className='reelv';d.dataset.id=x.id;
-  d.dataset.yt=x.music_youtube_id||'';
-  d.dataset.mp=x.music_preview_url||'';
-  d.dataset.ms=x.music_start||0;
-  d.dataset.ts=x.trim_start||0;
-  d.dataset.te=x.trim_end||0;
-  var fc=FILTERCSS[x.photo_filter]||'none';
-  var media=x.media_type==='photo'
-    ?'<img class="wfull" src="'+reelUrl(x.video_url)+'" loading="lazy" alt="" style="filter:'+fc+'">'
-    :'<video src="'+reelUrl(x.video_url)+'" playsinline loop preload="metadata" style="filter:'+fc+'"></video>';
-  var liked=_likedReels[x.id];
-  var mt=x.music_title?('🎵 '+x.music_title):(x.music_youtube_id?'🎵 موسيقى':'');
-  if(mt.length>24)mt=mt.slice(0,24)+'…';
-  d.innerHTML=media+
-    '<div class="reel-play">▶</div>'+
-    (mt?'<div class="reel-music">'+escapeHtml(mt)+'</div>':'')+
-    '<div class="reel-side">'+
-    '<button onclick="likeReel(\''+x.id+'\',this)">'+(liked?'❤️':'🤍')+'<span>'+(x.likes_count||0)+'</span></button>'+
-    '<button onclick="openReelComments(\''+x.id+'\')">💬<span>'+(x.comments_count||0)+'</span></button>'+
-    '<button onclick="reportReel(\''+x.id+'\')" style="font-size:16px">🚩</button>'+
-    '</div>'+
-    '<div class="reel-info"><b>'+escapeHtml(x.title||'')+'</b><small>@'+escapeHtml(name)+'</small></div>';
-  d.addEventListener('click',function(e){
-    if(e.target.closest('.reel-side'))return;
-    toggleReel(d);
-  });
-  return d;
-}
-function toggleReel(d){
-  var v=d.querySelector('video');
-  var btn=d.querySelector('.reel-play');
-  if(v){
-    if(v.paused){
-      pauseAllReels(d);
-      var ts=parseFloat(d.dataset.ts)||0,te=parseFloat(d.dataset.te)||0;
-      if(ts>0){try{v.currentTime=ts;}catch(e){}}
-      v.ontimeupdate=function(){if(te>ts&&te>0&&v.currentTime>=te){v.currentTime=ts;}};
-      v.play().catch(function(){});
-      btn.style.display='none';
-      if(d.dataset.mp)reelAudioPlay(d.dataset.mp,parseFloat(d.dataset.ms)||0);
-      else ytPlay(d.dataset.yt);
-    }
-    else{v.pause();btn.style.display='flex';reelAudioStop();ytStop();}
-  }else{
-    if(d.dataset.playing==='1'){d.dataset.playing='';reelAudioStop();ytStop();}
-    else{pauseAllReels(d);d.dataset.playing='1';
-      if(d.dataset.mp){reelAudioPlay(d.dataset.mp,parseFloat(d.dataset.ms)||0);toast('🎵 تشغل الموسيقى');}
-      else if(d.dataset.yt){ytPlay(d.dataset.yt);toast('🎵 تشغل الموسيقى');}}
-  }
-}
-var _reelAudio=null;
-function reelAudioPlay(url,start){
-  reelAudioStop();
-  if(!url)return;
-  _reelAudio=new Audio(url);
-  try{_reelAudio.currentTime=start||0;}catch(e){}
-  _reelAudio.play().catch(function(){});
-  var s0=start||0;
-  _reelAudio.ontimeupdate=function(){
-    if(_reelAudio&&_reelAudio.currentTime>s0+15){_reelAudio.currentTime=s0;}
-  };
-}
-function reelAudioStop(){if(_reelAudio){try{_reelAudio.pause();}catch(e){}_reelAudio=null;}}
-function pauseAllReels(except){
-  document.querySelectorAll('#reels-feed .reelv').forEach(function(d){
-    if(d===except)return;
-    var v=d.querySelector('video');
-    if(v&&!v.paused){v.pause();var b=d.querySelector('.reel-play');if(b)b.style.display='flex';}
-    d.dataset.playing='';
-  });
-  reelAudioStop();
-  ytStop();
-}
-function ytPlay(ytid){
-  ytStop();
-  if(!ytid)return;
-  var f=document.createElement('iframe');
-  f.id='yt-audio';
-  f.style.cssText='position:fixed;width:2px;height:2px;bottom:0;left:0;opacity:.01;pointer-events:none;border:0';
-  f.setAttribute('allow','autoplay; encrypted-media');
-  f.src='https://www.youtube-nocookie.com/embed/'+ytid+'?autoplay=1&loop=1&playlist='+ytid;
-  document.body.appendChild(f);
-}
-function ytStop(){var f=document.getElementById('yt-audio');if(f)f.remove();}
-async function likeReel(id,btn){
-  var liked=_likedReels[id];
-  var span=btn.querySelector('span');
-  var n=parseInt(span.textContent||'0',10)||0;
-  if(liked){delete _likedReels[id];btn.childNodes[0].textContent='🤍';span.textContent=Math.max(0,n-1);}
-  else{_likedReels[id]=1;btn.childNodes[0].textContent='❤️';span.textContent=n+1;}
-  try{localStorage.setItem('kb_liked_reels',JSON.stringify(_likedReels));}catch(e){}
-  if(SB){try{await SB.rpc('kb_like_reel',{p_id:id,p_delta:liked?-1:1});}catch(e){}}
-}
-function observeReels(){
-  if(_reelObs){try{_reelObs.disconnect();}catch(e){}}
-  if(!('IntersectionObserver' in window))return;
-  _reelObs=new IntersectionObserver(function(es){
-    es.forEach(function(en){
-      if(!en.isIntersecting){
-        var d=en.target,v=d.querySelector('video');
-        if(v&&!v.paused){v.pause();var b=d.querySelector('.reel-play');if(b)b.style.display='flex';}
-        if(d.dataset.playing==='1'){d.dataset.playing='';ytStop();}
-      }
-    });
-  },{threshold:0.25});
-  document.querySelectorAll('#reels-feed .reelv').forEach(function(d){_reelObs.observe(d);});
-}
-async function loadReels(force){
-  if(!SB||(_reelsLoaded&&!force))return;
-  var feed=document.getElementById('reels-feed');
-  try{
-    var r=await SB.from('kb_reels').select('id,author_id,video_url,title,media_type,music_youtube_id,music_preview_url,music_title,music_start,likes_count,comments_count,photo_filter,trim_start,trim_end').order('created_at',{ascending:false}).limit(30);
-    if(r.error)throw r.error;
-    var rows=r.data||[];
-    if(!rows.length){
-      feed.innerHTML='<div style="text-align:center;padding:44px 20px;color:var(--muted)">'+
-        '<div style="font-size:52px">🎬</div><br>ما كاش ريلز بعد<br>كوني أول وحدة تنشر! 💖<br><br>'+
-        '<button class="btn" onclick="go(\'reel-new\')">نشر أول ريلز 🚀</button></div>';
-    }else{
-      var ids=[];rows.forEach(function(x){if(ids.indexOf(x.author_id)<0)ids.push(x.author_id);});
-      var names={};
-      try{var pr=await SB.from('kb_profiles').select('id,full_name').in('id',ids);
-        if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x.full_name;});}catch(e){}
-      feed.innerHTML='';
-      rows.forEach(function(x){feed.appendChild(reelCard(x,names[x.author_id]||'بنت الكوكب'));});
-    }
-    _reelsLoaded=true;
-    observeReels();
-  }catch(e){
-    if(!_reelsLoaded)feed.innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">تعذر التحميل — تحققي من الاتصال</p>';
-  }
-}
-/* ===== تعليقات وبلاغات الريلز 💬🚩 ===== */
-var _rcReel=null;
-function openReelComments(id){
-  _rcReel=id;
-  document.getElementById('rc-list').innerHTML='<p style="text-align:center;color:var(--muted);padding:20px">نحمل التعليقات... ⏳</p>';
-  document.getElementById('rc-input').value='';
-  go('reel-comments');
-  loadReelComments();
-}
-async function loadReelComments(){
-  var list=document.getElementById('rc-list');
-  if(!SB||!_rcReel)return;
-  try{
-    var r=await SB.from('kb_reel_comments').select('id,content,created_at,author_id').eq('reel_id',_rcReel).order('created_at',{ascending:true}).limit(100);
-    if(r.error)throw r.error;
-    var rows=r.data||[];
-    if(!rows.length){list.innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">ما كاش تعليقات بعد<br>كوني أول وحدة تعلق 💖</p>';return;}
-    var ids=[];rows.forEach(function(x){if(ids.indexOf(x.author_id)<0)ids.push(x.author_id);});
-    var names={};
-    try{var pr=await SB.from('kb_profiles').select('id,full_name').in('id',ids);
-      if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x.full_name;});}catch(e){}
-    list.innerHTML='';
-    rows.forEach(function(x){
-      var d=document.createElement('div');
-      d.style.cssText='background:var(--card);border-radius:14px;padding:10px 14px;margin-bottom:8px;box-shadow:0 1px 4px rgba(0,0,0,.05)';
-      d.innerHTML='<b style="font-size:13px;color:var(--pink-d)">'+escapeHtml(names[x.author_id]||'بنت الكوكب')+'</b><p style="font-size:14px;margin-top:2px">'+escapeHtml(x.content)+'</p>';
-      list.appendChild(d);
-    });
-  }catch(e){list.innerHTML='<p style="text-align:center;color:var(--muted);padding:30px">تعذر التحميل</p>';}
-}
-async function sendReelComment(){
-  var inp=document.getElementById('rc-input');
-  var txt=inp.value.trim();
-  if(!txt){toast('اكتبي شي حاجة أولا ✍️');return;}
-  if(!SB||!_rcReel)return;
-  inp.value='';
-  try{
-    var r=await SB.rpc('kb_add_reel_comment',{p_reel:_rcReel,p_content:txt});
-    if(r.error)throw r.error;
-    loadReelComments();
-    var card=document.querySelector('#reels-feed .reelv[data-id="'+_rcReel+'"] .reel-side');
-    if(card&&card.children[1]){var sp=card.children[1].querySelector('span');if(sp)sp.textContent=(parseInt(sp.textContent||'0',10)||0)+1;}
-    toast('تنشر تعليقك 💖');
-  }catch(e){toast('تعذر النشر: '+e.message);}
-}
-async function reportReel(id){
-  var reason=prompt('علاش تبلغي على هاذ الريلز؟ 🚩');
-  if(!reason||!reason.trim())return;
-  if(!SB)return;
-  try{
-    var u=await sbUser();if(!u){toast('سجلي الدخول أولا');return;}
-    var r=await SB.from('kb_reports').insert({reporter_id:u.id,target_id:id,target_type:'reel',reason:reason.trim().slice(0,500)});
-    if(r.error)throw r.error;
-    toast('وصل البلاغ، شكرا 🚩');
-  }catch(e){toast('تعذر الإبلاغ: '+e.message);}
-}
-/* ===== السوق: تحميل المنتجات الحقيقية ===== */
-var _productsLoaded=false;
-async function loadProducts(force){
-  if(!SB||(_productsLoaded&&!force))return;
-  try{
-    var r=await SB.from('kb_products').select('id,name,price,wilaya,condition,photos,seller_id').eq('status','active').order('created_at',{ascending:false}).limit(30);
-    if(r.error||!r.data||!r.data.length)return;
-    var ids=[];r.data.forEach(function(p){if(ids.indexOf(p.seller_id)<0)ids.push(p.seller_id);});
-    var names={};
-    try{
-      var pr=await SB.from('kb_profiles').select('id,full_name').in('id',ids);
-      if(!pr.error&&pr.data)pr.data.forEach(function(x){names[x.id]=x.full_name;});
-    }catch(e){}
-    var g=document.getElementById('souq-grid');g.innerHTML='';
-    r.data.forEach(function(p){
-      var img=(p.photos&&p.photos.length)?'<img src="'+p.photos[0]+'" style="width:100%;height:100%;object-fit:cover">':'🛍️';
-      var d=document.createElement('div');d.className='prod';
-      d.innerHTML='<div class="img" style="background:linear-gradient(135deg,#ffe0ec,#e9d5ff);overflow:hidden">'+img+'<span class="badge">'+escapeHtml(p.condition||'جديد')+'</span></div><div class="info"><h4>'+escapeHtml(p.name)+'</h4><div class="price">'+(p.price?escapeHtml(p.price)+' دج':'السعر عند التواصل')+'</div><div class="seller">'+escapeHtml(names[p.seller_id]||'بنت الكوكب')+(p.wilaya?' • '+escapeHtml(p.wilaya):'')+'</div></div>';
-      g.appendChild(d);
-    });
-    _productsLoaded=true;
-  }catch(e){}
-}
-/* ===== تهيئة: جلسة محفوظة + PWA ===== */
-document.addEventListener('DOMContentLoaded',function(){
-  if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js').catch(function(){});}catch(e){}}
-  if(_skipSplash){
-    var sp=document.getElementById('splash');
-    if(sp)sp.classList.remove('active');
-  }
-  setTimeout(async function(){
-    if(!SB){go(_skipSplash?'login':'splash');return;}
-    try{
-      var s=await SB.auth.getSession();
-      if(s.data&&s.data.session){await gateAndEnter();}
-      else{go(_skipSplash?'login':'splash');}
-    }catch(e){go(_skipSplash?'login':'splash');}
-  },_skipSplash?100:500);
-});
-</script>
+<script src="app.js?v=16"></script>
 </body>
 </html>
