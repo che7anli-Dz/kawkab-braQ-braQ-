@@ -1105,9 +1105,10 @@ async function deletePhoto(){
     toast('تمحات التصويرة 🗑️');
   }catch(e){toast('تعذر المسح: '+(e.message||''));}
 }
-// مشاركة ↗️
+// مشاركة ↗️ — رابط دائم ما يموتش
+var PERMA_LINK='https://github.com/che7anli-Dz/kawkab-braQ-braQ-/releases/download/v1.3.1/kawkab-barq-barq.apk';
 function shareApp() {
-  var url=location.href;
+  var url=PERMA_LINK;
   if(navigator.share){navigator.share({title:'كوكب برق برق 🪐',text:'كوكب بلا ملكة... لأن كل وحدة فيكم ملكة 👑',url:url}).catch(function(){});}
   else{try{navigator.clipboard.writeText(url);toast('تنسخ الرابط ✅ شاركيه مع صاحباتك 💖');}catch(e){toast(url);}}
 }
