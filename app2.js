@@ -253,13 +253,20 @@ document.addEventListener('DOMContentLoaded',function(){
     var sp=document.getElementById('splash');
     if(sp)sp.classList.remove('active');
   }
-  setTimeout(async function(){
+  setTimeout(function(){
     if(!SB){go(_skipSplash?'login':'splash');return;}
-    try{
-      var s=await SB.auth.getSession();
-      if(s.data&&s.data.session){await gateAndEnter();}
-      else{go(_skipSplash?'login':'splash');}
-    }catch(e){go(_skipSplash?'login':'splash');}
+    var done=false;
+    function bootNav(id){if(!done){done=true;try{go(id);}catch(_e){}}}
+    /* مهلة أمان: الإقلاع عمرو ما يتعطل أكثر من 12 ثانية —
+       إذا الشبكة علقات، نروحو لشاشة الدخول بدل الشاشة البيضاء */
+    setTimeout(function(){bootNav(_skipSplash?'login':'splash');},12000);
+    (async function(){
+      try{
+        var s=await SB.auth.getSession();
+        if(s.data&&s.data.session){await gateAndEnter();done=true;}
+        else{bootNav(_skipSplash?'login':'splash');}
+      }catch(e){bootNav(_skipSplash?'login':'splash');}
+    })();
   },_skipSplash?100:500);
 });
 
