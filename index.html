@@ -20,6 +20,19 @@ try{
   }
   if(_kbSkip)document.documentElement.className+=' kb-skip';
 }catch(_e2){}
+/* شبكة أمان: عمري ما نخليو الشاشة بيضاء — إذا بعد 7 ثواني حتى شاشة
+   ما بانت (مثلا السكريبت فشل)، نرجعو لاندينغ الدخول */
+setTimeout(function(){
+  try{
+    var screens=document.querySelectorAll('.screen'),vis=false,i;
+    for(i=0;i<screens.length;i++){if(screens[i].offsetParent!==null){vis=true;break;}}
+    if(!vis){
+      document.documentElement.classList.remove('kb-skip');
+      var sp=document.getElementById('splash');
+      if(sp){sp.classList.add('active');sp.style.display='block';}
+    }
+  }catch(_e3){}
+},7000);
 </script>
 <style>
 .kb-skip #splash{display:none!important}
