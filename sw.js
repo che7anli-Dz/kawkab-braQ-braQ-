@@ -1,10 +1,16 @@
 /* كوكب برق برق — Service Worker */
-var CACHE = 'kawkab-bb-v29';
+var CACHE = 'kawkab-bb-v30';
 var ASSETS = ['./', './index.html', './app.js?v=52', './app2.js?v=52', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(
-    caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); })
+    caches.open(CACHE).then(function (c) {
+      return Promise.all(ASSETS.map(function (u) {
+        return fetch(u).then(function (res) {
+          if (res && res.ok) return c.put(u, res);
+        }).catch(function () {});
+      }));
+    })
       .then(function () { return self.skipWaiting(); })
       .catch(function () {})
   );
@@ -25,15 +31,21 @@ function isPage(url) {
     url.pathname === '/kawkab-braQ-braQ-/' || url.pathname.endsWith('/kawkab-braQ-braQ-/');
 }
 
+function isDocumentRequest(req) {
+  return req.mode === 'navigate' ||
+    (req.headers.get('accept') || '').indexOf('text/html') !== -1;
+}
+
 self.addEventListener('fetch', function (e) {
   if (e.request.method !== 'GET') return;
   var url = new URL(e.request.url);
-  /* الصفحة: الشبكة أولا باش التحديثات توصل مباشرة */
   if (isPage(url)) {
     e.respondWith(
       fetch(e.request).then(function (res) {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(e.request, copy); }).catch(function () {});
+        if (res && res.ok) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(e.request, copy); }).catch(function () {});
+        }
         return res;
       }).catch(function () {
         return caches.match(e.request).then(function (hit) { return hit || caches.match('./index.html'); });
@@ -41,15 +53,17 @@ self.addEventListener('fetch', function (e) {
     );
     return;
   }
-  /* الملفات: الكاش أولا */
   e.respondWith(
     caches.match(e.request).then(function (hit) {
       return hit || fetch(e.request).then(function (res) {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(e.request, copy); }).catch(function () {});
+        if (res && res.ok) {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(e.request, copy); }).catch(function () {});
+        }
         return res;
       }).catch(function () {
-        return caches.match('./index.html');
+        if (isDocumentRequest(e.request)) return caches.match('./index.html');
+        throw new Error('network-fail');
       });
     })
   );
